@@ -11,16 +11,16 @@ interface Props {
   onResetFilters?: () => void
 }
 
-const COLUMNS: Array<{ key: keyof MatchupResult; label: string }> = [
-  { key: 'batterName', label: 'Batter' },
-  { key: 'batterTeam', label: 'Team' },
-  { key: 'pitcherName', label: 'Pitcher' },
-  { key: 'ops', label: 'OPS' },
-  { key: 'avg', label: 'AVG' },
-  { key: 'slg', label: 'SLG' },
-  { key: 'ab', label: 'AB' },
-  { key: 'gameTime', label: 'Game' },
-  { key: 'lineupSource', label: 'Lineup' },
+const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> = [
+  { key: 'batterName', label: 'Batter', cls: 'w-36' },
+  { key: 'batterTeam', label: 'Team', cls: 'w-32' },
+  { key: 'pitcherName', label: 'Pitcher', cls: 'w-44' },
+  { key: 'ops', label: 'OPS', cls: 'w-20' },
+  { key: 'avg', label: 'AVG', cls: 'w-20' },
+  { key: 'slg', label: 'SLG', cls: 'w-20' },
+  { key: 'ab', label: 'AB', cls: 'w-14' },
+  { key: 'gameTime', label: 'Game', cls: 'w-36' },
+  { key: 'lineupSource', label: 'Lineup', cls: 'w-24' },
 ]
 
 export default function MatchupTable({ matchups, sort, onSort, totalMatchups, title = 'Qualifying Matchups', onResetFilters }: Props) {
@@ -54,14 +54,19 @@ export default function MatchupTable({ matchups, sort, onSort, totalMatchups, ti
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-fixed">
+            <colgroup>
+              {COLUMNS.map(col => (
+                <col key={col.key} className={col.cls} />
+              ))}
+            </colgroup>
             <thead>
               <tr className="bg-gray-800/60">
                 {COLUMNS.map(col => (
                   <th
                     key={col.key}
                     onClick={() => onSort(col.key)}
-                    className="px-3 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white select-none whitespace-nowrap"
+                    className={`px-3 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white select-none whitespace-nowrap ${col.cls}`}
                   >
                     {col.label}{sortIcon(col.key)}
                   </th>
