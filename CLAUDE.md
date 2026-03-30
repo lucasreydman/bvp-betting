@@ -4,7 +4,7 @@
 
 Next.js 16 / React 19 app. App Router only (no pages router). Tailwind v4 (no config file; `@import "tailwindcss"` in CSS).
 
-Public-facing copy: career batter vs pitcher stats from MLB for today’s schedule, sorted by OPS. Research only, not picks.
+Public-facing copy: **1+ total bases** prop betting; career BvP for today’s slate, ranked by OPS (then AVG, SLG, AB). Walks typically do not count toward TB at books; stats are hit-based.
 
 ## Architecture
 
