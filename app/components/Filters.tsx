@@ -10,15 +10,41 @@ interface Props {
   matchups: MatchupResult[]   // for CSV export (filtered set passed from parent)
 }
 
+// Decimal fields need 3 decimal places displayed; integer fields are whole numbers.
+const DECIMAL_FIELDS: Array<keyof FilterState> = ['minOPS', 'minSLG', 'minAVG']
+
+function formatValue(key: keyof FilterState, value: number): string {
+  return DECIMAL_FIELDS.includes(key) ? value.toFixed(3) : String(value)
+}
+
+function initDisplay(f: FilterState): Record<keyof FilterState, string> {
+  return {
+    minAB: String(f.minAB),
+    minOPS: f.minOPS.toFixed(3),
+    minSLG: f.minSLG.toFixed(3),
+    minAVG: f.minAVG.toFixed(3),
+    minHR: String(f.minHR),
+  }
+}
+
 export default function Filters({ filters, onApply, matchups }: Props) {
-  const [local, setLocal] = useState<FilterState>(filters)
+  // Store display values as strings so decimal places are preserved while typing.
+  const [local, setLocal] = useState<Record<keyof FilterState, string>>(() => initDisplay(filters))
 
   const set = (key: keyof FilterState, value: string) => {
-    setLocal(prev => ({ ...prev, [key]: Number(value) }))
+    setLocal(prev => ({ ...prev, [key]: value }))
   }
 
+  const parseLocal = (): FilterState => ({
+    minAB: Number(local.minAB),
+    minOPS: Number(local.minOPS),
+    minSLG: Number(local.minSLG),
+    minAVG: Number(local.minAVG),
+    minHR: Number(local.minHR),
+  })
+
   const handleReset = () => {
-    setLocal(DEFAULT_FILTERS)
+    setLocal(initDisplay(DEFAULT_FILTERS))
     onApply(DEFAULT_FILTERS)
   }
 
@@ -41,6 +67,12 @@ export default function Filters({ filters, onApply, matchups }: Props) {
         value={local[key]}
         step={step}
         onChange={e => set(key, e.target.value)}
+        onBlur={e => {
+          // Reformat decimal fields to 3 decimal places on blur
+          if (DECIMAL_FIELDS.includes(key)) {
+            set(key, Number(e.target.value).toFixed(3))
+          }
+        }}
         className="w-20 bg-gray-800 text-white text-sm px-2 py-1 rounded border border-gray-700 focus:outline-none focus:border-blue-500 font-mono"
       />
     </div>
@@ -56,7 +88,7 @@ export default function Filters({ filters, onApply, matchups }: Props) {
         {field('Min HR', 'minHR', '1')}
         <div className="flex gap-2 pb-0.5">
           <button
-            onClick={() => onApply(local)}
+            onClick={() => onApply(parseLocal())}
             className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded transition-colors"
           >
             Apply

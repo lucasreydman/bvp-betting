@@ -1,8 +1,10 @@
-import type { MatchupResult } from '@/lib/types'
+import type { MatchupResult, FilterState } from '@/lib/types'
+import { applyFilters } from '@/lib/utils'
 import { formatET } from '@/lib/utils'
 
 interface Props {
   matchups: MatchupResult[]
+  filters: FilterState
 }
 
 const CONFIDENCE_COLORS = {
@@ -11,10 +13,9 @@ const CONFIDENCE_COLORS = {
   low: 'text-orange-400',
 }
 
-export default function TopPlays({ matchups }: Props) {
-  // Filter-free: only require AB >= 10. Sort by SLG desc, then OPS as tiebreaker.
-  const top5 = [...matchups]
-    .filter(m => m.ab >= 10)
+export default function TopPlays({ matchups, filters }: Props) {
+  // Apply the same filters as the table so Top 5 always shows qualifying plays.
+  const top5 = applyFilters(matchups, filters)
     .sort((a, b) => b.slg - a.slg || b.ops - a.ops)
     .slice(0, 5)
 
@@ -22,7 +23,7 @@ export default function TopPlays({ matchups }: Props) {
     return (
       <div className="bg-gray-900 rounded-lg p-4 mb-4">
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Top 5 Plays Today</h2>
-        <p className="text-gray-500 text-sm">No matchups with 10+ AB found for this date.</p>
+        <p className="text-gray-500 text-sm">No qualifying matchups found for this date.</p>
       </div>
     )
   }

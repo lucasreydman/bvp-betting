@@ -11,21 +11,22 @@ interface Props {
 
 export default function StatusBar({ fetchedAt, gamesScanned, gamesSkipped, onRefresh, isLoading }: Props) {
   return (
-    <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
-      <div className="flex gap-4">
+    <div className="flex items-center gap-6 text-sm text-gray-400 mb-4">
+      <div className="flex gap-4 flex-1 min-w-0">
         {fetchedAt && (
-          <span>Last updated: {formatET(fetchedAt)}</span>
+          <span className="whitespace-nowrap">Last updated: {formatET(fetchedAt)}</span>
         )}
         {gamesScanned > 0 && (
-          <span>{gamesScanned} games scanned{gamesSkipped > 0 ? `, ${gamesSkipped} skipped (pitchers TBD)` : ''}</span>
+          <span className="whitespace-nowrap">{gamesScanned} games scanned{gamesSkipped > 0 ? `, ${gamesSkipped} skipped (pitchers TBD)` : ''}</span>
         )}
       </div>
       <button
         onClick={onRefresh}
         disabled={isLoading}
-        className="px-3 py-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 rounded text-xs font-medium transition-colors"
+        className="flex-shrink-0 flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:opacity-50 text-white rounded text-xs font-semibold transition-colors ml-auto"
       >
-        {isLoading ? 'Loading...' : '↻ Refresh'}
+        <span className={isLoading ? 'animate-spin inline-block' : ''}>↻</span>
+        {isLoading ? 'Refreshing...' : 'Refresh'}
       </button>
     </div>
   )
