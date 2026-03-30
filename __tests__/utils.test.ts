@@ -1,4 +1,4 @@
-import { formatTime, generateCSV, applyFilters, sortMatchups } from '@/lib/utils'
+import { formatTime, formatCountdownToStart, generateCSV, applyFilters, sortMatchups } from '@/lib/utils'
 import { DEFAULT_FILTERS, type MatchupResult } from '@/lib/types'
 
 const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => ({
@@ -87,5 +87,31 @@ describe('generateCSV', () => {
     const csv = generateCSV([matchup])
     expect(csv).toContain('Test Batter')
     expect(csv).toContain('NYY')
+  })
+})
+
+describe('formatCountdownToStart', () => {
+  it('returns null when start is in the past', () => {
+    expect(formatCountdownToStart('2020-01-01T12:00:00Z', new Date('2025-01-01T12:00:00Z').getTime())).toBeNull()
+  })
+
+  it('uses minutes under one hour', () => {
+    const now = new Date('2026-04-01T17:00:00Z').getTime()
+    expect(formatCountdownToStart('2026-04-01T17:45:00Z', now)).toBe('in 45m')
+  })
+
+  it('uses hours and minutes before 24h', () => {
+    const now = new Date('2026-04-01T12:00:00Z').getTime()
+    expect(formatCountdownToStart('2026-04-01T13:30:00Z', now)).toBe('in 1h 30m')
+  })
+
+  it('uses whole hours when minutes are zero', () => {
+    const now = new Date('2026-04-01T12:00:00Z').getTime()
+    expect(formatCountdownToStart('2026-04-01T14:00:00Z', now)).toBe('in 2h')
+  })
+
+  it('uses days when 24h or more', () => {
+    const now = new Date('2026-04-01T12:00:00Z').getTime()
+    expect(formatCountdownToStart('2026-04-03T13:00:00Z', now)).toBe('in 2d 1h')
   })
 })

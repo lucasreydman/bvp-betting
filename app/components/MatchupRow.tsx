@@ -1,8 +1,9 @@
 import type { MatchupResult } from '@/lib/types'
-import { formatTime } from '@/lib/utils'
+import GameTimeCell from './GameTimeCell'
 
 interface Props {
   matchup: MatchupResult
+  gameKind: 'upcoming' | 'inProgress'
 }
 
 const CONFIDENCE_ROW_COLORS = {
@@ -19,7 +20,7 @@ const CONFIDENCE_TEXT_COLORS = {
 
 const fmt3 = (n: number) => n.toFixed(3)
 
-export default function MatchupRow({ matchup: m }: Props) {
+export default function MatchupRow({ matchup: m, gameKind }: Props) {
   return (
     <tr className={`border-t ${CONFIDENCE_ROW_COLORS[m.confidence]} hover:bg-gray-800/50 transition-colors`}>
       <td className="px-3 py-2 font-medium text-white whitespace-nowrap">
@@ -43,7 +44,9 @@ export default function MatchupRow({ matchup: m }: Props) {
       <td className="px-3 py-2 font-mono text-sm text-gray-300">{fmt3(m.avg)}</td>
       <td className="px-3 py-2 font-mono text-sm text-gray-300">{fmt3(m.slg)}</td>
       <td className="px-3 py-2 font-mono text-sm text-white">{m.ab}</td>
-      <td className="px-3 py-2 text-xs text-gray-400 whitespace-nowrap">{formatTime(m.gameTime)}</td>
+      <td className="px-3 py-2 align-top">
+        <GameTimeCell gameTime={m.gameTime} variant={gameKind} />
+      </td>
       <td className="px-3 py-2">
         <span className={`inline-flex text-xs px-2 py-0.5 rounded font-medium ${
           m.lineupSource === 'confirmed'

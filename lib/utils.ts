@@ -10,6 +10,23 @@ export function formatTime(isoString: string): string {
   })
 }
 
+/** Relative time until first pitch. Returns null if start is in the past or invalid. */
+export function formatCountdownToStart(isoString: string, nowMs: number): string | null {
+  const start = new Date(isoString).getTime()
+  if (Number.isNaN(start)) return null
+  const diffMs = start - nowMs
+  if (diffMs <= 0) return null
+  const totalMins = Math.floor(diffMs / 60_000)
+  if (totalMins < 1) return 'in <1m'
+  if (totalMins < 60) return `in ${totalMins}m`
+  const h = Math.floor(totalMins / 60)
+  const m = totalMins % 60
+  if (h < 24) return m === 0 ? `in ${h}h` : `in ${h}h ${m}m`
+  const d = Math.floor(h / 24)
+  const remH = h % 24
+  return remH === 0 ? `in ${d}d` : `in ${d}d ${remH}h`
+}
+
 export function applyFilters(matchups: MatchupResult[], filters: FilterState): MatchupResult[] {
   return matchups.filter(m =>
     m.ab >= filters.minAB &&

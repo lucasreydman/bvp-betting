@@ -9,6 +9,8 @@ interface Props {
   totalMatchups: number
   title?: string
   onResetFilters?: () => void
+  /** Drives Game column: countdown vs live badge */
+  gameKind?: 'upcoming' | 'inProgress'
 }
 
 const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> = [
@@ -19,11 +21,19 @@ const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> =
   { key: 'avg', label: 'AVG', cls: 'min-w-[4.5rem]' },
   { key: 'slg', label: 'SLG', cls: 'min-w-[4.5rem]' },
   { key: 'ab', label: 'AB', cls: 'min-w-[3rem]' },
-  { key: 'gameTime', label: 'Game', cls: 'min-w-[9rem]' },
+  { key: 'gameTime', label: 'Game', cls: 'min-w-[10.5rem]' },
   { key: 'lineupSource', label: 'Lineup', cls: 'min-w-[6.5rem]' },
 ]
 
-export default function MatchupTable({ matchups, sort, onSort, totalMatchups, title = 'Upcoming', onResetFilters }: Props) {
+export default function MatchupTable({
+  matchups,
+  sort,
+  onSort,
+  totalMatchups,
+  title = 'Upcoming',
+  onResetFilters,
+  gameKind = 'upcoming',
+}: Props) {
   const sortIcon = (key: keyof MatchupResult) => {
     if (sort.column !== key) return <span className="text-gray-700 ml-1">↕</span>
     return <span className="text-blue-400 ml-1">{sort.direction === 'desc' ? '↓' : '↑'}</span>
@@ -75,7 +85,11 @@ export default function MatchupTable({ matchups, sort, onSort, totalMatchups, ti
             </thead>
             <tbody>
               {matchups.map(m => (
-                <MatchupRow key={`${m.batterId}-${m.pitcherId}-${m.gameTime}`} matchup={m} />
+                <MatchupRow
+                  key={`${m.batterId}-${m.pitcherId}-${m.gameTime}`}
+                  matchup={m}
+                  gameKind={gameKind}
+                />
               ))}
             </tbody>
           </table>

@@ -92,6 +92,7 @@ export default function ClientShell({ initialDate }: Props) {
             onSort={handleSort}
             totalMatchups={totalUpcoming}
             onResetFilters={() => setFilters(DEFAULT_FILTERS)}
+            gameKind="upcoming"
           />
           {(inProgress.length > 0 || totalInProgress > 0) && (
             <div className="mt-6">
@@ -101,6 +102,7 @@ export default function ClientShell({ initialDate }: Props) {
                 onSort={handleSort}
                 totalMatchups={totalInProgress}
                 title="In progress"
+                gameKind="inProgress"
               />
             </div>
           )}
