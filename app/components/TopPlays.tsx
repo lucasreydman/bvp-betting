@@ -30,7 +30,7 @@ export default function TopPlays({ matchups }: Props) {
       <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Top 5 Plays Today</h2>
       <ol className="space-y-2">
         {top5.map((m, i) => (
-          <li key={`${m.batterId}-${m.pitcherId}`} className="flex items-baseline gap-3 text-sm">
+          <li key={`${m.batterId}-${m.pitcherId}-${m.gameTime}`} className="flex items-baseline gap-3 text-sm">
             <span className="text-gray-500 w-4 font-mono">{i + 1}.</span>
             <span className="text-white font-medium">{m.batterName}</span>
             <span className="text-gray-400">vs {m.pitcherName}</span>

@@ -39,6 +39,12 @@ describe('calcStats', () => {
     const result = calcStats({ ab: 0, h: 0, doubles: 0, triples: 0, hr: 0, bb: 0, hbp: 0, sf: 0 })
     expect(result.obp).toBe(0)
   })
+
+  it('clamps singles when H is smaller than sum of extra-base hits (bad API row)', () => {
+    // Would imply negative singles without clamp; SLG uses 0 singles + 2B/3B/HR TB only
+    const result = calcStats({ ab: 10, h: 3, doubles: 5, triples: 0, hr: 0, bb: 0, hbp: 0, sf: 0 })
+    expect(result.slg).toBeCloseTo(1.0)
+  })
 })
 
 describe('assignConfidence', () => {

@@ -56,6 +56,7 @@ export default function ClientShell({ initialDate }: Props) {
   const filtered = applyFilters(allMatchups, filters)
   const upcoming = sortMatchups(filtered.filter(m => !isStarted(m)), sort)
   const inProgress = sortMatchups(filtered.filter(m => isStarted(m)), sort)
+  const csvMatchups = [...upcoming, ...inProgress]
 
   const totalUpcoming = allMatchups.filter(m => !isStarted(m)).length
   const totalInProgress = allMatchups.filter(m => isStarted(m)).length
@@ -84,7 +85,7 @@ export default function ClientShell({ initialDate }: Props) {
       ) : (
         <>
           <TopPlays matchups={upcoming} />
-          <Filters filters={filters} onApply={setFilters} matchups={upcoming} />
+          <Filters filters={filters} onApply={setFilters} matchups={csvMatchups} />
           <MatchupTable
             matchups={upcoming}
             sort={sort}

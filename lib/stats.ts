@@ -31,7 +31,7 @@ interface SplitStat {
 }
 
 export function calcStats(raw: RawStats): CalculatedStats {
-  const singles = raw.h - raw.doubles - raw.triples - raw.hr
+  const singles = Math.max(0, raw.h - raw.doubles - raw.triples - raw.hr)
   const slg = raw.ab > 0
     ? (singles + raw.doubles * 2 + raw.triples * 3 + raw.hr * 4) / raw.ab
     : 0

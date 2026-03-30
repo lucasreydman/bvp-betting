@@ -13,6 +13,8 @@ A daily betting research tool that surfaces the best **1+ total bases** plays by
 5. Displays results ranked by **OPS → AVG → SLG → AB**
 6. Games that have already started move to an **In Progress** section automatically on refresh — qualifying plays stay visible for reference even after first pitch
 
+**Total bases props:** Most books count only bases from hits (walks/HBP do not count toward TB). This tool still ranks by OPS/AVG/SLG from BvP as a general hitting-strength signal — it does not model walk-only PAs.
+
 ## Filters
 
 | Filter | Default | Description |
@@ -34,7 +36,7 @@ Confidence is based on sample size (career AB vs this pitcher):
 
 ## Data Quality
 
-The MLB `vsPlayer` API endpoint occasionally returns team-aggregate stats instead of individual BvP records (e.g. when a pitcher has only faced a team once). Results where 3 or more batters on the same team share identical raw stats against the same pitcher are automatically dropped.
+The MLB Stats API occasionally returns team-aggregate stats instead of individual BvP records (e.g. when a pitcher has only faced a team once). After building the list, any **stat line** that appears for **five or more** batters on the same team against the same pitcher (identical raw counting stats) is treated as bad data and those rows are dropped. Smaller duplicate clusters (2–4 batters) are left in place so borderline real ties are not removed.
 
 ## Stack
 

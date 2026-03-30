@@ -154,9 +154,9 @@ export async function GET(req: NextRequest) {
       if (i + BATCH_SIZE < allPairs.length) await sleep(BATCH_DELAY_MS)
     }
 
-    // Drop results where 2+ batters on the same team vs the same pitcher share
+    // Drop results where 5+ batters on the same team vs the same pitcher share
     // identical raw stats — the MLB API sometimes returns team-aggregate data
-    // instead of individual BvP records, making every batter look identical.
+    // instead of individual BvP records, making many batters look identical.
     const statKey = (r: MatchupResult) =>
       `${r.pitcherId}:${r.batterTeamId}:${r.ab}:${r.h}:${r.doubles}:${r.triples}:${r.hr}:${r.bb}:${r.hbp}:${r.sf}`
     const keyCounts = new Map<string, number>()

@@ -1,4 +1,4 @@
-import { formatET, generateCSV, applyFilters, sortMatchups } from '@/lib/utils'
+import { formatTime, generateCSV, applyFilters, sortMatchups } from '@/lib/utils'
 import { DEFAULT_FILTERS, type MatchupResult } from '@/lib/types'
 
 const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => ({
@@ -31,35 +31,29 @@ const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => (
   ...overrides,
 })
 
-describe('formatET', () => {
-  it('formats ISO string to ET time', () => {
-    // 2026-04-01T18:05:00Z = 2:05 PM ET (UTC-4 in April)
-    const result = formatET('2026-04-01T18:05:00Z')
-    expect(result).toMatch(/2:05 PM E[DS]T/)
+describe('formatTime', () => {
+  it('formats ISO string in the runtime local timezone', () => {
+    const result = formatTime('2026-04-01T18:05:00Z')
+    expect(result).toMatch(/\d{1,2}:\d{2}/)
+    expect(result).toMatch(/AM|PM/)
   })
 })
 
 describe('applyFilters', () => {
   it('returns matchup that passes all filters', () => {
-    const matchup = makeMatchup({ ab: 20, avg: 0.400, slg: 0.700, ops: 1.178, hr: 2 })
+    const matchup = makeMatchup({ ab: 20, avg: 0.400, slg: 0.700, ops: 1.178 })
     const result = applyFilters([matchup], DEFAULT_FILTERS)
     expect(result).toHaveLength(1)
   })
 
   it('excludes matchup that fails one filter (AND logic)', () => {
-    const matchup = makeMatchup({ ab: 20, avg: 0.200, slg: 0.700, ops: 1.178, hr: 2 }) // avg too low
+    const matchup = makeMatchup({ ab: 20, avg: 0.200, slg: 0.700, ops: 1.178 }) // avg too low
     const result = applyFilters([matchup], DEFAULT_FILTERS)
     expect(result).toHaveLength(0)
   })
 
-  it('uses >= semantics (minHR=1 includes HR=1)', () => {
-    const matchup = makeMatchup({ ab: 20, avg: 0.400, slg: 0.700, ops: 1.178, hr: 1 })
-    const result = applyFilters([matchup], DEFAULT_FILTERS)
-    expect(result).toHaveLength(1)
-  })
-
-  it('excludes matchup with HR=0 when minHR=1', () => {
-    const matchup = makeMatchup({ ab: 20, avg: 0.400, slg: 0.700, ops: 1.178, hr: 0 })
+  it('excludes matchup below minAB', () => {
+    const matchup = makeMatchup({ ab: 9, avg: 0.400, slg: 0.700, ops: 1.178 })
     const result = applyFilters([matchup], DEFAULT_FILTERS)
     expect(result).toHaveLength(0)
   })

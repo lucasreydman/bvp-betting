@@ -49,7 +49,7 @@ lib/
 - **Confidence** = AB-based: high ≥30, medium ≥15, low 10–14 — colors green/yellow/orange
 - **Module-level caches only** — never instantiate caches inside a request handler (re-created per request in serverless)
 - **`parseSplit(stat)`** is the single place that maps MLB API stat fields to internal raw+calculated shape — use it in both routes, never duplicate
-- **Aggregate dedup** — after building results, drop any result where 3+ batters on the same team vs the same pitcher share identical raw stats (MLB API quirk); threshold is `< 3` in `keyCounts`
+- **Aggregate dedup** — after building results, drop any result where **5+** batters on the same team vs the same pitcher share identical raw stats (MLB API quirk); a row is kept only when `keyCounts(statKey) < 5`
 - **`formatTime()`** uses `Intl.DateTimeFormat().resolvedOptions().timeZone` — auto-detects browser timezone, no hardcoded ET
 
 ## MLB Stats API
