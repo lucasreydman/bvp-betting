@@ -74,7 +74,10 @@ export async function GET(req: NextRequest) {
       lineupPosition?: number
     }> = []
 
+    const now = Date.now()
+
     for (const game of games) {
+      if (new Date(game.gameDate).getTime() <= now) continue  // game already started
       gamesScanned++
       const { home, away } = game.teams
       if (!home.probablePitcher || !away.probablePitcher) {
