@@ -44,8 +44,8 @@ export interface FilterState {
 export const DEFAULT_FILTERS: FilterState = {
   minAB: 10,
   minOPS: 0.950,
-  minSLG: 0.500,
-  minAVG: 0.300,
+  minSLG: 0.425,
+  minAVG: 0.275,
   minHR: 0,
 }
 
