@@ -38,10 +38,10 @@ export default function TopPlays({ matchups, filters }: Props) {
             <span className="text-white font-medium">{m.batterName}</span>
             <span className="text-gray-400">vs {m.pitcherName}</span>
             <span className={`font-mono font-bold ${CONFIDENCE_COLORS[m.confidence]}`}>
-              {m.slg.toFixed(3)} SLG
+              {m.ops.toFixed(3)} OPS
             </span>
-            <span className="text-gray-500 font-mono">{m.ops.toFixed(3)} OPS</span>
-            <span className="text-gray-500">{m.hr} HR</span>
+            <span className="text-gray-500 font-mono">{m.avg.toFixed(3)} AVG</span>
+            <span className="text-gray-500 font-mono">{m.slg.toFixed(3)} SLG</span>
             <span className="text-gray-600 text-xs">({m.ab} AB)</span>
             <span className="text-gray-600 text-xs ml-auto">{formatET(m.gameTime)}</span>
           </li>
