@@ -1,10 +1,8 @@
-import type { MatchupResult, FilterState } from '@/lib/types'
-import { applyFilters } from '@/lib/utils'
+import type { MatchupResult } from '@/lib/types'
 import { formatET } from '@/lib/utils'
 
 interface Props {
   matchups: MatchupResult[]
-  filters: FilterState
 }
 
 const CONFIDENCE_COLORS = {
@@ -13,9 +11,8 @@ const CONFIDENCE_COLORS = {
   low: 'text-orange-400',
 }
 
-export default function TopPlays({ matchups, filters }: Props) {
-  // Apply the same filters as the table so Top 5 always shows qualifying plays.
-  const top5 = applyFilters(matchups, filters)
+export default function TopPlays({ matchups }: Props) {
+  const top5 = [...matchups]
     .sort((a, b) => b.ops - a.ops || b.avg - a.avg || b.slg - a.slg || b.ab - a.ab)
     .slice(0, 5)
 

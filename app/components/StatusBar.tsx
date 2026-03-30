@@ -11,7 +11,7 @@ interface Props {
 
 export default function StatusBar({ fetchedAt, gamesScanned, gamesSkipped, onRefresh, isLoading }: Props) {
   return (
-    <div className="flex items-center gap-6 text-sm text-gray-400 mb-4">
+    <div className="flex items-center gap-6 text-sm text-gray-400">
       <div className="flex gap-4 flex-1 min-w-0">
         {fetchedAt && (
           <span className="whitespace-nowrap">Last updated: {formatET(fetchedAt)}</span>

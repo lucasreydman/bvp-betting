@@ -34,11 +34,10 @@ export interface MatchupResult {
 }
 
 export interface FilterState {
-  minAB: number    // default 15
-  minOPS: number   // default 0.950
-  minSLG: number   // default 0.500
-  minAVG: number   // default 0.300
-  minHR: number    // default 1
+  minAB: number
+  minOPS: number
+  minSLG: number
+  minAVG: number
 }
 
 export const DEFAULT_FILTERS: FilterState = {
@@ -46,7 +45,6 @@ export const DEFAULT_FILTERS: FilterState = {
   minOPS: 0.950,
   minSLG: 0.425,
   minAVG: 0.275,
-  minHR: 0,
 }
 
 export interface MatchupsResponse {

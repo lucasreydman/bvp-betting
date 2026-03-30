@@ -76,7 +76,7 @@ export default function ClientShell({ initialDate }: Props) {
         <LoadingSkeleton />
       ) : (
         <>
-          <TopPlays matchups={allMatchups} filters={filters} />
+          <TopPlays matchups={filtered} />
           <Filters filters={filters} onApply={setFilters} matchups={sorted} />
           <MatchupTable
             matchups={sorted}

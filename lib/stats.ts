@@ -17,6 +17,19 @@ interface CalculatedStats {
   xbh: number
 }
 
+interface SplitStat {
+  atBats: number
+  hits: number
+  doubles: number
+  triples: number
+  homeRuns: number
+  baseOnBalls: number
+  hitByPitch: number
+  sacFlies: number
+  strikeOuts: number
+  rbi: number
+}
+
 export function calcStats(raw: RawStats): CalculatedStats {
   const singles = raw.h - raw.doubles - raw.triples - raw.hr
   const slg = raw.ab > 0
@@ -37,4 +50,20 @@ export function assignConfidence(ab: number): 'high' | 'medium' | 'low' {
   if (ab >= 30) return 'high'
   if (ab >= 15) return 'medium'
   return 'low'
+}
+
+export function parseSplit(stat: SplitStat) {
+  const raw = {
+    ab: stat.atBats,
+    h: stat.hits,
+    doubles: stat.doubles,
+    triples: stat.triples,
+    hr: stat.homeRuns,
+    bb: stat.baseOnBalls,
+    hbp: stat.hitByPitch,
+    sf: stat.sacFlies,
+    k: stat.strikeOuts,
+    rbi: stat.rbi,
+  }
+  return { ...raw, ...calcStats(raw), confidence: assignConfidence(raw.ab) }
 }

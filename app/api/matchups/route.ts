@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { fetchSchedule, fetchConfirmedLineup, fetchActiveRoster, fetchCareerPA, fetchBvP, fetchPlayerName } from '@/lib/mlb-api'
-import { calcStats, assignConfidence } from '@/lib/stats'
+import { parseSplit } from '@/lib/stats'
 import { createCache } from '@/lib/cache'
 import type { MatchupResult, MatchupsResponse } from '@/lib/types'
 
 // Module-level caches — survive across requests in the same serverless instance
-const bvpCache = createCache<{ split: any }>(3600_000)       // 60 min
+const bvpCache = createCache<ReturnType<typeof parseSplit>>(3600_000)  // 60 min
 const rosterCache = createCache<number[]>(3600_000)           // 60 min
 const playerNameCache = createCache<string>(86400_000)        // 24h
 
@@ -82,8 +82,11 @@ export async function GET(req: NextRequest) {
         continue
       }
 
-      // Home batters vs away pitcher
-      const homeLineup = await getLineupPlayerIds(game.gamePk, home.team.id)
+      const [homeLineup, awayLineup] = await Promise.all([
+        getLineupPlayerIds(game.gamePk, home.team.id),
+        getLineupPlayerIds(game.gamePk, away.team.id),
+      ])
+
       homeLineup.ids.forEach((batterId, i) => {
         allPairs.push({
           batterId,
@@ -99,8 +102,6 @@ export async function GET(req: NextRequest) {
         })
       })
 
-      // Away batters vs home pitcher
-      const awayLineup = await getLineupPlayerIds(game.gamePk, away.team.id)
       awayLineup.ids.forEach((batterId, i) => {
         allPairs.push({
           batterId,
@@ -124,39 +125,22 @@ export async function GET(req: NextRequest) {
       const batchResults = await Promise.allSettled(
         batch.map(async pair => {
           const cacheKey = `${pair.batterId}:${pair.pitcherId}`
-          let split = bvpCache.get(cacheKey)?.split
-          if (!split) {
+          let stats = bvpCache.get(cacheKey)
+          if (!stats) {
             const fetched = await fetchBvP(pair.batterId, pair.pitcherId)
             if (!fetched || fetched.stat.atBats === 0) return null
-            split = fetched
-            bvpCache.set(cacheKey, { split })
+            stats = parseSplit(fetched.stat)
+            bvpCache.set(cacheKey, stats)
           }
 
-          const raw = {
-            ab: split.stat.atBats,
-            h: split.stat.hits,
-            doubles: split.stat.doubles,
-            triples: split.stat.triples,
-            hr: split.stat.homeRuns,
-            bb: split.stat.baseOnBalls,
-            hbp: split.stat.hitByPitch,
-            sf: split.stat.sacFlies,
-            k: split.stat.strikeOuts,
-            rbi: split.stat.rbi,
-          }
+          if (stats.ab < 10) return null
 
-          if (raw.ab < 10) return null
-
-          const calculated = calcStats(raw)
-          const confidence = assignConfidence(raw.ab)
           const batterName = await getPlayerName(pair.batterId)
 
           return {
             ...pair,
             batterName,
-            ...raw,
-            ...calculated,
-            confidence,
+            ...stats,
           } satisfies MatchupResult
         })
       )

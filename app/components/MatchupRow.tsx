@@ -33,15 +33,12 @@ export default function MatchupRow({ matchup: m }: Props) {
         {m.pitcherName}
         <span className="ml-1 text-gray-600 text-xs">({m.pitcherTeam})</span>
       </td>
-      <td className="px-3 py-2 font-mono text-sm text-white">{m.ab}</td>
-      <td className="px-3 py-2 font-mono text-sm text-gray-300">{m.h}</td>
-      <td className="px-3 py-2 font-mono text-sm text-gray-300">{m.hr}</td>
-      <td className="px-3 py-2 font-mono text-sm text-gray-300">{m.xbh}</td>
       <td className={`px-3 py-2 font-mono text-sm font-bold ${CONFIDENCE_TEXT_COLORS[m.confidence]}`}>
-        {fmt3(m.slg)}
+        {fmt3(m.ops)}
       </td>
-      <td className="px-3 py-2 font-mono text-sm text-gray-300">{fmt3(m.ops)}</td>
       <td className="px-3 py-2 font-mono text-sm text-gray-300">{fmt3(m.avg)}</td>
+      <td className="px-3 py-2 font-mono text-sm text-gray-300">{fmt3(m.slg)}</td>
+      <td className="px-3 py-2 font-mono text-sm text-white">{m.ab}</td>
       <td className="px-3 py-2 text-xs text-gray-400 whitespace-nowrap">{formatET(m.gameTime)}</td>
       <td className="px-3 py-2">
         <span className={`inline-flex text-xs px-2 py-0.5 rounded font-medium ${

@@ -15,16 +15,20 @@ export function applyFilters(matchups: MatchupResult[], filters: FilterState): M
     m.ab >= filters.minAB &&
     m.ops >= filters.minOPS &&
     m.slg >= filters.minSLG &&
-    m.avg >= filters.minAVG &&
-    m.hr >= filters.minHR
+    m.avg >= filters.minAVG
   )
 }
 
 export function sortMatchups(matchups: MatchupResult[], sort: SortState): MatchupResult[] {
   return [...matchups].sort((a, b) => {
-    const aVal = a[sort.column] as number
-    const bVal = b[sort.column] as number
-    return sort.direction === 'desc' ? bVal - aVal : aVal - bVal
+    const aVal = a[sort.column]
+    const bVal = b[sort.column]
+    if (typeof aVal === 'string' && typeof bVal === 'string') {
+      const cmp = aVal.localeCompare(bVal)
+      return sort.direction === 'desc' ? -cmp : cmp
+    }
+    const diff = (aVal as number) - (bVal as number)
+    return sort.direction === 'desc' ? -diff : diff
   })
 }
 

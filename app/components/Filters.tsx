@@ -10,7 +10,6 @@ interface Props {
   matchups: MatchupResult[]   // for CSV export (filtered set passed from parent)
 }
 
-// Decimal fields need 3 decimal places displayed; integer fields are whole numbers.
 const DECIMAL_FIELDS: Array<keyof FilterState> = ['minOPS', 'minSLG', 'minAVG']
 
 function initDisplay(f: FilterState): Record<keyof FilterState, string> {
@@ -19,7 +18,6 @@ function initDisplay(f: FilterState): Record<keyof FilterState, string> {
     minOPS: f.minOPS.toFixed(3),
     minSLG: f.minSLG.toFixed(3),
     minAVG: f.minAVG.toFixed(3),
-    minHR: String(f.minHR),
   }
 }
 
@@ -47,7 +45,6 @@ export default function Filters({ filters, onApply, matchups }: Props) {
     minOPS: Number(local.minOPS),
     minSLG: Number(local.minSLG),
     minAVG: Number(local.minAVG),
-    minHR: Number(local.minHR),
   })
 
   const handleApply = () => {

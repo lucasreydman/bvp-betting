@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { fetchBvP } from '@/lib/mlb-api'
-import { calcStats, assignConfidence } from '@/lib/stats'
+import { parseSplit } from '@/lib/stats'
 import { createCache } from '@/lib/cache'
 
-const bvpCache = createCache<ReturnType<typeof calcStats> & { ab: number; confidence: string }>(3600_000)
+const bvpCache = createCache<ReturnType<typeof parseSplit>>(3600_000)
 
 export async function GET(req: NextRequest) {
   const batterId = Number(req.nextUrl.searchParams.get('batterId'))
@@ -21,21 +21,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'No BvP data found' }, { status: 404 })
   }
 
-  const raw = {
-    ab: split.stat.atBats,
-    h: split.stat.hits,
-    doubles: split.stat.doubles,
-    triples: split.stat.triples,
-    hr: split.stat.homeRuns,
-    bb: split.stat.baseOnBalls,
-    hbp: split.stat.hitByPitch,
-    sf: split.stat.sacFlies,
-    k: split.stat.strikeOuts,
-    rbi: split.stat.rbi,
-  }
-  const calculated = calcStats(raw)
-  const confidence = assignConfidence(raw.ab)
-  const result = { ...raw, ...calculated, confidence }
+  const result = parseSplit(split.stat)
   bvpCache.set(cacheKey, result)
   return NextResponse.json(result)
 }
