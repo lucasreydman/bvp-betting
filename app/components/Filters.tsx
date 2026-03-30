@@ -85,7 +85,6 @@ export default function Filters({ filters, onApply, matchups }: Props) {
         {field('Min OPS', 'minOPS', '0.001')}
         {field('Min SLG', 'minSLG', '0.001')}
         {field('Min AVG', 'minAVG', '0.001')}
-        {field('Min HR', 'minHR', '1')}
         <div className="flex gap-2 pb-0.5">
           <button
             onClick={() => onApply(parseLocal())}

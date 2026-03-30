@@ -46,7 +46,7 @@ export const DEFAULT_FILTERS: FilterState = {
   minOPS: 0.950,
   minSLG: 0.500,
   minAVG: 0.300,
-  minHR: 1,
+  minHR: 0,
 }
 
 export interface MatchupsResponse {
