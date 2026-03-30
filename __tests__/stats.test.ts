@@ -36,7 +36,7 @@ describe('calcStats', () => {
 
   it('returns OBP of 0 when denominator is 0', () => {
     // Edge case: AB=0, BB=0, HBP=0, SF=0
-    const result = calcStats({ ab: 1, h: 0, doubles: 0, triples: 0, hr: 0, bb: 0, hbp: 0, sf: 0 })
+    const result = calcStats({ ab: 0, h: 0, doubles: 0, triples: 0, hr: 0, bb: 0, hbp: 0, sf: 0 })
     expect(result.obp).toBe(0)
   })
 })
