@@ -1,7 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
-  * { @apply border-gray-800; }
+  * {
+    border-color: var(--color-gray-800, #1f2937);
+  }
 }
