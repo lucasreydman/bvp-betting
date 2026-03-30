@@ -161,7 +161,7 @@ export async function GET(req: NextRequest) {
       `${r.pitcherId}:${r.batterTeamId}:${r.ab}:${r.h}:${r.doubles}:${r.triples}:${r.hr}:${r.bb}:${r.hbp}:${r.sf}`
     const keyCounts = new Map<string, number>()
     for (const r of results) keyCounts.set(statKey(r), (keyCounts.get(statKey(r)) ?? 0) + 1)
-    const deduped = results.filter(r => keyCounts.get(statKey(r))! < 3)
+    const deduped = results.filter(r => keyCounts.get(statKey(r))! < 5)
 
     const response: MatchupsResponse = {
       date,
