@@ -23,7 +23,7 @@ const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> =
   { key: 'lineupSource', label: 'Lineup', cls: 'w-24' },
 ]
 
-export default function MatchupTable({ matchups, sort, onSort, totalMatchups, title = 'Qualifying Matchups', onResetFilters }: Props) {
+export default function MatchupTable({ matchups, sort, onSort, totalMatchups, title = 'Upcoming', onResetFilters }: Props) {
   const sortIcon = (key: keyof MatchupResult) => {
     if (sort.column !== key) return <span className="text-gray-700 ml-1">↕</span>
     return <span className="text-blue-400 ml-1">{sort.direction === 'desc' ? '↓' : '↑'}</span>
@@ -42,7 +42,7 @@ export default function MatchupTable({ matchups, sort, onSort, totalMatchups, ti
 
       {matchups.length === 0 ? (
         <div className="px-4 py-8 text-center text-gray-500 text-sm space-y-3">
-          <p>No matchups meet your criteria — try relaxing the filters.</p>
+          <p>No rows match these filters. Try lowering a minimum.</p>
           {onResetFilters && (
             <button
               onClick={onResetFilters}

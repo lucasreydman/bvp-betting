@@ -19,15 +19,15 @@ export default function TopPlays({ matchups }: Props) {
   if (top5.length === 0) {
     return (
       <div className="bg-gray-900 rounded-lg p-4 mb-4">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Top 5 Plays Today</h2>
-        <p className="text-gray-500 text-sm">No qualifying matchups found for this date.</p>
+        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Top 5 by OPS</h2>
+        <p className="text-gray-500 text-sm">No upcoming games with data for this date.</p>
       </div>
     )
   }
 
   return (
     <div className="bg-gray-900 rounded-lg p-4 mb-4">
-      <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Top 5 Plays Today</h2>
+      <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Top 5 by OPS</h2>
       <ol className="space-y-2">
         {top5.map((m, i) => (
           <li key={`${m.batterId}-${m.pitcherId}-${m.gameTime}`} className="flex items-baseline gap-3 text-sm">

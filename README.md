@@ -1,51 +1,50 @@
-# MLB BvP Total Bases Tool
+# MLB BvP
 
-A daily betting research tool that surfaces the best **1+ total bases** plays by ranking every batter vs pitcher matchup on the day's schedule using career head-to-head stats from the MLB Stats API.
+A small web app for **research**: career batter vs pitcher (BvP) stats from the [MLB Stats API](https://statsapi.mlb.com) for the games on a chosen day. Results are sorted by **OPS** (then AVG, SLG, AB). This is not betting advice or a picks service.
 
 **Live:** [bvp-betting.vercel.app](https://bvp-betting.vercel.app)
 
-## How It Works
+## How it works
 
-1. Pulls the day's schedule and probable pitchers from the MLB Stats API
-2. Resolves each team's lineup — confirmed batting order from the boxscore when available, otherwise estimated from the top 9 active roster players by career plate appearances
-3. Fetches career BvP (batter vs pitcher) splits for every batter–pitcher pair (minimum 10 AB)
-4. Calculates OPS, AVG, SLG, OBP, and XBH from the raw split
-5. Displays results ranked by **OPS → AVG → SLG → AB**
-6. Games that have already started move to an **In Progress** section automatically on refresh — qualifying plays stay visible for reference even after first pitch
+1. Loads the schedule and probable pitchers for the date.
+2. Builds each lineup: official order from the boxscore when available, otherwise the top 9 active players by career plate appearances.
+3. Fetches career BvP for each batter vs the opposing starter (minimum 10 AB to show a row).
+4. Computes OPS, AVG, SLG, OBP, and XBH from the split.
+5. Ranks by OPS → AVG → SLG → AB. **Top 5 by OPS** highlights the best upcoming rows.
+6. Splits the UI into **Upcoming** and **In progress** after first pitch; refresh updates which bucket a game is in.
 
-**Total bases props:** Most books count only bases from hits (walks/HBP do not count toward TB). This tool still ranks by OPS/AVG/SLG from BvP as a general hitting-strength signal — it does not model walk-only PAs.
+**Total bases / props:** Many books count only hit bases toward TB (not walks). The app still ranks on OPS/AVG/SLG from BvP as a general hitting snapshot; it does not model walk-only plate appearances.
 
 ## Filters
 
-| Filter | Default | Description |
-|--------|---------|-------------|
-| Min AB | 10 | Minimum career at-bats against this pitcher |
+| Filter | Default | Meaning |
+|--------|---------|--------|
+| Min AB | 10 | Career AB vs this pitcher |
 | Min OPS | .950 | On-base plus slugging |
-| Min SLG | .425 | Slugging percentage |
+| Min SLG | .425 | Slugging |
 | Min AVG | .275 | Batting average |
 
-All filters are AND logic — a matchup must pass every threshold to appear. Filters apply to both the Qualifying Matchups and In Progress sections.
+All four minimums apply at once (AND). The same rules apply to Upcoming and In progress. **Export CSV** includes rows from both sections that pass the filters.
 
-## Confidence Levels
+## Confidence
 
-Confidence is based on sample size (career AB vs this pitcher):
+Sample size (career AB vs this pitcher):
 
-- **High** (green) — 30+ AB
-- **Medium** (yellow) — 15–29 AB
-- **Low** (orange) — 10–14 AB
+- **High** (green): 30+ AB  
+- **Medium** (yellow): 15–29 AB  
+- **Low** (orange): 10–14 AB  
 
-## Data Quality
+## Data quality
 
-The MLB Stats API occasionally returns team-aggregate stats instead of individual BvP records (e.g. when a pitcher has only faced a team once). After building the list, any **stat line** that appears for **five or more** batters on the same team against the same pitcher (identical raw counting stats) is treated as bad data and those rows are dropped. Smaller duplicate clusters (2–4 batters) are left in place so borderline real ties are not removed.
+The API sometimes returns team-level aggregates instead of true individual BvP. After building the list, any raw stat line shared by **five or more** batters on the same team against the same pitcher is dropped. Smaller duplicate groups (2–4) are kept so real ties are not stripped.
 
 ## Stack
 
-- **Next.js 16** (App Router) + **React 19**
-- **Tailwind CSS v4**
-- **MLB Stats API** (free, no auth required)
-- Deployed on **Vercel**
+- **Next.js 16** (App Router), **React 19**, **Tailwind CSS v4**
+- **MLB Stats API** (no auth)
+- Hosted on **Vercel**
 
-## Local Development
+## Local development
 
 ```bash
 npm install
@@ -55,24 +54,20 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000).
 
 ```bash
-npm test        # unit tests
-npm run build   # production build
+npm test
+npm run build
 ```
 
-## Project Structure
+## Project layout
 
 ```
 app/
-  api/matchups/   Main data endpoint — schedule → lineups → BvP stats
-  api/bvp/        Single batter vs pitcher lookup (debug)
-  api/schedule/   Raw schedule for a date
-  components/     All UI components
+  api/matchups/   Schedule → lineups → BvP
+  api/bvp/        Single BvP lookup (debug)
+  api/schedule/   Schedule JSON for a date
+  components/     UI
 lib/
-  types.ts        Shared types and filter defaults
-  stats.ts        parseSplit(), calcStats(), assignConfidence()
-  utils.ts        applyFilters(), sortMatchups(), generateCSV()
-  mlb-api.ts      MLB Stats API fetch functions
-  cache.ts        In-memory TTL cache
+  types.ts, stats.ts, utils.ts, mlb-api.ts, cache.ts
 ```
 
 ## License

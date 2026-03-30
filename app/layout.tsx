@@ -5,8 +5,9 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'MLB BvP Total Bases Tool',
-  description: 'Daily batter vs pitcher matchup scanner for 1+ total bases betting, ranked by OPS',
+  title: 'MLB BvP',
+  description:
+    'Career batter vs pitcher stats for the MLB schedule. Filter and sort by OPS, AVG, SLG, and AB.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

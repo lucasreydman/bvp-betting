@@ -17,7 +17,10 @@ export default function StatusBar({ fetchedAt, gamesScanned, gamesSkipped, onRef
           <span className="whitespace-nowrap">Last updated: {formatTime(fetchedAt)}</span>
         )}
         {gamesScanned > 0 && (
-          <span className="whitespace-nowrap">{gamesScanned} games scanned{gamesSkipped > 0 ? `, ${gamesSkipped} skipped (pitchers TBD)` : ''}</span>
+          <span className="whitespace-nowrap">
+            {gamesScanned} games scanned
+            {gamesSkipped > 0 ? `, ${gamesSkipped} skipped (no probable pitcher)` : ''}
+          </span>
         )}
       </div>
       <button

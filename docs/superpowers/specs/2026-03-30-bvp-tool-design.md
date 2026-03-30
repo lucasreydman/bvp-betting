@@ -1,4 +1,4 @@
-# MLB BvP Total Bases Tool — Design Spec
+# MLB BvP: Design Spec (historical)
 
 **Date:** 2026-03-30
 **Status:** Approved

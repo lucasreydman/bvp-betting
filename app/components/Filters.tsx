@@ -130,7 +130,7 @@ export default function Filters({ filters, onApply, matchups }: Props) {
           </button>
         </div>
       </div>
-      <p className="text-xs text-gray-600 mt-2">All filters use AND logic — matchup must pass every threshold.</p>
+      <p className="text-xs text-gray-600 mt-2">Each row must pass all four minimums.</p>
     </div>
   )
 }

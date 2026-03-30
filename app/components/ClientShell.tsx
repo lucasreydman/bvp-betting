@@ -33,7 +33,7 @@ export default function ClientShell({ initialDate }: Props) {
       setAllMatchups(data.results)
       setMeta({ date: data.date, fetchedAt: data.fetchedAt, gamesScanned: data.gamesScanned, gamesSkipped: data.gamesSkipped, matchupsFound: data.matchupsFound })
     } catch (err) {
-      setError('Unable to fetch MLB data — please try again later.')
+      setError('Could not load MLB data. Try again in a moment.')
     } finally {
       setIsLoading(false)
     }
@@ -100,7 +100,7 @@ export default function ClientShell({ initialDate }: Props) {
                 sort={sort}
                 onSort={handleSort}
                 totalMatchups={totalInProgress}
-                title="In Progress"
+                title="In progress"
               />
             </div>
           )}
