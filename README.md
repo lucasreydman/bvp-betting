@@ -11,6 +11,7 @@ A daily betting research tool that surfaces the best **1+ total bases** plays by
 3. Fetches career BvP (batter vs pitcher) splits for every batter–pitcher pair (minimum 10 AB)
 4. Calculates OPS, AVG, SLG, OBP, and XBH from the raw split
 5. Displays results ranked by **OPS → AVG → SLG → AB**
+6. Games that have already started move to an **In Progress** section automatically on refresh — qualifying plays stay visible for reference even after first pitch
 
 ## Filters
 
@@ -21,7 +22,7 @@ A daily betting research tool that surfaces the best **1+ total bases** plays by
 | Min SLG | .425 | Slugging percentage |
 | Min AVG | .275 | Batting average |
 
-All filters are AND logic — a matchup must pass every threshold to appear.
+All filters are AND logic — a matchup must pass every threshold to appear. Filters apply to both the Qualifying Matchups and In Progress sections.
 
 ## Confidence Levels
 
@@ -30,6 +31,10 @@ Confidence is based on sample size (career AB vs this pitcher):
 - **High** (green) — 30+ AB
 - **Medium** (yellow) — 15–29 AB
 - **Low** (orange) — 10–14 AB
+
+## Data Quality
+
+The MLB `vsPlayer` API endpoint occasionally returns team-aggregate stats instead of individual BvP records (e.g. when a pitcher has only faced a team once). Results where 3 or more batters on the same team share identical raw stats against the same pitcher are automatically dropped.
 
 ## Stack
 

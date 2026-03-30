@@ -19,14 +19,14 @@ app/
     DatePicker.tsx       # ±3 day nav, UTC-safe date arithmetic
     StatusBar.tsx        # Last updated, games scanned, refresh button
     Filters.tsx          # 4 filter inputs + Apply/Reset/Export CSV
-    TopPlays.tsx         # Top 5 by OPS→AVG→SLG→AB from filtered set
-    MatchupTable.tsx     # Sortable table — columns: OPS→AVG→SLG→AB
+    TopPlays.tsx         # Top 5 by OPS→AVG→SLG→AB from upcoming filtered set
+    MatchupTable.tsx     # Sortable table — reused for both Qualifying and In Progress sections
     MatchupRow.tsx       # Single row, confidence-color coded
     LoadingSkeleton.tsx  # Pulse skeleton during fetch
 lib/
   types.ts    # MatchupResult, FilterState, DEFAULT_FILTERS, SortState
   stats.ts    # calcStats(), assignConfidence(), parseSplit()
-  utils.ts    # applyFilters(), sortMatchups(), generateCSV(), formatET()
+  utils.ts    # applyFilters(), sortMatchups(), generateCSV(), formatTime()
   mlb-api.ts  # All MLB Stats API fetch functions
   cache.ts    # createCache<T>(ttlMs) — simple in-memory TTL cache
 ```
@@ -35,18 +35,22 @@ lib/
 
 1. `ClientShell` fetches `/api/matchups?date=YYYY-MM-DD` on mount and date change
 2. Route fetches schedule → lineups (confirmed boxscore or estimated top-9 by career PA) → BvP stats in batches of 20 with 200ms delays
-3. Server filters out AB < 10; client applies 4 filters (minAB, minOPS, minSLG, minAVG)
-4. `applyFilters` + `sortMatchups` run on every render (pure, fast — ~500 items max)
-5. `TopPlays` receives the already-filtered array; sorts by OPS→AVG→SLG→AB
+3. Server filters out AB < 10 and drops aggregate results (3+ batters same team/pitcher/stats); client applies 4 filters (minAB, minOPS, minSLG, minAVG)
+4. Client splits filtered results into `upcoming` (game hasn't started) and `inProgress` (game started) using `Date.now()` vs `gameTime`
+5. `TopPlays` and Qualifying Matchups table use `upcoming` only; In Progress table shows `inProgress`
+6. `applyFilters` + `sortMatchups` run on every render (pure, fast — ~500 items max)
 
 ## Key Invariants
 
-- **Filters are AND logic** — matchup must pass all 4 thresholds
-- **Top 5 and table use the same filtered set** — TopPlays receives `filtered`, not `allMatchups`
+- **Filters are AND logic** — matchup must pass all 4 thresholds; filters apply to both sections
+- **Upcoming vs In Progress split is client-side** — computed from `Date.now()` vs `m.gameTime` on every render; refresh naturally moves rows between sections
+- **TopPlays uses `upcoming` only** — never pass `allMatchups` or unfiltered data to it
 - **Sort order matches filter order**: OPS → AVG → SLG → AB everywhere (Top 5, table default, tiebreakers)
 - **Confidence** = AB-based: high ≥30, medium ≥15, low 10–14 — colors green/yellow/orange
 - **Module-level caches only** — never instantiate caches inside a request handler (re-created per request in serverless)
 - **`parseSplit(stat)`** is the single place that maps MLB API stat fields to internal raw+calculated shape — use it in both routes, never duplicate
+- **Aggregate dedup** — after building results, drop any result where 3+ batters on the same team vs the same pitcher share identical raw stats (MLB API quirk); threshold is `< 3` in `keyCounts`
+- **`formatTime()`** uses `Intl.DateTimeFormat().resolvedOptions().timeZone` — auto-detects browser timezone, no hardcoded ET
 
 ## MLB Stats API
 
