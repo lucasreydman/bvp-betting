@@ -82,7 +82,7 @@ export async function fetchCareerPA(playerId: number): Promise<number> {
 }
 
 export async function fetchBvP(batterId: number, pitcherId: number): Promise<MLBBvPSplit | null> {
-  const url = `${BASE}/people/${batterId}/stats?stats=vsPlayer&opposingPlayerId=${pitcherId}&group=hitting`
+  const url = `${BASE}/people/${batterId}/stats?stats=vsPlayerTotal&opposingPlayerId=${pitcherId}&group=hitting`
   const res = await fetch(url)  // no revalidate — handled by in-memory cache in the route
   if (!res.ok) return null
   const data = await res.json()

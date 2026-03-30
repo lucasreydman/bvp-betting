@@ -61,7 +61,7 @@ Key endpoints used:
 - `/game/{gamePk}/boxscore` — confirmed batting order
 - `/teams/{teamId}/roster?rosterType=active`
 - `/people/{playerId}/stats?stats=career&group=hitting`
-- `/people/{batterId}/stats?stats=vsPlayer&opposingPlayerId={pitcherId}&group=hitting`
+- `/people/{batterId}/stats?stats=vsPlayerTotal&opposingPlayerId={pitcherId}&group=hitting` — career/all-time (not current season)
 - `/people/{playerId}`
 
 BvP fetch has **no Next.js revalidate** — handled by in-memory `bvpCache` (60 min TTL).
