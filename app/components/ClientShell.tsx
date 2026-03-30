@@ -50,8 +50,15 @@ export default function ClientShell({ initialDate }: Props) {
     }))
   }
 
+  const now = Date.now()
+  const isStarted = (m: MatchupResult) => new Date(m.gameTime).getTime() <= now
+
   const filtered = applyFilters(allMatchups, filters)
-  const sorted = sortMatchups(filtered, sort)
+  const upcoming = sortMatchups(filtered.filter(m => !isStarted(m)), sort)
+  const inProgress = sortMatchups(filtered.filter(m => isStarted(m)), sort)
+
+  const totalUpcoming = allMatchups.filter(m => !isStarted(m)).length
+  const totalInProgress = allMatchups.filter(m => isStarted(m)).length
 
   return (
     <div>
@@ -76,15 +83,26 @@ export default function ClientShell({ initialDate }: Props) {
         <LoadingSkeleton />
       ) : (
         <>
-          <TopPlays matchups={filtered} />
-          <Filters filters={filters} onApply={setFilters} matchups={sorted} />
+          <TopPlays matchups={upcoming} />
+          <Filters filters={filters} onApply={setFilters} matchups={upcoming} />
           <MatchupTable
-            matchups={sorted}
+            matchups={upcoming}
             sort={sort}
             onSort={handleSort}
-            totalMatchups={allMatchups.length}
+            totalMatchups={totalUpcoming}
             onResetFilters={() => setFilters(DEFAULT_FILTERS)}
           />
+          {(inProgress.length > 0 || totalInProgress > 0) && (
+            <div className="mt-6">
+              <MatchupTable
+                matchups={inProgress}
+                sort={sort}
+                onSort={handleSort}
+                totalMatchups={totalInProgress}
+                title="In Progress"
+              />
+            </div>
+          )}
         </>
       )}
     </div>

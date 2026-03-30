@@ -6,8 +6,9 @@ interface Props {
   matchups: MatchupResult[]
   sort: SortState
   onSort: (column: keyof MatchupResult) => void
-  totalMatchups: number       // pre-filter count, for displaying "N of M"
-  onResetFilters: () => void  // called when user clicks Reset Filters in empty state
+  totalMatchups: number
+  title?: string
+  onResetFilters?: () => void
 }
 
 const COLUMNS: Array<{ key: keyof MatchupResult; label: string }> = [
@@ -22,7 +23,7 @@ const COLUMNS: Array<{ key: keyof MatchupResult; label: string }> = [
   { key: 'lineupSource', label: 'Lineup' },
 ]
 
-export default function MatchupTable({ matchups, sort, onSort, totalMatchups, onResetFilters }: Props) {
+export default function MatchupTable({ matchups, sort, onSort, totalMatchups, title = 'Qualifying Matchups', onResetFilters }: Props) {
   const sortIcon = (key: keyof MatchupResult) => {
     if (sort.column !== key) return <span className="text-gray-700 ml-1">↕</span>
     return <span className="text-blue-400 ml-1">{sort.direction === 'desc' ? '↓' : '↑'}</span>
@@ -32,7 +33,7 @@ export default function MatchupTable({ matchups, sort, onSort, totalMatchups, on
     <div className="bg-gray-900 rounded-lg overflow-hidden">
       <div className="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
-          Qualifying Matchups
+          {title}
         </h2>
         <span className="text-xs text-gray-600">
           {matchups.length} of {totalMatchups} matchups
@@ -42,12 +43,14 @@ export default function MatchupTable({ matchups, sort, onSort, totalMatchups, on
       {matchups.length === 0 ? (
         <div className="px-4 py-8 text-center text-gray-500 text-sm space-y-3">
           <p>No matchups meet your criteria — try relaxing the filters.</p>
-          <button
-            onClick={onResetFilters}
-            className="px-4 py-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded transition-colors"
-          >
-            Reset Filters
-          </button>
+          {onResetFilters && (
+            <button
+              onClick={onResetFilters}
+              className="px-4 py-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded transition-colors"
+            >
+              Reset Filters
+            </button>
+          )}
         </div>
       ) : (
         <div className="overflow-x-auto">
