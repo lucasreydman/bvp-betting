@@ -12,15 +12,15 @@ interface Props {
 }
 
 const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> = [
-  { key: 'batterName', label: 'Batter', cls: 'w-36' },
-  { key: 'batterTeam', label: 'Team', cls: 'w-32' },
-  { key: 'pitcherName', label: 'Pitcher', cls: 'w-44' },
-  { key: 'ops', label: 'OPS', cls: 'w-20' },
-  { key: 'avg', label: 'AVG', cls: 'w-20' },
-  { key: 'slg', label: 'SLG', cls: 'w-20' },
-  { key: 'ab', label: 'AB', cls: 'w-14' },
-  { key: 'gameTime', label: 'Game', cls: 'w-36' },
-  { key: 'lineupSource', label: 'Lineup', cls: 'w-24' },
+  { key: 'batterName', label: 'Batter', cls: 'min-w-[9rem]' },
+  { key: 'batterTeam', label: 'Team', cls: 'min-w-[13rem]' },
+  { key: 'pitcherName', label: 'Pitcher', cls: 'min-w-[17rem]' },
+  { key: 'ops', label: 'OPS', cls: 'min-w-[4.5rem]' },
+  { key: 'avg', label: 'AVG', cls: 'min-w-[4.5rem]' },
+  { key: 'slg', label: 'SLG', cls: 'min-w-[4.5rem]' },
+  { key: 'ab', label: 'AB', cls: 'min-w-[3rem]' },
+  { key: 'gameTime', label: 'Game', cls: 'min-w-[9rem]' },
+  { key: 'lineupSource', label: 'Lineup', cls: 'min-w-[6.5rem]' },
 ]
 
 export default function MatchupTable({ matchups, sort, onSort, totalMatchups, title = 'Upcoming', onResetFilters }: Props) {
@@ -54,7 +54,7 @@ export default function MatchupTable({ matchups, sort, onSort, totalMatchups, ti
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm table-fixed">
+          <table className="w-full min-w-[1100px] text-sm table-auto">
             <colgroup>
               {COLUMNS.map(col => (
                 <col key={col.key} className={col.cls} />

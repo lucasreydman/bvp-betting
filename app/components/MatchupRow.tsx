@@ -28,10 +28,14 @@ export default function MatchupRow({ matchup: m }: Props) {
           <span className="ml-1 text-gray-500 text-xs">#{m.lineupPosition}</span>
         )}
       </td>
-      <td className="px-3 py-2 text-gray-300 text-sm">{m.batterTeam}</td>
-      <td className="px-3 py-2 text-gray-400 text-sm whitespace-nowrap">
-        {m.pitcherName}
-        <span className="ml-1 text-gray-600 text-xs">({m.pitcherTeam})</span>
+      <td className="px-3 py-2 text-gray-300 text-sm align-top break-words min-w-[13rem] max-w-[16rem]">
+        {m.batterTeam}
+      </td>
+      <td className="px-3 py-2 text-gray-400 text-sm align-top min-w-[17rem] max-w-[22rem]">
+        <span className="break-words">
+          {m.pitcherName}{' '}
+          <span className="text-gray-600 text-xs">({m.pitcherTeam})</span>
+        </span>
       </td>
       <td className={`px-3 py-2 font-mono text-sm font-bold ${CONFIDENCE_TEXT_COLORS[m.confidence]}`}>
         {fmt3(m.ops)}
