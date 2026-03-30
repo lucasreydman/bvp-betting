@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { FilterState, MatchupResult } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
 import { generateCSV } from '@/lib/utils'
@@ -12,10 +12,6 @@ interface Props {
 
 // Decimal fields need 3 decimal places displayed; integer fields are whole numbers.
 const DECIMAL_FIELDS: Array<keyof FilterState> = ['minOPS', 'minSLG', 'minAVG']
-
-function formatValue(key: keyof FilterState, value: number): string {
-  return DECIMAL_FIELDS.includes(key) ? value.toFixed(3) : String(value)
-}
 
 function initDisplay(f: FilterState): Record<keyof FilterState, string> {
   return {
@@ -30,6 +26,17 @@ function initDisplay(f: FilterState): Record<keyof FilterState, string> {
 export default function Filters({ filters, onApply, matchups }: Props) {
   // Store display values as strings so decimal places are preserved while typing.
   const [local, setLocal] = useState<Record<keyof FilterState, string>>(() => initDisplay(filters))
+  const [flash, setFlash] = useState<'apply' | 'reset' | 'export' | null>(null)
+
+  // Sync inputs when parent resets filters externally (e.g. "Reset Filters" in empty table).
+  useEffect(() => {
+    setLocal(initDisplay(filters))
+  }, [filters])
+
+  const flashFor = (key: 'apply' | 'reset' | 'export') => {
+    setFlash(key)
+    setTimeout(() => setFlash(null), 1500)
+  }
 
   const set = (key: keyof FilterState, value: string) => {
     setLocal(prev => ({ ...prev, [key]: value }))
@@ -43,9 +50,15 @@ export default function Filters({ filters, onApply, matchups }: Props) {
     minHR: Number(local.minHR),
   })
 
+  const handleApply = () => {
+    onApply(parseLocal())
+    flashFor('apply')
+  }
+
   const handleReset = () => {
     setLocal(initDisplay(DEFAULT_FILTERS))
     onApply(DEFAULT_FILTERS)
+    flashFor('reset')
   }
 
   const handleExport = () => {
@@ -57,6 +70,7 @@ export default function Filters({ filters, onApply, matchups }: Props) {
     a.download = `bvp-matchups-${new Date().toISOString().split('T')[0]}.csv`
     a.click()
     URL.revokeObjectURL(url)
+    flashFor('export')
   }
 
   const field = (label: string, key: keyof FilterState, step: string) => (
@@ -87,23 +101,35 @@ export default function Filters({ filters, onApply, matchups }: Props) {
         {field('Min AVG', 'minAVG', '0.001')}
         <div className="flex gap-2 pb-0.5">
           <button
-            onClick={() => onApply(parseLocal())}
-            className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded transition-colors"
+            onClick={handleApply}
+            className={`px-4 py-1.5 text-white text-sm font-medium rounded transition-colors ${
+              flash === 'apply'
+                ? 'bg-green-600'
+                : 'bg-blue-600 hover:bg-blue-500'
+            }`}
           >
-            Apply
+            {flash === 'apply' ? 'Applied ✓' : 'Apply'}
           </button>
           <button
             onClick={handleReset}
-            className="px-4 py-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded transition-colors"
+            className={`px-4 py-1.5 text-white text-sm font-medium rounded transition-colors ${
+              flash === 'reset'
+                ? 'bg-green-700'
+                : 'bg-gray-700 hover:bg-gray-600'
+            }`}
           >
-            Reset
+            {flash === 'reset' ? 'Reset ✓' : 'Reset'}
           </button>
           <button
             onClick={handleExport}
             disabled={matchups.length === 0}
-            className="px-4 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-white text-sm font-medium rounded transition-colors"
+            className={`px-4 py-1.5 text-white text-sm font-medium rounded transition-colors disabled:opacity-40 ${
+              flash === 'export'
+                ? 'bg-green-700'
+                : 'bg-gray-700 hover:bg-gray-600'
+            }`}
           >
-            Export CSV
+            {flash === 'export' ? 'Exported ✓' : 'Export CSV'}
           </button>
         </div>
       </div>

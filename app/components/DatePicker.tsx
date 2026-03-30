@@ -26,7 +26,7 @@ export default function DatePicker({ date, onChange }: Props) {
       <button
         onClick={() => onChange(addDays(date, -1))}
         disabled={date <= minDate}
-        className="px-2 py-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-30 rounded text-sm transition-colors"
+        className="px-2 py-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-800 rounded text-sm transition-colors"
       >
         ‹
       </button>
@@ -42,7 +42,7 @@ export default function DatePicker({ date, onChange }: Props) {
       <button
         onClick={() => onChange(addDays(date, 1))}
         disabled={date >= maxDate}
-        className="px-2 py-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-30 rounded text-sm transition-colors"
+        className="px-2 py-1 bg-gray-800 hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-800 rounded text-sm transition-colors"
       >
         ›
       </button>
