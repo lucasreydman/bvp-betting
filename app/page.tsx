@@ -9,7 +9,7 @@ export default function Home() {
           MLB BvP Total Bases Tool
         </h1>
         <p className="text-gray-400 text-sm mt-1">
-          Career batter vs pitcher stats — ranked by SLG for total bases betting
+          Career batter vs pitcher stats — ranked by OPS for 1+ total bases betting
         </p>
       </header>
       <ClientShell initialDate={today} />

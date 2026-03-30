@@ -19,7 +19,7 @@ export default function ClientShell({ initialDate }: Props) {
   const [allMatchups, setAllMatchups] = useState<MatchupResult[]>([])
   const [meta, setMeta] = useState<Omit<MatchupsResponse, 'results'> | null>(null)
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)
-  const [sort, setSort] = useState<SortState>({ column: 'slg', direction: 'desc' })
+  const [sort, setSort] = useState<SortState>({ column: 'ops', direction: 'desc' })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 

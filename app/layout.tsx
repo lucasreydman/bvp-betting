@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'MLB BvP Total Bases Tool',
-  description: 'Daily batter vs pitcher matchup scanner for total bases betting',
+  description: 'Daily batter vs pitcher matchup scanner for 1+ total bases betting, ranked by OPS',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
