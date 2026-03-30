@@ -16,7 +16,7 @@ const CONFIDENCE_COLORS = {
 export default function TopPlays({ matchups, filters }: Props) {
   // Apply the same filters as the table so Top 5 always shows qualifying plays.
   const top5 = applyFilters(matchups, filters)
-    .sort((a, b) => b.slg - a.slg || b.ops - a.ops)
+    .sort((a, b) => b.ops - a.ops || b.avg - a.avg || b.slg - a.slg || b.ab - a.ab)
     .slice(0, 5)
 
   if (top5.length === 0) {
