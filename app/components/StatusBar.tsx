@@ -1,5 +1,5 @@
 'use client'
-import { formatET } from '@/lib/utils'
+import { formatTime } from '@/lib/utils'
 
 interface Props {
   fetchedAt: string | null
@@ -14,7 +14,7 @@ export default function StatusBar({ fetchedAt, gamesScanned, gamesSkipped, onRef
     <div className="flex items-center gap-6 text-sm text-gray-400">
       <div className="flex gap-4 flex-1 min-w-0">
         {fetchedAt && (
-          <span className="whitespace-nowrap">Last updated: {formatET(fetchedAt)}</span>
+          <span className="whitespace-nowrap">Last updated: {formatTime(fetchedAt)}</span>
         )}
         {gamesScanned > 0 && (
           <span className="whitespace-nowrap">{gamesScanned} games scanned{gamesSkipped > 0 ? `, ${gamesSkipped} skipped (pitchers TBD)` : ''}</span>

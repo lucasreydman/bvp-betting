@@ -1,5 +1,5 @@
 import type { MatchupResult } from '@/lib/types'
-import { formatET } from '@/lib/utils'
+import { formatTime } from '@/lib/utils'
 
 interface Props {
   matchups: MatchupResult[]
@@ -40,7 +40,7 @@ export default function TopPlays({ matchups }: Props) {
             <span className="text-gray-500 font-mono">{m.avg.toFixed(3)} AVG</span>
             <span className="text-gray-500 font-mono">{m.slg.toFixed(3)} SLG</span>
             <span className="text-gray-600 text-xs">({m.ab} AB)</span>
-            <span className="text-gray-600 text-xs ml-auto">{formatET(m.gameTime)}</span>
+            <span className="text-gray-600 text-xs ml-auto">{formatTime(m.gameTime)}</span>
           </li>
         ))}
       </ol>

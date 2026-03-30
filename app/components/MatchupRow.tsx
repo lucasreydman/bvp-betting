@@ -1,5 +1,5 @@
 import type { MatchupResult } from '@/lib/types'
-import { formatET } from '@/lib/utils'
+import { formatTime } from '@/lib/utils'
 
 interface Props {
   matchup: MatchupResult
@@ -39,7 +39,7 @@ export default function MatchupRow({ matchup: m }: Props) {
       <td className="px-3 py-2 font-mono text-sm text-gray-300">{fmt3(m.avg)}</td>
       <td className="px-3 py-2 font-mono text-sm text-gray-300">{fmt3(m.slg)}</td>
       <td className="px-3 py-2 font-mono text-sm text-white">{m.ab}</td>
-      <td className="px-3 py-2 text-xs text-gray-400 whitespace-nowrap">{formatET(m.gameTime)}</td>
+      <td className="px-3 py-2 text-xs text-gray-400 whitespace-nowrap">{formatTime(m.gameTime)}</td>
       <td className="px-3 py-2">
         <span className={`inline-flex text-xs px-2 py-0.5 rounded font-medium ${
           m.lineupSource === 'confirmed'

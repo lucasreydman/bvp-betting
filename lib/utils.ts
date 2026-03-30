@@ -1,8 +1,8 @@
 import type { FilterState, MatchupResult, SortState } from './types'
 
-export function formatET(isoString: string): string {
+export function formatTime(isoString: string): string {
   return new Date(isoString).toLocaleString('en-US', {
-    timeZone: 'America/New_York',
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
@@ -41,7 +41,7 @@ export function generateCSV(matchups: MatchupResult[]): string {
   ]
   const rows = matchups.map(m => [
     m.batterName, m.batterTeam, m.pitcherName, m.pitcherTeam,
-    formatET(m.gameTime),
+    formatTime(m.gameTime),
     m.ab, m.h, m.doubles, m.triples, m.hr, m.bb, m.k, m.rbi,
     m.avg.toFixed(3), m.slg.toFixed(3), m.obp.toFixed(3), m.ops.toFixed(3), m.xbh,
     m.confidence, m.lineupSource,
