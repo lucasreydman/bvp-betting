@@ -4,13 +4,13 @@
 
 Next.js 16 / React 19 app. App Router only (no pages router). Tailwind v4 (no config file; `@import "tailwindcss"` in CSS).
 
-Public-facing copy: **1+ total bases** prop betting; career BvP for today’s slate, ranked by OPS (then AVG, SLG, AB). Walks typically do not count toward TB at books; stats are hit-based.
+Public-facing copy: **“to record a hit / to get a hit”** prop betting; career BvP for today’s slate, surfaced by career BvP batting average weighted by sample size (AVG × min(AB/30, 1)). Walks/HBP do not count as hits.
 
 ## Architecture
 
 ```
 app/
-  page.tsx               # Server component; passes today's date to ClientShell
+  page.tsx               # Server component
   layout.tsx             # Root layout, metadata
   api/
     matchups/route.ts    # Main endpoint: all BvP pairs for a date
@@ -20,8 +20,8 @@ app/
     ClientShell.tsx      # Root client component; owns state
     DatePicker.tsx       # ±3 day nav, UTC-safe date arithmetic
     StatusBar.tsx        # Last updated, games scanned, refresh
-    Filters.tsx          # Four minimums + Apply / Reset / Export CSV
-    TopPlays.tsx         # Top 5 by OPS (tiebreak AVG, SLG, AB); upcoming only
+    Filters.tsx          # Min AB + Min AVG + optional OPS filter; Apply / Reset / Export CSV
+    TopPlays.tsx         # Top 5 by AVG×confidence (AB-scaled); upcoming only
     MatchupTable.tsx     # Sortable table: Upcoming and In progress sections
     MatchupRow.tsx       # Single row, confidence colors
     LoadingSkeleton.tsx  # Loading state
@@ -37,7 +37,7 @@ lib/
 
 1. `ClientShell` fetches `/api/matchups?date=YYYY-MM-DD` on mount and date change.
 2. Route loads schedule, then lineups (boxscore or estimated top 9 by career PA), then BvP in batches of 20 with 200 ms delays.
-3. Server excludes rows with fewer than 10 AB, then dedupes rows where 5+ batters on the same team vs the same pitcher share identical raw stats. Client applies four filters: minAB, minOPS, minSLG, minAVG.
+3. Server excludes rows with fewer than 10 AB, then dedupes rows where 5+ batters on the same team vs the same pitcher share identical raw stats. Client applies filters: minAB, minAVG, and optional minOPS.
 4. Client splits into `upcoming` vs `inProgress` using `Date.now()` vs `gameTime`.
 5. `TopPlays` and the first table use `upcoming` only; second table is **In progress**.
 6. CSV export includes both upcoming and in-progress rows that pass filters.
@@ -45,11 +45,11 @@ lib/
 
 ## Key Invariants
 
-- **Filters:** AND logic. Every minimum must pass. Same filters apply to Upcoming and In progress.
+- **Filters:** AND logic across active filters (minAB/minAVG and optional minOPS). Same filters apply to Upcoming and In progress.
 - **Upcoming vs In progress:** Client-side split from `Date.now()` vs `m.gameTime`; refresh moves rows between sections.
 - **TopPlays:** Only `upcoming` matchups (not the full unfiltered list).
-- **Default ranking:** OPS, then AVG, SLG, AB (Top 5 card, table default sort, tiebreakers).
-- **Confidence:** AB vs this pitcher: high ≥30, medium 15–29, low 10–14 (green / yellow / orange).
+- **Default sort:** AVG desc by default (table). Top 5 card uses AVG × min(AB/30, 1) with tiebreakers raw AVG then AB.
+- **Confidence:** AB vs this pitcher: high ≥30, medium 15–29, low 10–14 (green / yellow / red).
 - **Caches:** Module-level only for BvP and roster/name TTL caches (not recreated inside the handler).
 - **`parseSplit(stat)`:** Single mapping from MLB stat fields to raw + calculated fields; use in both API routes.
 - **Aggregate dedup:** Drop rows where `keyCounts(statKey) >= 5` for identical raw lines (same team vs same pitcher). Keeps clusters of 4 or fewer.
