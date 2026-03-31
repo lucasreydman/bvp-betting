@@ -3,5 +3,9 @@
 @layer base {
   * {
     border-color: var(--color-gray-800, #1f2937);
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
   }
 }
