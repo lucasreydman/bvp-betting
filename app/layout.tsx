@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   title: 'MLB BvP',
   description:
     'MLB batter vs pitcher stats for the batter to get a hit prop. Filter and sort by OPS, AVG, SLG, and AB.',
-  icons: [{ rel: 'icon', url: '/favicon.png' }],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
