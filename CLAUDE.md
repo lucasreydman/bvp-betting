@@ -17,11 +17,11 @@ app/
   components/
     ClientShell.tsx      # Root client component; owns state
     DatePicker.tsx       # ±3 day nav, UTC-safe date arithmetic
-    StatusBar.tsx        # Last updated, games scanned, refresh
-    Filters.tsx          # Min AB + Min AVG + optional OPS filter; Apply / Reset / Export CSV
-    TopPlays.tsx         # Top 5 by AVG×confidence (AB-scaled); upcoming only
-    MatchupTable.tsx     # Sortable table: Upcoming and In progress sections
-    MatchupRow.tsx       # Single row, confidence colors
+    StatusBar.tsx        # Last updated, games scanned, refresh; stacks vertically on mobile
+    Filters.tsx          # Min AB + Min AVG + optional OPS filter; Apply / Reset / Export CSV (CSV hidden on mobile)
+    TopPlays.tsx         # Top 5 by AVG×confidence (AB-scaled); upcoming only; 2-row card layout on mobile
+    MatchupTable.tsx     # Sortable table (sm+) + card list (mobile); sort chips on mobile; TEAM_ABBR map for mobile cards
+    MatchupRow.tsx       # Single <tr> row; used only in the sm+ table path
     LoadingSkeleton.tsx  # Loading state
 lib/
   types.ts    # MatchupResult, FilterState, DEFAULT_FILTERS, SortState
@@ -52,6 +52,8 @@ lib/
 - **`parseSplit(stat)`:** Single mapping from MLB stat fields to raw + calculated fields; use in both API routes.
 - **Aggregate dedup:** Drop rows where `keyCounts(statKey) >= 5` for identical raw lines (same team vs same pitcher). Keeps clusters of 4 or fewer.
 - **`formatTime()`:** Uses `Intl.DateTimeFormat().resolvedOptions().timeZone` (browser local time, not hardcoded ET).
+- **Mobile layout:** `MatchupTable` renders a card list (`sm:hidden`) and a full table (`hidden sm:block`). Cards show batter, AVG, team abbreviation vs pitcher, H/AB, lineup badge, and `GameTimeCell`. Sort chips (AVG / AB / Time) replace column-header sorting on mobile. `TopPlays` uses `sm:hidden` / `hidden sm:flex` to switch between a 2-row card and the single-row desktop layout. `StatusBar` stacks clock + "Updated" on the left with the refresh button on the right on mobile; "games scanned" text is `hidden sm:inline`.
+- **Team abbreviations:** `TEAM_ABBR` map in `MatchupTable.tsx` covers all 30 MLB teams; `abbr()` falls back to initials for unknown names.
 
 ## MLB Stats API
 
@@ -77,6 +79,10 @@ npm run lint      # ESLint
 npm test          # Jest (lib/)
 npx vercel --prod # deploy
 ```
+
+## Assets
+
+- `public/favicon.png` — MLB BvP logo (batter silhouette + "MLB BvP" wordmark). Referenced in `layout.tsx` metadata.
 
 ## Tests
 

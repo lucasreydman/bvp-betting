@@ -23,7 +23,7 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 | Min AVG | .300 | Batting average |
 | Min OPS | Off | Optional OPS filter (toggle on/off) |
 
-All active minimums apply at once (AND). The same rules apply to Upcoming and In progress. **Export CSV** includes rows from both sections that pass the filters (in the current sort order).
+All active minimums apply at once (AND). The same rules apply to Upcoming and In progress. **Export CSV** (desktop only) includes rows from both sections that pass the filters in the current sort order.
 
 ## Confidence
 
@@ -36,6 +36,16 @@ Sample size (career AB vs this pitcher):
 ## Data quality
 
 The API sometimes returns team-level aggregates instead of true individual BvP. After building the list, any raw stat line shared by **five or more** batters on the same team against the same pitcher is dropped. Smaller duplicate groups (2–4) are kept so real ties are not stripped.
+
+## Mobile layout
+
+The site is fully responsive. On small screens:
+
+- **DatePicker** and **StatusBar** stack vertically instead of sitting side by side.
+- **Top 5 Plays** renders each entry as a two-row card (name + AVG on top; pitcher + AB + time below).
+- **Upcoming / In progress tables** switch from a wide scrollable table to a vertical card list. Each card shows batter name, lineup position, AVG (confidence-colored left border), team abbreviation vs pitcher, H/AB, lineup badge, and game time. A sort-chip row lets you tap to sort by AVG, AB, or Time.
+- **Filters** — Apply and Reset stretch to fill the row; Export CSV is hidden (use desktop for CSV export).
+- Team names in mobile cards are shown as abbreviations (NYY, LAD, SF, etc.).
 
 ## Time zones
 
