@@ -30,9 +30,8 @@ export function formatCountdownToStart(isoString: string, nowMs: number): string
 export function applyFilters(matchups: MatchupResult[], filters: FilterState): MatchupResult[] {
   return matchups.filter(m =>
     m.ab >= filters.minAB &&
-    m.ops >= filters.minOPS &&
-    m.slg >= filters.minSLG &&
-    m.avg >= filters.minAVG
+    m.avg >= filters.minAVG &&
+    (filters.minOPS === null || m.ops >= filters.minOPS)
   )
 }
 
