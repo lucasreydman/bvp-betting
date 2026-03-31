@@ -17,10 +17,22 @@ export default function TopPlays({ matchups }: Props) {
     .sort((a, b) => score(b) - score(a) || b.avg - a.avg || b.ab - a.ab)
     .slice(0, 5)
 
+  const header = (
+    <div className="flex items-center gap-2 mb-3">
+      <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Top 5 Plays</h2>
+      <div className="relative group">
+        <span className="text-gray-600 hover:text-gray-400 text-xs cursor-default select-none border border-gray-700 rounded-full w-4 h-4 inline-flex items-center justify-center leading-none">i</span>
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-300 shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
+          Ranked by <span className="text-white font-medium">AVG × confidence</span>, where confidence scales linearly from 0 to 1 as AB goes from 0 to 30. A .350 AVG in 30 AB scores higher than a .500 AVG in 10 AB. Tiebreaker: raw AVG, then AB.
+        </div>
+      </div>
+    </div>
+  )
+
   if (top5.length === 0) {
     return (
       <div className="bg-gray-900 rounded-lg p-4 mb-4">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Top 5 Plays</h2>
+        {header}
         <p className="text-gray-500 text-sm">No upcoming games with data for this date.</p>
       </div>
     )
@@ -28,7 +40,7 @@ export default function TopPlays({ matchups }: Props) {
 
   return (
     <div className="bg-gray-900 rounded-lg p-4 mb-4">
-      <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Top 5 Plays</h2>
+      {header}
       <ol className="space-y-2">
         {top5.map((m, i) => (
           <li key={`${m.batterId}-${m.pitcherId}-${m.gameTime}`} className="flex items-baseline gap-3 text-sm">

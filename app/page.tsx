@@ -8,7 +8,7 @@ export default function Home() {
         <p className="text-gray-400 text-sm mt-1 max-w-2xl text-balance">
           For the{' '}
           <span className="text-gray-300">batter to get a hit prop</span>
-          {': '}Career batter vs pitcher stats for today&apos;s slate from MLB, ranked by AVG (then OPS, AB).
+          {': '}Career batter vs pitcher stats for today&apos;s MLB slate. Table sorted by AVG against this pitcher. Top 5 Plays weighted by sample size.
         </p>
       </header>
       <ClientShell />
