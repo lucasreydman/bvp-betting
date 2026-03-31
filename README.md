@@ -1,6 +1,6 @@
 # MLB BvP
 
-Built for **1+ total bases** prop betting: career batter vs pitcher (BvP) stats from the [MLB Stats API](https://statsapi.mlb.com) for each day’s games. Rows are sorted by **OPS** (then AVG, SLG, AB) so you can spot strong hit-based matchups before first pitch.
+Built for the **batter to get a hit** prop: career batter vs pitcher (BvP) stats from the [MLB Stats API](https://statsapi.mlb.com) for each day’s games. Rows are sorted by **OPS** (then AVG, SLG, AB) so you can spot strong matchups before first pitch.
 
 **Live:** [bvp-betting.vercel.app](https://bvp-betting.vercel.app)
 
@@ -10,10 +10,10 @@ Built for **1+ total bases** prop betting: career batter vs pitcher (BvP) stats 
 2. Builds each lineup: official order from the boxscore when available, otherwise the top 9 active players by career plate appearances.
 3. Fetches career BvP for each batter vs the opposing starter (minimum 10 AB to show a row).
 4. Computes OPS, AVG, SLG, OBP, and XBH from the split.
-5. Ranks by OPS → AVG → SLG → AB. **Top 5 by OPS** highlights the best upcoming rows for scanning 1+ TB spots.
+5. Ranks by OPS → AVG → SLG → AB. **Top 5 by OPS** highlights the best upcoming rows.
 6. Splits the UI into **Upcoming** and **In progress** after first pitch; refresh updates which bucket a game is in.
 
-**Why BvP for 1+ TB:** The prop pays on hit total bases (singles and up). Most books do not count walks or HBP toward TB. This app uses career hit stats vs that pitcher, not walk outcomes.
+**Why BvP for this prop:** Any hit (single through homer) wins. This app uses career hit stats vs that specific pitcher — not walk or HBP outcomes, which don't count.
 
 ## Filters
 
