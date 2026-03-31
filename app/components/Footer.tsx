@@ -58,7 +58,7 @@ export default function Footer() {
           {' · '}
           Data from the{' '}
           <a
-            href="https://statsapi.mlb.com"
+            href="https://github.com/toddrob99/MLB-StatsAPI"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-white transition-colors"
