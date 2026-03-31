@@ -67,7 +67,7 @@ export default function ClientShell() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
         <DatePicker date={date} onChange={setDate} />
         <StatusBar
           fetchedAt={meta?.fetchedAt ?? null}

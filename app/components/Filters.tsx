@@ -88,7 +88,7 @@ export default function Filters({ filters, onApply, matchups }: Props) {
         step={step}
         onChange={e => set(key, e.target.value)}
         onBlur={e => set(key, Number(e.target.value).toFixed(3))}
-        className="w-20 bg-gray-800 text-white text-sm px-2 py-1 rounded border border-gray-700 focus:outline-none focus:border-blue-500 font-mono"
+        className="w-20 bg-gray-800 text-white text-sm px-2 py-1.5 rounded border border-gray-700 focus:outline-none focus:border-blue-500 font-mono"
       />
     </div>
   )
@@ -104,7 +104,7 @@ export default function Filters({ filters, onApply, matchups }: Props) {
             value={local.minAB}
             step="1"
             onChange={e => set('minAB', e.target.value)}
-            className="w-20 bg-gray-800 text-white text-sm px-2 py-1 rounded border border-gray-700 focus:outline-none focus:border-blue-500 font-mono"
+            className="w-20 bg-gray-800 text-white text-sm px-2 py-1.5 rounded border border-gray-700 focus:outline-none focus:border-blue-500 font-mono"
           />
         </div>
         {field('Min AVG', 'minAVG', '0.001', minAvgId)}
@@ -113,10 +113,10 @@ export default function Filters({ filters, onApply, matchups }: Props) {
             <label htmlFor={minOpsId} className="text-xs text-gray-400 flex items-center gap-1">
               Min OPS
               <button
-                onClick={handleToggleOPS}
-                className="text-gray-600 hover:text-gray-400 text-xs leading-none"
-                title="Remove OPS filter"
                 type="button"
+                onClick={handleToggleOPS}
+                className="text-gray-600 hover:text-gray-400 text-xs leading-none p-0.5 touch-manipulation"
+                title="Remove OPS filter"
               >
                 ✕
               </button>
@@ -128,40 +128,44 @@ export default function Filters({ filters, onApply, matchups }: Props) {
               step="0.001"
               onChange={e => set('minOPS', e.target.value)}
               onBlur={e => set('minOPS', Number(e.target.value).toFixed(3))}
-              className="w-20 bg-gray-800 text-white text-sm px-2 py-1 rounded border border-gray-700 focus:outline-none focus:border-blue-500 font-mono"
+              className="w-20 bg-gray-800 text-white text-sm px-2 py-1.5 rounded border border-gray-700 focus:outline-none focus:border-blue-500 font-mono"
             />
           </div>
         ) : (
-          <div className="flex flex-col justify-end gap-1 pb-0.5">
+          <div className="flex flex-col justify-end gap-1">
             <button
+              type="button"
               onClick={handleToggleOPS}
-              className="text-xs text-gray-500 hover:text-gray-300 border border-dashed border-gray-700 hover:border-gray-500 px-2 py-1 rounded transition-colors"
+              className="text-xs text-gray-500 hover:text-gray-300 border border-dashed border-gray-700 hover:border-gray-500 px-2 py-1.5 rounded transition-colors touch-manipulation"
             >
               + OPS filter
             </button>
           </div>
         )}
-        <div className="flex gap-2 pb-0.5">
+        <div className="flex gap-2 flex-wrap">
           <button
+            type="button"
             onClick={handleApply}
-            className={`px-4 py-1.5 text-white text-sm font-medium rounded transition-colors ${
+            className={`px-4 py-2 text-white text-sm font-medium rounded transition-colors touch-manipulation ${
               flash === 'apply' ? 'bg-green-600' : 'bg-blue-600 hover:bg-blue-500'
             }`}
           >
             {flash === 'apply' ? 'Applied ✓' : 'Apply'}
           </button>
           <button
+            type="button"
             onClick={handleReset}
-            className={`px-4 py-1.5 text-white text-sm font-medium rounded transition-colors ${
+            className={`px-4 py-2 text-white text-sm font-medium rounded transition-colors touch-manipulation ${
               flash === 'reset' ? 'bg-green-700' : 'bg-gray-700 hover:bg-gray-600'
             }`}
           >
             {flash === 'reset' ? 'Reset ✓' : 'Reset'}
           </button>
           <button
+            type="button"
             onClick={handleExport}
             disabled={matchups.length === 0}
-            className={`px-4 py-1.5 text-white text-sm font-medium rounded transition-colors disabled:opacity-40 ${
+            className={`px-4 py-2 text-white text-sm font-medium rounded transition-colors disabled:opacity-40 touch-manipulation ${
               flash === 'export' ? 'bg-green-700' : 'bg-gray-700 hover:bg-gray-600'
             }`}
           >

@@ -41,18 +41,36 @@ export default function TopPlays({ matchups }: Props) {
   return (
     <div className="bg-gray-900 rounded-lg p-4 mb-4">
       {header}
-      <ol className="space-y-2">
+      <ol className="divide-y divide-gray-800/40 sm:divide-y-0 sm:space-y-2 -mx-4 sm:mx-0 px-0 sm:px-0">
         {top5.map((m, i) => (
-          <li key={`${m.batterId}-${m.pitcherId}-${m.gameTime}`} className="flex items-baseline gap-3 text-sm">
-            <span className="text-gray-500 w-4 font-mono">{i + 1}.</span>
-            <span className="text-white font-medium">{m.batterName}</span>
-            <span className="text-gray-400">vs {m.pitcherName}</span>
-            <span className={`font-mono font-bold ${CONFIDENCE_COLORS[m.confidence]}`}>
-              {m.avg.toFixed(3)} AVG
-            </span>
-            <span className="text-gray-500 font-mono">{m.ops.toFixed(3)} OPS</span>
-            <span className="text-gray-600 text-xs">({m.ab} AB)</span>
-            <span className="text-gray-600 text-xs ml-auto">{formatTime(m.gameTime)}</span>
+          <li key={`${m.batterId}-${m.pitcherId}-${m.gameTime}`} className="px-4 py-2 sm:px-0 sm:py-0">
+            {/* Mobile: 2-row layout */}
+            <div className="sm:hidden">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 w-4 shrink-0 font-mono text-xs">{i + 1}.</span>
+                <span className="text-white font-medium text-sm flex-1 min-w-0 truncate">{m.batterName}</span>
+                <span className={`font-mono font-bold text-sm shrink-0 ${CONFIDENCE_COLORS[m.confidence]}`}>
+                  {m.avg.toFixed(3)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 pl-6 mt-0.5">
+                <span className="text-gray-400 text-xs flex-1 min-w-0 truncate">vs {m.pitcherName}</span>
+                <span className="text-gray-500 text-xs shrink-0 font-mono">{m.ab} AB</span>
+                <span className="text-gray-600 text-xs shrink-0">{formatTime(m.gameTime)}</span>
+              </div>
+            </div>
+            {/* Desktop: single row */}
+            <div className="hidden sm:flex items-baseline gap-3 text-sm">
+              <span className="text-gray-500 w-4 font-mono">{i + 1}.</span>
+              <span className="text-white font-medium">{m.batterName}</span>
+              <span className="text-gray-400">vs {m.pitcherName}</span>
+              <span className={`font-mono font-bold ${CONFIDENCE_COLORS[m.confidence]}`}>
+                {m.avg.toFixed(3)} AVG
+              </span>
+              <span className="text-gray-500 font-mono">{m.ops.toFixed(3)} OPS</span>
+              <span className="text-gray-600 text-xs">({m.ab} AB)</span>
+              <span className="text-gray-600 text-xs ml-auto">{formatTime(m.gameTime)}</span>
+            </div>
           </li>
         ))}
       </ol>

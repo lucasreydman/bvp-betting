@@ -1,6 +1,7 @@
 'use client'
 import type { MatchupResult, SortState } from '@/lib/types'
 import MatchupRow from './MatchupRow'
+import GameTimeCell from './GameTimeCell'
 
 interface Props {
   matchups: MatchupResult[]
@@ -25,6 +26,24 @@ const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> =
   { key: 'lineupSource', label: 'Lineup', cls: 'hidden sm:table-cell min-w-[6.5rem]' },
 ]
 
+const MOBILE_SORT_COLS: Array<{ key: keyof MatchupResult; label: string }> = [
+  { key: 'avg', label: 'AVG' },
+  { key: 'ab', label: 'AB' },
+  { key: 'gameTime', label: 'Time' },
+]
+
+const CARD_LEFT_BORDER: Record<string, string> = {
+  high: 'border-l-green-500',
+  medium: 'border-l-yellow-500',
+  low: 'border-l-red-500',
+}
+
+const CARD_AVG_COLOR: Record<string, string> = {
+  high: 'text-green-400',
+  medium: 'text-yellow-400',
+  low: 'text-red-400',
+}
+
 export default function MatchupTable({
   matchups,
   sort,
@@ -39,8 +58,24 @@ export default function MatchupTable({
     return <span className="text-blue-400 ml-1">{sort.direction === 'desc' ? '↓' : '↑'}</span>
   }
 
+  const emptyState = (
+    <div className="px-4 py-8 text-center text-gray-500 text-sm space-y-3">
+      <p>No rows match these filters. Try lowering a minimum.</p>
+      {onResetFilters && (
+        <button
+          type="button"
+          onClick={onResetFilters}
+          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded transition-colors touch-manipulation"
+        >
+          Reset Filters
+        </button>
+      )}
+    </div>
+  )
+
   return (
     <div className="bg-gray-900 rounded-lg overflow-hidden">
+      {/* Table header */}
       <div className="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
           {title}
@@ -50,50 +85,113 @@ export default function MatchupTable({
         </span>
       </div>
 
-      {matchups.length === 0 ? (
-        <div className="px-4 py-8 text-center text-gray-500 text-sm space-y-3">
-          <p>No rows match these filters. Try lowering a minimum.</p>
-          {onResetFilters && (
-            <button
-              onClick={onResetFilters}
-              className="px-4 py-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded transition-colors"
-            >
-              Reset Filters
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-full sm:min-w-[1100px] text-sm table-auto">
-            <colgroup>
-              {COLUMNS.map(col => (
-                <col key={col.key} className={col.cls} />
-              ))}
-            </colgroup>
-            <thead>
-              <tr className="bg-gray-800/60">
-                {COLUMNS.map(col => (
-                  <th
+      {matchups.length === 0 ? emptyState : (
+        <>
+          {/* ── Mobile card view ── */}
+          <div className="sm:hidden">
+            {/* Sort chips */}
+            <div className="px-4 py-2 border-b border-gray-800 flex items-center gap-2">
+              <span className="text-xs text-gray-600">Sort:</span>
+              <div className="flex gap-1.5">
+                {MOBILE_SORT_COLS.map(col => (
+                  <button
                     key={col.key}
+                    type="button"
                     onClick={() => onSort(col.key)}
-                    className={`px-3 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white select-none whitespace-nowrap ${col.cls}`}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition-colors touch-manipulation ${
+                      sort.column === col.key
+                        ? 'bg-blue-600/20 border-blue-500/50 text-blue-400'
+                        : 'border-gray-700 text-gray-500 active:text-gray-300'
+                    }`}
                   >
-                    {col.label}{sortIcon(col.key)}
-                  </th>
+                    {col.label}
+                    {sort.column === col.key ? (sort.direction === 'desc' ? ' ↓' : ' ↑') : ''}
+                  </button>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
+              </div>
+            </div>
+
+            {/* Cards */}
+            <div className="divide-y divide-gray-800/60">
               {matchups.map(m => (
-                <MatchupRow
+                <div
                   key={`${m.batterId}-${m.pitcherId}-${m.gameTime}`}
-                  matchup={m}
-                  gameKind={gameKind}
-                />
+                  className={`px-4 py-3 border-l-4 ${CARD_LEFT_BORDER[m.confidence]}`}
+                >
+                  {/* Row 1: Batter name + AVG */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="font-medium text-white text-sm truncate">{m.batterName}</span>
+                      {m.lineupPosition && (
+                        <span className="text-gray-500 text-xs shrink-0">#{m.lineupPosition}</span>
+                      )}
+                    </div>
+                    <span className={`font-mono font-bold text-sm shrink-0 ${CARD_AVG_COLOR[m.confidence]}`}>
+                      {m.avg.toFixed(3)}
+                    </span>
+                  </div>
+
+                  {/* Row 2: Team vs Pitcher */}
+                  <div className="mt-0.5 flex items-center gap-1.5 text-xs min-w-0">
+                    <span className="shrink-0 text-gray-400 truncate max-w-[7rem]">{m.batterTeam}</span>
+                    <span className="text-gray-600 shrink-0">vs</span>
+                    <span className="text-gray-400 truncate flex-1 min-w-0">{m.pitcherName}</span>
+                    <span className="text-gray-600 shrink-0 truncate max-w-[6rem]">({m.pitcherTeam})</span>
+                  </div>
+
+                  {/* Row 3: H/AB + lineup badge + game time */}
+                  <div className="mt-1.5 flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-2 text-gray-500">
+                      <span className="font-mono">{m.h}/{m.ab} AB</span>
+                      <span className="text-gray-700">·</span>
+                      <span className={`px-1.5 py-0.5 rounded font-medium ${
+                        m.lineupSource === 'confirmed'
+                          ? 'bg-gray-800 text-gray-400'
+                          : 'bg-amber-900/40 text-amber-400'
+                      }`}>
+                        {m.lineupSource === 'confirmed' ? 'Confirmed' : 'Estimated'}
+                      </span>
+                    </div>
+                    <GameTimeCell gameTime={m.gameTime} variant={gameKind} />
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </div>
+
+          {/* ── Desktop table view ── */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full min-w-full sm:min-w-[1100px] text-sm table-auto">
+              <colgroup>
+                {COLUMNS.map(col => (
+                  <col key={col.key} className={col.cls} />
+                ))}
+              </colgroup>
+              <thead>
+                <tr className="bg-gray-800/60">
+                  {COLUMNS.map(col => (
+                    <th
+                      key={col.key}
+                      onClick={() => onSort(col.key)}
+                      className={`px-3 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white select-none whitespace-nowrap ${col.cls}`}
+                    >
+                      {col.label}{sortIcon(col.key)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {matchups.map(m => (
+                  <MatchupRow
+                    key={`${m.batterId}-${m.pitcherId}-${m.gameTime}`}
+                    matchup={m}
+                    gameKind={gameKind}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   )
