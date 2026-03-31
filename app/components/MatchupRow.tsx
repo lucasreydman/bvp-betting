@@ -9,13 +9,13 @@ interface Props {
 const CONFIDENCE_ROW_COLORS = {
   high: 'border-green-900/40 bg-green-950/20',
   medium: 'border-yellow-900/40 bg-yellow-950/10',
-  low: 'border-orange-900/40 bg-orange-950/10',
+  low: 'border-red-900/40 bg-red-950/10',
 }
 
 const CONFIDENCE_TEXT_COLORS = {
   high: 'text-green-400',
   medium: 'text-yellow-400',
-  low: 'text-orange-400',
+  low: 'text-red-400',
 }
 
 const fmt3 = (n: number) => n.toFixed(3)
@@ -39,11 +39,11 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
         </span>
       </td>
       <td className={`px-3 py-2 font-mono text-sm font-bold ${CONFIDENCE_TEXT_COLORS[m.confidence]}`}>
-        {fmt3(m.ops)}
+        {fmt3(m.avg)}
       </td>
-      <td className="px-3 py-2 font-mono text-sm text-gray-300">{fmt3(m.avg)}</td>
-      <td className="px-3 py-2 font-mono text-sm text-gray-300">{fmt3(m.slg)}</td>
-      <td className="px-3 py-2 font-mono text-sm text-white">{m.ab}</td>
+      <td className="px-3 py-2 font-mono text-sm text-gray-300">{m.h}</td>
+      <td className="px-3 py-2 font-mono text-sm text-gray-400">{m.ab}</td>
+      <td className="px-3 py-2 font-mono text-sm text-gray-500">{fmt3(m.ops)}</td>
       <td className="px-3 py-2 align-top">
         <GameTimeCell gameTime={m.gameTime} variant={gameKind} />
       </td>

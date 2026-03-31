@@ -160,7 +160,6 @@ export default function Filters({ filters, onApply, matchups }: Props) {
           </button>
         </div>
       </div>
-      <p className="text-xs text-gray-600 mt-2">All active filters must pass.</p>
     </div>
   )
 }

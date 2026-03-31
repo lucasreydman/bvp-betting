@@ -8,7 +8,7 @@ interface Props {
 const CONFIDENCE_COLORS = {
   high: 'text-green-400',
   medium: 'text-yellow-400',
-  low: 'text-orange-400',
+  low: 'text-red-400',
 }
 
 export default function TopPlays({ matchups }: Props) {

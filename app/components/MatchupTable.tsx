@@ -17,10 +17,10 @@ const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> =
   { key: 'batterName', label: 'Batter', cls: 'min-w-[9rem]' },
   { key: 'batterTeam', label: 'Team', cls: 'min-w-[13rem]' },
   { key: 'pitcherName', label: 'Pitcher', cls: 'min-w-[17rem]' },
-  { key: 'ops', label: 'OPS', cls: 'min-w-[4.5rem]' },
   { key: 'avg', label: 'AVG', cls: 'min-w-[4.5rem]' },
-  { key: 'slg', label: 'SLG', cls: 'min-w-[4.5rem]' },
+  { key: 'h', label: 'H', cls: 'min-w-[3rem]' },
   { key: 'ab', label: 'AB', cls: 'min-w-[3rem]' },
+  { key: 'ops', label: 'OPS', cls: 'min-w-[4.5rem]' },
   { key: 'gameTime', label: 'Game', cls: 'min-w-[10.5rem]' },
   { key: 'lineupSource', label: 'Lineup', cls: 'min-w-[6.5rem]' },
 ]
