@@ -23,16 +23,16 @@ const fmt3 = (n: number) => n.toFixed(3)
 export default function MatchupRow({ matchup: m, gameKind }: Props) {
   return (
     <tr className={`border-t ${CONFIDENCE_ROW_COLORS[m.confidence]} hover:bg-gray-800/50 transition-colors`}>
-      <td className="px-3 py-2 font-medium text-white whitespace-nowrap">
+      <td className="px-3 py-2 font-medium text-white whitespace-normal sm:whitespace-nowrap break-words">
         {m.batterName}
         {m.lineupPosition && (
           <span className="ml-1 text-gray-500 text-xs">#{m.lineupPosition}</span>
         )}
       </td>
-      <td className="px-3 py-2 text-gray-300 text-sm align-top break-words min-w-[13rem] max-w-[16rem]">
+      <td className="px-3 py-2 text-gray-300 text-sm align-top break-words hidden sm:table-cell min-w-[11rem] max-w-[16rem]">
         {m.batterTeam}
       </td>
-      <td className="px-3 py-2 text-gray-400 text-sm align-top min-w-[17rem] max-w-[22rem]">
+      <td className="px-3 py-2 text-gray-400 text-sm align-top min-w-[14rem] max-w-[22rem] break-words">
         <span className="break-words">
           {m.pitcherName}{' '}
           <span className="text-gray-600 text-xs">({m.pitcherTeam})</span>
@@ -43,11 +43,11 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
       </td>
       <td className="px-3 py-2 font-mono text-sm text-gray-300">{m.h}</td>
       <td className="px-3 py-2 font-mono text-sm text-gray-400">{m.ab}</td>
-      <td className="px-3 py-2 font-mono text-sm text-gray-500">{fmt3(m.ops)}</td>
+      <td className="px-3 py-2 font-mono text-sm text-gray-500 hidden sm:table-cell">{fmt3(m.ops)}</td>
       <td className="px-3 py-2 align-top">
         <GameTimeCell gameTime={m.gameTime} variant={gameKind} />
       </td>
-      <td className="px-3 py-2">
+      <td className="px-3 py-2 hidden sm:table-cell">
         <span className={`inline-flex text-xs px-2 py-0.5 rounded font-medium ${
           m.lineupSource === 'confirmed'
             ? 'bg-gray-800 text-gray-400'

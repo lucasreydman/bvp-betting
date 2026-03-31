@@ -15,14 +15,14 @@ interface Props {
 
 const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> = [
   { key: 'batterName', label: 'Batter', cls: 'min-w-[9rem]' },
-  { key: 'batterTeam', label: 'Team', cls: 'min-w-[13rem]' },
-  { key: 'pitcherName', label: 'Pitcher', cls: 'min-w-[17rem]' },
+  { key: 'batterTeam', label: 'Team', cls: 'hidden sm:table-cell min-w-[11rem]' },
+  { key: 'pitcherName', label: 'Pitcher', cls: 'min-w-[14rem]' },
   { key: 'avg', label: 'AVG', cls: 'min-w-[4.5rem]' },
   { key: 'h', label: 'H', cls: 'min-w-[3rem]' },
   { key: 'ab', label: 'AB', cls: 'min-w-[3rem]' },
-  { key: 'ops', label: 'OPS', cls: 'min-w-[4.5rem]' },
+  { key: 'ops', label: 'OPS', cls: 'hidden sm:table-cell min-w-[4.5rem]' },
   { key: 'gameTime', label: 'Game', cls: 'min-w-[10.5rem]' },
-  { key: 'lineupSource', label: 'Lineup', cls: 'min-w-[6.5rem]' },
+  { key: 'lineupSource', label: 'Lineup', cls: 'hidden sm:table-cell min-w-[6.5rem]' },
 ]
 
 export default function MatchupTable({
@@ -64,7 +64,7 @@ export default function MatchupTable({
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1100px] text-sm table-auto">
+          <table className="w-full min-w-full sm:min-w-[1100px] text-sm table-auto">
             <colgroup>
               {COLUMNS.map(col => (
                 <col key={col.key} className={col.cls} />
