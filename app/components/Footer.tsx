@@ -36,6 +36,12 @@ export default function Footer() {
             <span className="text-gray-400 font-mono">AVG × min(AB / 30, 1)</span> — a .350 in 30 AB
             scores higher than a .500 in 8 AB because the larger sample is more trustworthy.
           </p>
+          <p className="leading-relaxed">
+            That means lowering min AB can change which matchups make the top 5, but it does not
+            automatically make those lower-AB matchups better bets. The 15 AB default is safer
+            because it keeps the list focused on more reliable career BvP history and avoids the
+            wider variance of very small samples.
+          </p>
         </div>
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Optional OPS filter</h3>
