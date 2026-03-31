@@ -1,6 +1,6 @@
 # MLB BvP
 
-Built for the **“to record a hit / to get a hit”** prop: career batter vs pitcher (BvP) stats from the [MLB Stats API](https://statsapi.mlb.com) for each day’s games. This tool surfaces today’s best historical matchups ranked by **career BvP batting average**, weighted by sample size for reliability.
+Built for the FanDuel **Player Hits (1+)** prop, also shown as Bet365 **Total Bases (1+)** or **Hits (1+)** and theScore Bet **Hits (1+)**. These props mean the same thing at the same odds. This tool surfaces today’s best historical matchups ranked by **career BvP batting average**, weighted by sample size for reliability.
 
 **Live:** [bvp-betting.vercel.app](https://bvp-betting.vercel.app)
 

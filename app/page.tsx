@@ -8,10 +8,13 @@ export default function Home() {
         <h1 className="text-2xl font-bold text-white tracking-tight">MLB BvP</h1>
         <p className="text-gray-400 text-sm mt-1 max-w-2xl text-balance">
           Career batter vs pitcher stats for the{' '}
-          <span className="text-gray-300">&ldquo;To Record a Hit&rdquo;</span>
-          {' prop (FanDuel) — also called '}
-          <span className="text-gray-300">&ldquo;To Get a Hit&rdquo;</span>
-          {' on Bet365 and theScore Bet. Any single, double, triple, or homer wins. This tool surfaces today\'s best historical matchups ranked by career BvP batting average — the stat that directly predicts hit probability — weighted by sample size for reliability.'}
+          <span className="text-sky-400 font-semibold">Player Hits (1+)</span>{' '}
+          prop on FanDuel, also shown as{' '}
+          <span className="text-emerald-400 font-semibold">Total Bases (1+)</span>{' '}or{' '}
+          <span className="text-emerald-400 font-semibold">Hits (1+)</span>{' '}
+          on Bet365 and{' '}
+          <span className="text-amber-400 font-semibold">Hits (1+)</span>{' '}
+          on theScore Bet. They mean the same thing at the same odds. Any single, double, triple, or homer wins. This tool surfaces today’s best historical matchups ranked by career BvP batting average, weighted by sample size for reliability.
         </p>
       </header>
       <ClientShell />
