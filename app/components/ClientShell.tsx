@@ -10,12 +10,16 @@ import TopPlays from './TopPlays'
 import Filters from './Filters'
 import MatchupTable from './MatchupTable'
 
-interface Props {
-  initialDate: string
+function localToday(): string {
+  const d = new Date()
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
 }
 
-export default function ClientShell({ initialDate }: Props) {
-  const [date, setDate] = useState(initialDate)
+export default function ClientShell() {
+  const [date, setDate] = useState(localToday)
   const [allMatchups, setAllMatchups] = useState<MatchupResult[]>([])
   const [meta, setMeta] = useState<Omit<MatchupsResponse, 'results'> | null>(null)
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)

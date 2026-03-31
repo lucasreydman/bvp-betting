@@ -1,4 +1,5 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { formatTime } from '@/lib/utils'
 
 interface Props {
@@ -10,9 +11,19 @@ interface Props {
 }
 
 export default function StatusBar({ fetchedAt, gamesScanned, gamesSkipped, onRefresh, isLoading }: Props) {
+  const [now, setNow] = useState<string>('')
+
+  useEffect(() => {
+    const tick = () => setNow(new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' }))
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [])
+
   return (
     <div className="flex items-center gap-6 text-sm text-gray-400">
       <div className="flex gap-4 flex-1 min-w-0">
+        {now && <span className="whitespace-nowrap font-mono">{now}</span>}
         {fetchedAt && (
           <span className="whitespace-nowrap">Last updated: {formatTime(fetchedAt)}</span>
         )}

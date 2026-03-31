@@ -1,7 +1,6 @@
 import ClientShell from './components/ClientShell'
 
 export default function Home() {
-  const today = new Date().toISOString().split('T')[0]
   return (
     <main className="max-w-7xl mx-auto px-4 py-6">
       <header className="mb-6">
@@ -13,7 +12,7 @@ export default function Home() {
           Walks usually don&apos;t count toward TB.
         </p>
       </header>
-      <ClientShell initialDate={today} />
+      <ClientShell />
     </main>
   )
 }
