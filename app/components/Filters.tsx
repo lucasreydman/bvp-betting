@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useId, useState, useEffect } from 'react'
 import type { FilterState, MatchupResult } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
 import { generateCSV } from '@/lib/utils'
@@ -21,6 +21,9 @@ function initDisplay(f: FilterState): { minAB: string; minOPS: string; minAVG: s
 }
 
 export default function Filters({ filters, onApply, matchups }: Props) {
+  const minAbId = useId()
+  const minAvgId = useId()
+  const minOpsId = useId()
   const [local, setLocal] = useState(() => initDisplay(filters))
   const [opsEnabled, setOpsEnabled] = useState(filters.minOPS !== null)
   const [flash, setFlash] = useState<'apply' | 'reset' | 'export' | null>(null)
@@ -73,10 +76,13 @@ export default function Filters({ filters, onApply, matchups }: Props) {
     setOpsEnabled(prev => !prev)
   }
 
-  const field = (label: string, key: keyof typeof local, step: string) => (
+  const field = (label: string, key: keyof typeof local, step: string, id: string) => (
     <div className="flex flex-col gap-1">
-      <label className="text-xs text-gray-400">{label}</label>
+      <label htmlFor={id} className="text-xs text-gray-400">
+        {label}
+      </label>
       <input
+        id={id}
         type="number"
         value={local[key]}
         step={step}
@@ -91,8 +97,9 @@ export default function Filters({ filters, onApply, matchups }: Props) {
     <div className="bg-gray-900 rounded-lg p-4 mb-4">
       <div className="flex flex-wrap items-end gap-4">
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-gray-400">Min AB</label>
+          <label htmlFor={minAbId} className="text-xs text-gray-400">Min AB</label>
           <input
+            id={minAbId}
             type="number"
             value={local.minAB}
             step="1"
@@ -100,20 +107,22 @@ export default function Filters({ filters, onApply, matchups }: Props) {
             className="w-20 bg-gray-800 text-white text-sm px-2 py-1 rounded border border-gray-700 focus:outline-none focus:border-blue-500 font-mono"
           />
         </div>
-        {field('Min AVG', 'minAVG', '0.001')}
+        {field('Min AVG', 'minAVG', '0.001', minAvgId)}
         {opsEnabled ? (
           <div className="flex flex-col gap-1">
-            <label className="text-xs text-gray-400 flex items-center gap-1">
+            <label htmlFor={minOpsId} className="text-xs text-gray-400 flex items-center gap-1">
               Min OPS
               <button
                 onClick={handleToggleOPS}
                 className="text-gray-600 hover:text-gray-400 text-xs leading-none"
                 title="Remove OPS filter"
+                type="button"
               >
                 ✕
               </button>
             </label>
             <input
+              id={minOpsId}
               type="number"
               value={local.minOPS}
               step="0.001"
