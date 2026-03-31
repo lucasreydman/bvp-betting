@@ -142,11 +142,11 @@ export default function Filters({ filters, onApply, matchups }: Props) {
             </button>
           </div>
         )}
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2">
           <button
             type="button"
             onClick={handleApply}
-            className={`px-4 py-2 text-white text-sm font-medium rounded transition-colors touch-manipulation ${
+            className={`flex-1 sm:flex-none px-4 py-2 text-white text-sm font-medium rounded transition-colors touch-manipulation ${
               flash === 'apply' ? 'bg-green-600' : 'bg-blue-600 hover:bg-blue-500'
             }`}
           >
@@ -155,7 +155,7 @@ export default function Filters({ filters, onApply, matchups }: Props) {
           <button
             type="button"
             onClick={handleReset}
-            className={`px-4 py-2 text-white text-sm font-medium rounded transition-colors touch-manipulation ${
+            className={`flex-1 sm:flex-none px-4 py-2 text-white text-sm font-medium rounded transition-colors touch-manipulation ${
               flash === 'reset' ? 'bg-green-700' : 'bg-gray-700 hover:bg-gray-600'
             }`}
           >
@@ -165,7 +165,7 @@ export default function Filters({ filters, onApply, matchups }: Props) {
             type="button"
             onClick={handleExport}
             disabled={matchups.length === 0}
-            className={`px-4 py-2 text-white text-sm font-medium rounded transition-colors disabled:opacity-40 touch-manipulation ${
+            className={`hidden sm:block px-4 py-2 text-white text-sm font-medium rounded transition-colors disabled:opacity-40 touch-manipulation ${
               flash === 'export' ? 'bg-green-700' : 'bg-gray-700 hover:bg-gray-600'
             }`}
           >
