@@ -1,5 +1,3 @@
-@AGENTS.md
-
 # MLB BvP
 
 Next.js 16 / React 19 app. App Router only (no pages router). Tailwind v4 (no config file; `@import "tailwindcss"` in CSS).
