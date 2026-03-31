@@ -30,7 +30,11 @@ export default function DatePicker({ date, onChange }: Props) {
       >
         ‹
       </button>
+      <label htmlFor="date-input" className="sr-only">
+        Select date
+      </label>
       <input
+        id="date-input"
         type="date"
         value={date}
         min={minDate}
