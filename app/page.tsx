@@ -27,6 +27,10 @@ export default function Home() {
           <span className="text-slate-300"> Parlay the two recommended legs together. If both hit, you double your money. It pays +100 or better, and the legs are chosen to give you the highest combined probability of both hitting on that day's slate.</span>
         </p>
         <p>
+          <span className="text-orange-400 font-semibold">If it says Smash Double, even better.</span>
+          <span className="text-slate-300"> A Smash Double is a Daily Double where both legs also have a career OPS above .950 against their pitcher. OPS measures overall offensive production, so when both the average and the OPS are elite, the historical edge is stronger on both sides of the parlay. Same bet, higher conviction.</span>
+        </p>
+        <p>
           <span className="text-white font-semibold">Prefer lower risk?</span>
           <span className="text-slate-300"> Pick your favorites out of the Top 5 Plays and take them as singles. You do not necessarily win more often, but you have lower risk per bet than a parlay.</span>
         </p>
