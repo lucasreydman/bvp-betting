@@ -37,8 +37,9 @@ export default function TopPlays({ matchups }: Props) {
         <div className="space-y-3 leading-5">
           <p>
             <span className="text-sky-400 font-semibold">Primary score:</span>
-            <span className="text-sky-400"> score = AVG × confidence</span>
+            <span className="text-sky-400"> career batting average against this pitcher, weighted by how many at-bats back it up. More at-bats = more trust in the number.</span>
           </p>
+          <p className="text-slate-400 pl-3">score = AVG × confidence</p>
           <p className="text-slate-400 pl-3">confidence = min(AB / 30, 1)</p>
           <p>
             <span className="text-green-300 font-semibold">Hit chance %:</span>
@@ -69,7 +70,7 @@ export default function TopPlays({ matchups }: Props) {
             {/* Mobile: 2-row layout */}
             <div className="sm:hidden">
               <div className="flex items-center gap-2">
-                <span className="text-gray-500 w-4 shrink-0 font-mono text-xs">{i + 1}.</span>
+                <span className="text-sky-400 w-4 shrink-0 font-mono text-xs">{i + 1}.</span>
                 <span className="text-white font-medium text-sm flex-1 min-w-0 truncate">{m.batterName}</span>
                 <span className={`font-mono font-bold text-sm shrink-0 ${CONFIDENCE_COLORS[m.confidence]}`}>
                   {m.avg.toFixed(3)}
@@ -85,7 +86,7 @@ export default function TopPlays({ matchups }: Props) {
             </div>
             {/* Desktop: single row */}
             <div className="hidden sm:flex items-baseline gap-3 text-sm">
-              <span className="text-gray-500 w-4 font-mono">{i + 1}.</span>
+              <span className="text-sky-400 w-4 font-mono">{i + 1}.</span>
               <span className="text-white font-medium">{m.batterName}</span>
               <span className="text-gray-400">vs {m.pitcherName}</span>
               <span className={`font-mono font-bold ${CONFIDENCE_COLORS[m.confidence]}`}>
@@ -142,7 +143,17 @@ export default function TopPlays({ matchups }: Props) {
         <div className="mt-4 rounded-lg border border-gray-800 bg-gray-950 p-3 text-sm">
           <div className="flex items-center gap-1.5 mb-1">
             <span className="text-gray-400 uppercase tracking-wider text-[10px] font-semibold">Daily Double</span>
-            <span className="text-gray-600 text-[10px] cursor-default" title="A Daily Double is a 2-leg parlay using the top plays with the highest combined hit probability, on different pitchers. If both legs also have an OPS above .950, it becomes a Smash Double.">ⓘ</span>
+            <span className="relative group inline-flex items-center">
+              <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full border border-gray-600 text-gray-500 text-[9px] font-bold cursor-default leading-none select-none hover:border-gray-400 hover:text-gray-300 transition-colors">i</span>
+              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
+                <span className="block bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-300 text-[11px] leading-4 shadow-xl">
+                  A Daily Double is a 2-leg parlay built from the top plays with the highest combined hit probability, keeping both legs on different pitchers. If both legs also carry an OPS above .950, it upgrades to a Smash Double.
+                  <span className="block absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 overflow-hidden">
+                    <span className="block w-2 h-2 bg-gray-800 border-r border-b border-gray-700 rotate-45 -translate-y-1/2"></span>
+                  </span>
+                </span>
+              </span>
+            </span>
           </div>
           <p className="text-gray-500">{top5.length < 2 ? 'Only 1 upcoming play available. One or more top plays have already started and cannot be bet on. A parlay requires at least 2 upcoming legs.' : 'No double recommendation available for the current top plays.'}</p>
         </div>
