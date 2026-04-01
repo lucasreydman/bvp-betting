@@ -65,7 +65,7 @@ export default function HistorySection() {
           {loading ? (
             <p className="text-gray-500 text-sm">Loading history...</p>
           ) : !hasData ? (
-            <p className="text-gray-500 text-sm">No saved daily doubles yet. They&apos;ll appear here after today&apos;s first visit pre-game.</p>
+            <p className="text-gray-500 text-sm">No history yet. Today&apos;s Daily Double will appear here tomorrow once results are in.</p>
           ) : (
             <div className="space-y-2">
               {entries.filter(e => e.dailyDoubleFirst !== null).map(entry => (
