@@ -10,6 +10,7 @@ import LoadingSkeleton from './LoadingSkeleton'
 import TopPlays from './TopPlays'
 import Filters from './Filters'
 import MatchupTable from './MatchupTable'
+import HistorySection from './HistorySection'
 
 function localToday(): string {
   const d = new Date()
@@ -29,6 +30,7 @@ export default function ClientShell() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [snapshot, setSnapshot] = useState<MatchupResult[] | null>(null)
+  const [savedDailyDouble, setSavedDailyDouble] = useState<DailyDouble | null>(null)
 
   const fetchMatchups = useCallback(async (d: string) => {
     setIsLoading(true)
@@ -54,15 +56,22 @@ export default function ClientShell() {
     const today = localToday()
     if (date >= today) {
       setSnapshot(null)
+      setSavedDailyDouble(null)
       return
     }
     // Clear stale snapshot immediately so the previous date's data doesn't flash
     setSnapshot(null)
+    setSavedDailyDouble(null)
     let cancelled = false
     fetch(`/api/snapshot?date=${date}`)
       .then(r => r.json())
-      .then(data => { if (!cancelled) setSnapshot(data.top5 ?? null) })
-      .catch(() => { if (!cancelled) setSnapshot(null) })
+      .then(data => {
+        if (!cancelled) {
+          setSnapshot(data.top5 ?? null)
+          setSavedDailyDouble(data.dailyDouble ?? null)
+        }
+      })
+      .catch(() => { if (!cancelled) { setSnapshot(null); setSavedDailyDouble(null) } })
     return () => { cancelled = true }
   }, [date])
 
@@ -95,11 +104,15 @@ export default function ClientShell() {
     .slice(0, 5)
 
   // Daily Double from ALL plays today (upcoming + in-progress) so it stays
-  // visible and exportable even after games have started
+  // visible and exportable even after games have started.
+  // For past dates, use the saved (frozen) daily double from KV so it never changes
+  // even after games end and live stats update.
   const allDayTop5 = [...filtered]
     .sort((a, b) => top5Score(b) - top5Score(a) || b.avg - a.avg || b.ab - a.ab)
     .slice(0, 5)
-  const csvDailyDouble: DailyDouble | null = suggestDailyDouble(allDayTop5)
+  const csvDailyDouble: DailyDouble | null = isPast
+    ? savedDailyDouble
+    : suggestDailyDouble(allDayTop5)
 
   return (
     <div>
@@ -148,6 +161,7 @@ export default function ClientShell() {
           )}
         </>
       )}
+      <HistorySection />
     </div>
   )
 }

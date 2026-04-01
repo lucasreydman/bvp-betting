@@ -98,3 +98,21 @@ export async function fetchPlayerName(playerId: number): Promise<string> {
   const data = await res.json()
   return data.people?.[0]?.fullName ?? `Player ${playerId}`
 }
+
+// Returns number of hits the batter recorded in a specific game (from boxscore).
+// Returns null if the player wasn't found in the boxscore (DNP / game not started).
+export async function fetchGameBatterHits(gamePk: number, batterId: number): Promise<number | null> {
+  const url = `${BASE}/game/${gamePk}/boxscore`
+  const res = await fetch(url, { next: { revalidate: 300 } }) // 5 min cache
+  if (!res.ok) return null
+  const data = await res.json()
+  const playerKey = `ID${batterId}`
+  for (const side of ['home', 'away'] as const) {
+    const player = data.teams?.[side]?.players?.[playerKey]
+    if (player) {
+      const hits = player?.stats?.batting?.hits
+      return typeof hits === 'number' ? hits : null
+    }
+  }
+  return null
+}

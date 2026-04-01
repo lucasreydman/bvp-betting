@@ -6,6 +6,7 @@ export interface MatchupResult {
   pitcherId: number
   pitcherName: string
   pitcherTeam: string
+  gamePk: number             // MLB game ID, needed for outcome checking
   gameTime: string           // ISO string, display in ET
   isHome: boolean
   lineupSource: 'confirmed' | 'estimated'
@@ -73,4 +74,18 @@ export interface ScheduleResponse {
 export interface SortState {
   column: keyof MatchupResult
   direction: 'asc' | 'desc'
+}
+
+export interface HistoryOutcome {
+  firstHit: boolean | null   // null = couldn't determine
+  secondHit: boolean | null
+}
+
+export interface HistoryEntry {
+  date: string
+  top5: MatchupResult[] | null
+  dailyDoubleFirst: MatchupResult | null
+  dailyDoubleSecond: MatchupResult | null
+  dailyDoubleIsSmash: boolean
+  outcome: HistoryOutcome | null
 }
