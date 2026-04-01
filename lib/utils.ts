@@ -28,57 +28,43 @@ export function hitProbability(avg: number, atBats: number): number {
   return 1 - Math.pow(1 - avg, atBats)
 }
 
-export interface DoublePairSuggestion {
+export interface DailyDouble {
   first: MatchupResult
   second: MatchupResult
+  firstProbability: number
+  secondProbability: number
   combinedProbability: number
+  isSmash: boolean  // true when both legs have OPS > 0.950
 }
 
-export function suggestDoublePairs(matchups: MatchupResult[]): DoublePairSuggestion[] {
-  const enriched = matchups.map(matchup => {
-    const adjustedAvg = regressedAvg(matchup.avg, matchup.ab)
-    const expectedAB = expectedAtBats(matchup.lineupPosition)
-    return {
-      matchup,
-      probability: hitProbability(adjustedAvg, expectedAB),
-    }
-  })
+export function suggestDailyDouble(matchups: MatchupResult[]): DailyDouble | null {
+  const enriched = matchups.map(matchup => ({
+    matchup,
+    probability: hitProbability(regressedAvg(matchup.avg, matchup.ab), expectedAtBats(matchup.lineupPosition)),
+  }))
 
-  const pairs = [] as Array<DoublePairSuggestion & { batterIds: Set<number> }>
+  let best: DailyDouble | null = null
 
-  for (let i = 0; i < enriched.length; i += 1) {
-    for (let j = i + 1; j < enriched.length; j += 1) {
+  for (let i = 0; i < enriched.length; i++) {
+    for (let j = i + 1; j < enriched.length; j++) {
       const a = enriched[i]
       const b = enriched[j]
       if (a.matchup.pitcherId === b.matchup.pitcherId) continue
-      pairs.push({
-        first: a.matchup,
-        second: b.matchup,
-        combinedProbability: a.probability * b.probability,
-        batterIds: new Set([a.matchup.batterId, b.matchup.batterId]),
-      })
+      const combinedProbability = a.probability * b.probability
+      if (!best || combinedProbability > best.combinedProbability) {
+        best = {
+          first: a.matchup,
+          second: b.matchup,
+          firstProbability: a.probability,
+          secondProbability: b.probability,
+          combinedProbability,
+          isSmash: a.matchup.ops > 0.950 && b.matchup.ops > 0.950,
+        }
+      }
     }
   }
 
-  pairs.sort((a, b) => b.combinedProbability - a.combinedProbability)
-
-  const selected: DoublePairSuggestion[] = []
-  const usedBatters = new Set<number>()
-
-  for (const pair of pairs) {
-    if (selected.length === 0) {
-      selected.push(pair)
-      pair.batterIds.forEach(id => usedBatters.add(id))
-      continue
-    }
-
-    if (![...pair.batterIds].some(id => usedBatters.has(id))) {
-      selected.push(pair)
-      break
-    }
-  }
-
-  return selected
+  return best
 }
 
 /** Relative time until first pitch. Returns null if start is in the past or invalid. */

@@ -1,5 +1,5 @@
 import type { MatchupResult } from '@/lib/types'
-import { formatTime, expectedAtBats, hitProbability, regressedAvg, suggestDoublePairs } from '@/lib/utils'
+import { formatTime, expectedAtBats, hitProbability, regressedAvg, suggestDailyDouble } from '@/lib/utils'
 
 interface Props {
   matchups: MatchupResult[]
@@ -25,7 +25,7 @@ export default function TopPlays({ matchups }: Props) {
     .sort((a, b) => score(b.m) - score(a.m) || b.m.avg - a.m.avg || b.m.ab - a.m.ab)
     .slice(0, 5)
 
-  const suggestedPairs = suggestDoublePairs(top5.map(item => item.m))
+  const dailyDouble = suggestDailyDouble(top5.map(item => item.m))
 
   const header = (
     <div className="mb-4">
@@ -36,13 +36,13 @@ export default function TopPlays({ matchups }: Props) {
         <div className="mb-3 text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">How Top Plays are ranked</div>
         <div className="space-y-3 leading-5">
           <p>
-            <span className="text-white font-semibold">Primary score:</span>
-            <span className="text-slate-300"> score = AVG × confidence</span>
+            <span className="text-sky-400 font-semibold">Primary score:</span>
+            <span className="text-sky-400"> score = AVG × confidence</span>
           </p>
           <p className="text-slate-400 pl-3">confidence = min(AB / 30, 1)</p>
           <p>
-            <span className="text-white font-semibold">Hit chance %:</span>
-            <span className="text-slate-300"> estimated chance of ≥1 hit using a regressed AVG and expected ABs.</span>
+            <span className="text-green-300 font-semibold">Hit chance %:</span>
+            <span className="text-green-300"> estimated chance of ≥1 hit using a regressed AVG and expected ABs.</span>
           </p>
           <p className="text-slate-400 pl-3">adjusted AVG = (AB / (AB + 50)) × AVG + (50 / (AB + 50)) × 0.260</p>
           <p className="text-slate-400 pl-3">hit chance = 1 − (1 − adjusted AVG)^(expected AB)</p>
@@ -101,31 +101,49 @@ export default function TopPlays({ matchups }: Props) {
         ))}
       </ol>
 
-      <div className="mt-4 rounded-lg border border-gray-800 bg-gray-950 p-3 text-sm">
-        <div className="text-gray-400 uppercase tracking-wider text-[10px] font-semibold mb-2">Suggested doubles</div>
-        {suggestedPairs.length > 0 ? (
-          <div className="flex flex-col gap-3 text-sm text-gray-200">
-            {suggestedPairs.map((pair, index) => (
-              <div key={`${pair.first.batterId}-${pair.second.batterId}`} className="rounded-lg border border-gray-800 bg-gray-900 p-3">
-                <div className="text-gray-300 font-medium">Double {index + 1}</div>
-                <div className="flex flex-wrap items-center gap-2 mt-1 text-sm">
-                  <span className="font-medium text-white">{pair.first.batterName}</span>
-                  <span className="text-gray-500">vs {pair.first.pitcherName}</span>
-                  <span className="text-gray-400">+</span>
-                  <span className="font-medium text-white">{pair.second.batterName}</span>
-                  <span className="text-gray-500">vs {pair.second.pitcherName}</span>
-                </div>
-                <div className="text-green-300 font-semibold mt-1">
-                  Combined chance ≈ {(pair.combinedProbability * 100).toFixed(1)}%
-                </div>
+      {dailyDouble ? (
+        <div className={`mt-4 rounded-lg border p-3 text-sm ${dailyDouble.isSmash ? 'border-orange-500/50 bg-orange-950/20' : 'border-gray-800 bg-gray-950'}`}>
+          <div className="flex items-baseline gap-2 mb-1">
+            <div className={`uppercase tracking-wider text-[10px] font-semibold ${dailyDouble.isSmash ? 'text-orange-400' : 'text-yellow-400'}`}>
+              {dailyDouble.isSmash ? 'Smash Double' : 'Daily Double'}
+            </div>
+            <div className={`text-[10px] ${dailyDouble.isSmash ? 'text-orange-400/70' : 'text-yellow-400/70'}`}>
+              {dailyDouble.isSmash ? 'Both legs elite OPS (>.950) — strongest possible parlay' : 'Parlay these two legs for +100 or better'}
+            </div>
+          </div>
+
+          <div className="mt-2 space-y-2">
+            {([
+              { leg: dailyDouble.first, prob: dailyDouble.firstProbability },
+              { leg: dailyDouble.second, prob: dailyDouble.secondProbability },
+            ] as const).map(({ leg, prob }, i) => (
+              <div key={leg.batterId} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <span className="text-gray-500 font-mono text-xs w-4 shrink-0">#{i + 1}</span>
+                <span className="text-white font-medium">{leg.batterName}</span>
+                <span className="text-gray-500">vs {leg.pitcherName}</span>
+                <span className={`font-mono font-bold text-xs ${CONFIDENCE_COLORS[leg.confidence]}`}>{leg.avg.toFixed(3)} AVG</span>
+                <span className={`font-mono text-xs ${dailyDouble.isSmash ? 'text-orange-300' : 'text-gray-400'}`}>{leg.ops.toFixed(3)} OPS</span>
+                <span className="text-gray-500 font-mono text-xs">{leg.ab} AB</span>
+                <span className="text-green-300 font-semibold text-xs">{(prob * 100).toFixed(0)}% hit chance</span>
               </div>
             ))}
-            <div className="text-gray-500">Each pair is chosen to maximize combined hit probability while keeping both legs on different pitchers. The second pair is the next best non-overlapping double, so it does not reuse a batter from the first pair.</div>
           </div>
-        ) : (
-          <p className="text-gray-500">No clean double recommendation found for the current top plays.</p>
-        )}
-      </div>
+
+          <div className={`mt-3 pt-2 border-t flex flex-wrap items-baseline gap-x-3 gap-y-1 ${dailyDouble.isSmash ? 'border-orange-500/20' : 'border-gray-800'}`}>
+            <span className="text-green-300 font-semibold">Combined: {(dailyDouble.combinedProbability * 100).toFixed(1)}%</span>
+            <span className="text-gray-500 text-xs">
+              {dailyDouble.isSmash
+                ? `Both legs carry career OPS above .950 against their pitchers — that's elite historical production on both sides of the parlay, not just strong AVG.`
+                : `Chosen from today's top plays: highest combined hit probability with both legs on different pitchers.`}
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4 rounded-lg border border-gray-800 bg-gray-950 p-3 text-sm">
+          <div className="text-gray-400 uppercase tracking-wider text-[10px] font-semibold mb-1">Daily Double</div>
+          <p className="text-gray-500">No double recommendation available for the current top plays.</p>
+        </div>
+      )}
     </div>
   )
 }

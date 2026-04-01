@@ -1,4 +1,4 @@
-import { formatTime, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, hitProbability, suggestDoublePairs } from '@/lib/utils'
+import { formatTime, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, hitProbability, suggestDailyDouble } from '@/lib/utils'
 import { DEFAULT_FILTERS, type MatchupResult } from '@/lib/types'
 
 const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => ({
@@ -103,27 +103,40 @@ describe('hitProbability', () => {
   })
 })
 
-describe('suggestDoublePairs', () => {
-  it('returns the two best disjoint doubles from available matchups', () => {
+describe('suggestDailyDouble', () => {
+  it('returns the single best pair with different pitchers', () => {
     const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.300, ab: 40 })
     const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.320, ab: 30 })
     const c = makeMatchup({ batterId: 3, pitcherId: 3, avg: 0.350, ab: 20 })
-    const d = makeMatchup({ batterId: 4, pitcherId: 4, avg: 0.280, ab: 25 })
-    const suggestions = suggestDoublePairs([a, b, c, d])
+    const result = suggestDailyDouble([a, b, c])
 
-    expect(suggestions).toHaveLength(2)
-    expect(suggestions[0].first.batterId).not.toBe(suggestions[0].second.batterId)
-    expect(suggestions[0].first.pitcherId).not.toBe(suggestions[0].second.pitcherId)
-    expect(suggestions[1].first.batterId).not.toBe(suggestions[1].second.batterId)
-    expect(suggestions[1].first.pitcherId).not.toBe(suggestions[1].second.pitcherId)
+    expect(result).not.toBeNull()
+    expect(result!.first.batterId).not.toBe(result!.second.batterId)
+    expect(result!.first.pitcherId).not.toBe(result!.second.pitcherId)
+    expect(result!.combinedProbability).toBeGreaterThan(0)
+  })
 
-    const usedBatters = new Set([
-      suggestions[0].first.batterId,
-      suggestions[0].second.batterId,
-      suggestions[1].first.batterId,
-      suggestions[1].second.batterId,
-    ])
-    expect(usedBatters.size).toBe(4)
+  it('marks isSmash when both legs have OPS > 0.950', () => {
+    const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.400, ab: 40, ops: 1.100 })
+    const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.380, ab: 35, ops: 0.980 })
+    const result = suggestDailyDouble([a, b])
+
+    expect(result).not.toBeNull()
+    expect(result!.isSmash).toBe(true)
+  })
+
+  it('does not mark isSmash when one leg is below 0.950 OPS', () => {
+    const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.400, ab: 40, ops: 1.100 })
+    const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.380, ab: 35, ops: 0.900 })
+    const result = suggestDailyDouble([a, b])
+
+    expect(result).not.toBeNull()
+    expect(result!.isSmash).toBe(false)
+  })
+
+  it('returns null when no valid pairs exist', () => {
+    const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.300, ab: 40 })
+    expect(suggestDailyDouble([a])).toBeNull()
   })
 })
 
