@@ -19,7 +19,7 @@ function formatDisplay(dateStr: string): string {
 export default function DatePicker({ date, onChange }: Props) {
   const today = new Date().toISOString().split('T')[0]
   const minDate = addDays(today, -3)
-  const maxDate = addDays(today, 3)
+  const maxDate = addDays(today, 1)
 
   return (
     <div className="flex items-center gap-2">
