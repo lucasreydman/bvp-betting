@@ -17,10 +17,10 @@ export default function Home() {
       </header>
 
       <div className="mb-6 rounded-2xl border border-slate-700 bg-slate-950 p-4 text-xs text-slate-300 space-y-3 leading-5">
-        <div className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">How to use this for best results</div>
+        <div className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">How to use this system for best results</div>
         <p>
           <span className="text-white font-semibold">Check it in the morning</span>
-          <span className="text-slate-300"> before any games start. Once games begin, those legs are no longer available to bet.</span>
+          <span className="text-slate-300"> before any games start. Once games begin, those legs no longer have the same mathematical backing. They will not show up in the Daily Double calculations.</span>
         </p>
         <p>
           <span className="text-yellow-400 font-semibold">Best bet: take the Daily Double.</span>
@@ -28,11 +28,17 @@ export default function Home() {
         </p>
         <p>
           <span className="text-white font-semibold">Prefer lower risk?</span>
-          <span className="text-slate-300"> Take one to five of the Top 5 Plays as singles instead. Each is a straight bet that the batter records at least one hit. You win less per bet, but you win more often.</span>
+          <span className="text-slate-300"> Pick your favorites out of the Top 5 Plays and take them as singles. You do not necessarily win more often, but you have lower risk per bet than a parlay.</span>
+        </p>
+        <p>
+          <span className="text-green-300 font-semibold">Confirmed lineups make the hit chance more accurate.</span>
+          <span className="text-slate-300"> Each play shows an estimated at-bats (Est. AB) number used to calculate hit probability. Until the official lineup is posted, everyone defaults to 4.1 AB. Once the lineup is confirmed, that number adjusts by batting order position: leadoff through third (.4.45 AB), cleanup (4.25 AB), fifth and sixth (4.05 AB), seventh through ninth (3.85 AB). Plays marked </span>
+          <span className="text-white font-semibold">confirmed</span>
+          <span className="text-slate-300"> are stronger picks because the hit chance percentage is based on where that batter actually sits in the order, not a generic estimate. Check back after lineups drop, usually 3 to 4 hours before first pitch.</span>
         </p>
         <p>
           <span className="text-sky-400 font-semibold">Consistency is everything for EV.</span>
-          <span className="text-slate-300"> The edge here is statistical — it compounds over time. The more consistently you take these plays, the higher your expected value will be. Skipping days or cherry-picking erodes that edge. Treat it like a system, not a tip.</span>
+          <span className="text-slate-300"> The edge here is statistical. It compounds over time. The more consistently you take these plays, the higher your expected value will be. Skipping days or cherry-picking erodes that edge. Treat it like a system, not a tip.</span>
         </p>
       </div>
 
