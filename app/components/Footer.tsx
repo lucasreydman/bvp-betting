@@ -54,7 +54,12 @@ export default function Footer() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-800">
         <p>
           Built by{' '}
-          <span className="text-gray-400 font-medium">Lucas Reydman</span>
+          <a
+            href="https://lucasreydman.github.io/cv/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-400 font-medium hover:text-white transition-colors"
+          >Lucas Reydman</a>
           {' · '}
           Data from the{' '}
           <a
