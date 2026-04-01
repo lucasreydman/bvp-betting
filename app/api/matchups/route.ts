@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { fetchSchedule, fetchConfirmedLineup, fetchActiveRoster, fetchCareerPA, fetchBvP, fetchPlayerName } from '@/lib/mlb-api'
 import { parseSplit } from '@/lib/stats'
 import { createCache } from '@/lib/cache'
+import { kvGet, kvSet } from '@/lib/kv'
 import type { MatchupResult, MatchupsResponse } from '@/lib/types'
 
 // Module-level caches — survive across requests in the same serverless instance
@@ -171,6 +172,28 @@ export async function GET(req: NextRequest) {
       matchupsFound: deduped.length,
       results: deduped,
     }
+
+    // Persist top-5 snapshot the first time this date is requested.
+    // Only include games that haven't started yet so the snapshot reflects
+    // pre-game top plays, not post-game ones.
+    // Fire-and-forget — do not await, so it doesn't delay the response.
+    const snapshotKey = `top5:${date}`
+    kvGet<MatchupResult[]>(snapshotKey).then(existing => {
+      if (!existing) {
+        const nowIso = new Date().toISOString()
+        const upcomingOnly = deduped.filter(r => r.gameTime > nowIso)
+        const top5 = [...upcomingOnly]
+          .sort((a, b) =>
+            b.avg * Math.min(b.ab / 30, 1) - a.avg * Math.min(a.ab / 30, 1) ||
+            b.avg - a.avg ||
+            b.ab - a.ab
+          )
+          .slice(0, 5)
+        kvSet(snapshotKey, top5).catch(err =>
+          console.error('Failed to save top-5 snapshot:', err)
+        )
+      }
+    }).catch(err => console.error('Failed to read snapshot:', err))
 
     return NextResponse.json(response)
   } catch (err) {
