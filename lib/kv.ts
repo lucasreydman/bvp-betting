@@ -1,0 +1,22 @@
+// lib/kv.ts
+// Thin wrapper around @vercel/kv with an in-memory fallback for local dev.
+// When KV_REST_API_URL / KV_REST_API_TOKEN are not set, all reads/writes go to
+// a module-level Map that lasts for the lifetime of the serverless instance.
+import { kv } from '@vercel/kv'
+
+const hasKv = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)
+const memStore = new Map<string, string>()
+
+export async function kvGet<T>(key: string): Promise<T | null> {
+  if (hasKv) return kv.get<T>(key)
+  const raw = memStore.get(key)
+  return raw ? (JSON.parse(raw) as T) : null
+}
+
+export async function kvSet(key: string, value: unknown): Promise<void> {
+  if (hasKv) {
+    await kv.set(key, value)
+  } else {
+    memStore.set(key, JSON.stringify(value))
+  }
+}
