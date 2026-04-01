@@ -2,7 +2,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { MatchupResult, FilterState, MatchupsResponse, SortState } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
-import { applyFilters, sortMatchups } from '@/lib/utils'
+import { applyFilters, sortMatchups, suggestDailyDouble } from '@/lib/utils'
+import type { DailyDouble } from '@/lib/utils'
 import StatusBar from './StatusBar'
 import DatePicker from './DatePicker'
 import LoadingSkeleton from './LoadingSkeleton'
@@ -86,6 +87,12 @@ export default function ClientShell() {
   const isPast = date < localToday()
   const topPlaysMatchups = isPast ? (snapshot ?? []) : upcoming
 
+  const top5Score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
+  const top5Matchups = [...topPlaysMatchups]
+    .sort((a, b) => top5Score(b) - top5Score(a) || b.avg - a.avg || b.ab - a.ab)
+    .slice(0, 5)
+  const csvDailyDouble: DailyDouble | null = suggestDailyDouble(top5Matchups)
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
@@ -110,7 +117,7 @@ export default function ClientShell() {
       ) : (
         <>
           <TopPlays matchups={topPlaysMatchups} />
-          <Filters filters={filters} onApply={setFilters} matchups={csvMatchups} />
+          <Filters filters={filters} onApply={setFilters} matchups={csvMatchups} top5={top5Matchups} dailyDouble={csvDailyDouble} />
           <MatchupTable
             matchups={upcoming}
             sort={sort}

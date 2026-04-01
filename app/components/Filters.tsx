@@ -1,13 +1,16 @@
 'use client'
-import { useId, useState, useEffect } from 'react'
+import { useId, useState, useEffect, useRef } from 'react'
 import type { FilterState, MatchupResult } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
 import { generateCSV } from '@/lib/utils'
+import type { DailyDouble } from '@/lib/utils'
 
 interface Props {
   filters: FilterState
   onApply: (filters: FilterState) => void
-  matchups: MatchupResult[]   // for CSV export (filtered set passed from parent)
+  matchups: MatchupResult[]       // full filtered list for CSV export
+  top5?: MatchupResult[]          // top 5 plays for CSV export
+  dailyDouble?: DailyDouble | null  // daily double legs for CSV export
 }
 
 const DEFAULT_OPS_VALUE = 0.700
@@ -20,18 +23,31 @@ function initDisplay(f: FilterState): { minAB: string; minOPS: string; minAVG: s
   }
 }
 
-export default function Filters({ filters, onApply, matchups }: Props) {
+export default function Filters({ filters, onApply, matchups, top5, dailyDouble }: Props) {
   const minAbId = useId()
   const minAvgId = useId()
   const minOpsId = useId()
   const [local, setLocal] = useState(() => initDisplay(filters))
   const [opsEnabled, setOpsEnabled] = useState(filters.minOPS !== null)
   const [flash, setFlash] = useState<'apply' | 'reset' | 'export' | null>(null)
+  const [showExportMenu, setShowExportMenu] = useState(false)
+  const exportRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setLocal(initDisplay(filters))
     setOpsEnabled(filters.minOPS !== null)
   }, [filters])
+
+  useEffect(() => {
+    if (!showExportMenu) return
+    const handler = (e: MouseEvent) => {
+      if (exportRef.current && !exportRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showExportMenu])
 
   const flashFor = (key: 'apply' | 'reset' | 'export') => {
     setFlash(key)
@@ -60,15 +76,16 @@ export default function Filters({ filters, onApply, matchups }: Props) {
     flashFor('reset')
   }
 
-  const handleExport = () => {
-    const csv = generateCSV(matchups)
+  const downloadCSV = (rows: MatchupResult[], label: string) => {
+    const csv = generateCSV(rows)
     const blob = new Blob([csv], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `bvp-matchups-${new Date().toISOString().split('T')[0]}.csv`
+    a.download = `bvp-${label}-${new Date().toISOString().split('T')[0]}.csv`
     a.click()
     URL.revokeObjectURL(url)
+    setShowExportMenu(false)
     flashFor('export')
   }
 
@@ -161,16 +178,52 @@ export default function Filters({ filters, onApply, matchups }: Props) {
           >
             {flash === 'reset' ? 'Reset ✓' : 'Reset'}
           </button>
-          <button
-            type="button"
-            onClick={handleExport}
-            disabled={matchups.length === 0}
-            className={`hidden sm:block px-4 py-2 text-white text-sm font-medium rounded transition-colors disabled:opacity-40 touch-manipulation ${
-              flash === 'export' ? 'bg-green-700' : 'bg-gray-700 hover:bg-gray-600'
-            }`}
-          >
-            {flash === 'export' ? 'Exported ✓' : 'Export CSV'}
-          </button>
+          <div ref={exportRef} className="relative hidden sm:block">
+            <button
+              type="button"
+              onClick={() => setShowExportMenu(prev => !prev)}
+              disabled={matchups.length === 0 && !top5?.length && !dailyDouble}
+              className={`px-4 py-2 text-white text-sm font-medium rounded transition-colors disabled:opacity-40 touch-manipulation flex items-center gap-1.5 ${
+                flash === 'export' ? 'bg-green-700' : 'bg-gray-700 hover:bg-gray-600'
+              }`}
+            >
+              {flash === 'export' ? 'Exported ✓' : 'Export CSV'}
+              {flash !== 'export' && <span className="text-gray-400 text-xs">▾</span>}
+            </button>
+            {showExportMenu && (
+              <div className="absolute bottom-full mb-1.5 right-0 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden z-20">
+                <button
+                  type="button"
+                  disabled={!dailyDouble}
+                  onClick={() => dailyDouble && downloadCSV([dailyDouble.first, dailyDouble.second], 'daily-double')}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <div className="font-medium text-yellow-400">{dailyDouble?.isSmash ? 'Smash Double' : 'Daily Double'}</div>
+                  <div className="text-xs text-gray-500">2 legs</div>
+                </button>
+                <div className="border-t border-gray-700" />
+                <button
+                  type="button"
+                  disabled={!top5?.length}
+                  onClick={() => top5?.length && downloadCSV(top5, 'top5')}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <div className="font-medium">Top 5 Plays</div>
+                  <div className="text-xs text-gray-500">{top5?.length ?? 0} rows</div>
+                </button>
+                <div className="border-t border-gray-700" />
+                <button
+                  type="button"
+                  disabled={matchups.length === 0}
+                  onClick={() => matchups.length && downloadCSV(matchups, 'full-list')}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <div className="font-medium">Full List</div>
+                  <div className="text-xs text-gray-500">{matchups.length} rows</div>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
