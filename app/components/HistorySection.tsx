@@ -35,7 +35,7 @@ function LegResult({ hit }: { hit: boolean | null }) {
 export default function HistorySection() {
   const [entries, setEntries] = useState<HistoryEntry[]>([])
   const [loading, setLoading] = useState(true)
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
 
   useEffect(() => {
     if (!open) return
@@ -52,6 +52,7 @@ export default function HistorySection() {
   return (
     <div className="mt-6">
       <button
+        type="button"
         onClick={() => setOpen(o => !o)}
         className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-200 transition-colors"
       >

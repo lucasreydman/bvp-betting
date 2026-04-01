@@ -53,13 +53,8 @@ export default function ClientShell() {
   }, [date, fetchMatchups])
 
   useEffect(() => {
-    const today = localToday()
-    if (date >= today) {
-      setSnapshot(null)
-      setSavedDailyDouble(null)
-      return
-    }
-    // Clear stale snapshot immediately so the previous date's data doesn't flash
+    // Always fetch the pre-game snapshot — for past dates it's the primary data source,
+    // for today it's the fallback once all games have started.
     setSnapshot(null)
     setSavedDailyDouble(null)
     let cancelled = false
@@ -94,7 +89,10 @@ export default function ClientShell() {
   const totalInProgress = allMatchups.filter(m => isStarted(m)).length
 
   const isPast = date < localToday()
-  const topPlaysMatchups = isPast ? (snapshot ?? []) : upcoming
+  // For today: show live upcoming games; once all have started fall back to the
+  // pre-game snapshot so the Top 5 and Daily Double remain visible all day.
+  const allGamesStarted = !isPast && upcoming.length === 0 && totalInProgress > 0
+  const topPlaysMatchups = isPast || allGamesStarted ? (snapshot ?? []) : upcoming
 
   const top5Score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
 
@@ -103,14 +101,12 @@ export default function ClientShell() {
     .sort((a, b) => top5Score(b) - top5Score(a) || b.avg - a.avg || b.ab - a.ab)
     .slice(0, 5)
 
-  // Daily Double from ALL plays today (upcoming + in-progress) so it stays
-  // visible and exportable even after games have started.
-  // For past dates, use the saved (frozen) daily double from KV so it never changes
-  // even after games end and live stats update.
+  // Daily Double: use the frozen pre-game snapshot once games have started or for past dates.
+  // While upcoming games still exist, compute live from the current top-5.
   const allDayTop5 = [...filtered]
     .sort((a, b) => top5Score(b) - top5Score(a) || b.avg - a.avg || b.ab - a.ab)
     .slice(0, 5)
-  const csvDailyDouble: DailyDouble | null = isPast
+  const csvDailyDouble: DailyDouble | null = isPast || allGamesStarted
     ? savedDailyDouble
     : suggestDailyDouble(allDayTop5)
 
