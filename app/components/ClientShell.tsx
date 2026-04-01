@@ -92,7 +92,7 @@ export default function ClientShell() {
   // For today: show live upcoming games; once all have started fall back to the
   // pre-game snapshot so the Top 5 and Daily Double remain visible all day.
   const allGamesStarted = !isPast && upcoming.length === 0 && totalInProgress > 0
-  const topPlaysMatchups = isPast || allGamesStarted ? (snapshot ?? []) : upcoming
+  const topPlaysMatchups = isPast || allGamesStarted ? applyFilters(snapshot ?? [], filters) : upcoming
 
   const top5Score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
 
