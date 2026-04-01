@@ -38,7 +38,7 @@ export default function ClientShell() {
       const data: MatchupsResponse = await res.json()
       setAllMatchups(data.results)
       setMeta({ date: data.date, fetchedAt: data.fetchedAt, gamesScanned: data.gamesScanned, gamesSkipped: data.gamesSkipped, matchupsFound: data.matchupsFound })
-    } catch (err) {
+    } catch {
       setError('Could not load MLB data. Try again in a moment.')
     } finally {
       setIsLoading(false)

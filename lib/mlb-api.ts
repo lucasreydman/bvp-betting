@@ -60,7 +60,7 @@ export async function fetchConfirmedLineup(gamePk: number, teamId: number): Prom
   const side = data.teams?.home?.team?.id === teamId ? 'home' : 'away'
   // The MLB boxscore `batters` field is an array of numeric player IDs
   const batters: Array<number | { id: number }> = data.teams?.[side]?.batters ?? []
-  const ids = batters.map((b: any) => (typeof b === 'number' ? b : b.id)).filter(Boolean)
+  const ids = batters.map((b: number | { id: number }) => (typeof b === 'number' ? b : b.id)).filter(Boolean)
   return ids.length > 0 ? ids : null
 }
 
