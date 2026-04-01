@@ -116,7 +116,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               {dailyDouble.isSmash ? 'Smash Double' : 'Daily Double'}
             </div>
             {anyLegStarted ? (
-              <div className="text-[10px] text-gray-500">In progress. Export below to track your bet.</div>
+              <div className="text-[10px] text-gray-500">In progress. Export available below.</div>
             ) : (
               <div className={`text-[10px] ${dailyDouble.isSmash ? 'text-orange-400/70' : 'text-yellow-400/70'}`}>
                 {dailyDouble.isSmash ? 'Both legs elite OPS (>.950) — strongest possible parlay' : 'Parlay these two legs for +100 or better'}
