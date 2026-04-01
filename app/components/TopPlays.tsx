@@ -1,8 +1,11 @@
 import type { MatchupResult } from '@/lib/types'
 import { formatTime, expectedAtBats, hitProbability, regressedAvg, suggestDailyDouble } from '@/lib/utils'
+import type { DailyDouble } from '@/lib/utils'
 
 interface Props {
   matchups: MatchupResult[]
+  overrideDailyDouble?: DailyDouble | null
+  now: number
 }
 
 const CONFIDENCE_COLORS = {
@@ -11,7 +14,7 @@ const CONFIDENCE_COLORS = {
   low: 'text-red-400',
 }
 
-export default function TopPlays({ matchups }: Props) {
+export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) {
   const score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
 
   const enriched = matchups.map(m => {
@@ -25,7 +28,11 @@ export default function TopPlays({ matchups }: Props) {
     .sort((a, b) => score(b.m) - score(a.m) || b.m.avg - a.m.avg || b.m.ab - a.m.ab)
     .slice(0, 5)
 
-  const dailyDouble = suggestDailyDouble(top5.map(item => item.m))
+  const internalDailyDouble = suggestDailyDouble(top5.map(item => item.m))
+  const dailyDouble = overrideDailyDouble !== undefined ? overrideDailyDouble : internalDailyDouble
+
+  const isStarted = (leg: MatchupResult) => new Date(leg.gameTime).getTime() <= now
+  const anyLegStarted = dailyDouble ? isStarted(dailyDouble.first) || isStarted(dailyDouble.second) : false
 
   const header = (
     <div className="mb-4">
@@ -108,34 +115,44 @@ export default function TopPlays({ matchups }: Props) {
             <div className={`uppercase tracking-wider text-[10px] font-semibold ${dailyDouble.isSmash ? 'text-orange-400' : 'text-yellow-400'}`}>
               {dailyDouble.isSmash ? 'Smash Double' : 'Daily Double'}
             </div>
-            <div className={`text-[10px] ${dailyDouble.isSmash ? 'text-orange-400/70' : 'text-yellow-400/70'}`}>
-              {dailyDouble.isSmash ? 'Both legs elite OPS (>.950) — strongest possible parlay' : 'Parlay these two legs for +100 or better'}
-            </div>
+            {anyLegStarted ? (
+              <div className="text-[10px] text-gray-500">In progress. Export below to track your bet.</div>
+            ) : (
+              <div className={`text-[10px] ${dailyDouble.isSmash ? 'text-orange-400/70' : 'text-yellow-400/70'}`}>
+                {dailyDouble.isSmash ? 'Both legs elite OPS (>.950) — strongest possible parlay' : 'Parlay these two legs for +100 or better'}
+              </div>
+            )}
           </div>
 
           <div className="mt-2 space-y-2">
             {([
               { leg: dailyDouble.first, prob: dailyDouble.firstProbability },
               { leg: dailyDouble.second, prob: dailyDouble.secondProbability },
-            ] as const).map(({ leg, prob }, i) => (
-              <div key={leg.batterId} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                <span className="text-gray-500 font-mono text-xs w-4 shrink-0">#{i + 1}</span>
-                <span className="text-white font-medium">{leg.batterName}</span>
-                <span className="text-gray-500">vs {leg.pitcherName}</span>
-                <span className={`font-mono font-bold text-xs ${CONFIDENCE_COLORS[leg.confidence]}`}>{leg.avg.toFixed(3)} AVG</span>
-                <span className={`font-mono text-xs ${dailyDouble.isSmash ? 'text-orange-300' : 'text-gray-400'}`}>{leg.ops.toFixed(3)} OPS</span>
-                <span className="text-gray-500 font-mono text-xs">{leg.ab} AB</span>
-                <span className="text-green-300 font-semibold text-xs">{(prob * 100).toFixed(0)}% hit chance</span>
-              </div>
-            ))}
+            ] as const).map(({ leg, prob }, i) => {
+              const legStarted = isStarted(leg)
+              return (
+                <div key={leg.batterId} className={`flex flex-wrap items-baseline gap-x-2 gap-y-0.5 ${legStarted ? 'opacity-50' : ''}`}>
+                  <span className="text-gray-500 font-mono text-xs w-4 shrink-0">#{i + 1}</span>
+                  <span className="text-white font-medium">{leg.batterName}</span>
+                  <span className="text-gray-500">vs {leg.pitcherName}</span>
+                  <span className={`font-mono font-bold text-xs ${CONFIDENCE_COLORS[leg.confidence]}`}>{leg.avg.toFixed(3)} AVG</span>
+                  <span className={`font-mono text-xs ${dailyDouble.isSmash ? 'text-orange-300' : 'text-gray-400'}`}>{leg.ops.toFixed(3)} OPS</span>
+                  <span className="text-gray-500 font-mono text-xs">{leg.ab} AB</span>
+                  <span className="text-green-300 font-semibold text-xs">{(prob * 100).toFixed(0)}% hit chance</span>
+                  {legStarted && <span className="text-[9px] font-bold text-amber-400 border border-amber-400/40 rounded px-1 py-0.5 uppercase tracking-wide leading-none">In Progress</span>}
+                </div>
+              )
+            })}
           </div>
 
           <div className={`mt-3 pt-2 border-t flex flex-wrap items-baseline gap-x-3 gap-y-1 ${dailyDouble.isSmash ? 'border-orange-500/20' : 'border-gray-800'}`}>
             <span className="text-green-300 font-semibold">Combined: {(dailyDouble.combinedProbability * 100).toFixed(1)}%</span>
             <span className="text-gray-500 text-xs">
-              {dailyDouble.isSmash
-                ? `Both legs carry career OPS above .950 against their pitchers — that's elite historical production on both sides of the parlay, not just strong AVG.`
-                : `Chosen from today's top plays: highest combined hit probability with both legs on different pitchers.`}
+              {anyLegStarted
+                ? `This was today's recommended parlay before games started.`
+                : dailyDouble.isSmash
+                  ? `Both legs carry career OPS above .950 against their pitchers — that's elite historical production on both sides of the parlay, not just strong AVG.`
+                  : `Chosen from today's top plays: highest combined hit probability with both legs on different pitchers.`}
             </span>
           </div>
         </div>

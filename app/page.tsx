@@ -32,9 +32,9 @@ export default function Home() {
         </p>
         <p>
           <span className="text-green-300 font-semibold">Confirmed lineups make the hit chance more accurate.</span>
-          <span className="text-slate-300"> Each play shows an estimated at-bats (Est. AB) number used to calculate hit probability. Until the official lineup is posted, everyone defaults to 4.1 AB. Once the lineup is confirmed, that number adjusts by batting order position: leadoff through third (.4.45 AB), cleanup (4.25 AB), fifth and sixth (4.05 AB), seventh through ninth (3.85 AB). Plays marked </span>
+          <span className="text-slate-300"> Hit chance is calculated using an expected at-bats number that adjusts based on where the batter sits in the order. Until lineups are official, a generic estimate is used. Plays marked </span>
           <span className="text-white font-semibold">confirmed</span>
-          <span className="text-slate-300"> are stronger picks because the hit chance percentage is based on where that batter actually sits in the order, not a generic estimate. Check back after lineups drop, usually 3 to 4 hours before first pitch.</span>
+          <span className="text-slate-300"> are stronger because that number is exact. Lineups usually drop 3 to 4 hours before first pitch.</span>
         </p>
         <p>
           <span className="text-sky-400 font-semibold">Consistency is everything for EV.</span>

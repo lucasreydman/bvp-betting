@@ -88,10 +88,18 @@ export default function ClientShell() {
   const topPlaysMatchups = isPast ? (snapshot ?? []) : upcoming
 
   const top5Score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
+
+  // Top 5 for display + "Top 5 Plays" CSV: upcoming only (bettable)
   const top5Matchups = [...topPlaysMatchups]
     .sort((a, b) => top5Score(b) - top5Score(a) || b.avg - a.avg || b.ab - a.ab)
     .slice(0, 5)
-  const csvDailyDouble: DailyDouble | null = suggestDailyDouble(top5Matchups)
+
+  // Daily Double from ALL plays today (upcoming + in-progress) so it stays
+  // visible and exportable even after games have started
+  const allDayTop5 = [...filtered]
+    .sort((a, b) => top5Score(b) - top5Score(a) || b.avg - a.avg || b.ab - a.ab)
+    .slice(0, 5)
+  const csvDailyDouble: DailyDouble | null = suggestDailyDouble(allDayTop5)
 
   return (
     <div>
@@ -116,7 +124,7 @@ export default function ClientShell() {
         <LoadingSkeleton />
       ) : (
         <>
-          <TopPlays matchups={topPlaysMatchups} />
+          <TopPlays matchups={topPlaysMatchups} overrideDailyDouble={csvDailyDouble} now={now} />
           <Filters filters={filters} onApply={setFilters} matchups={csvMatchups} top5={top5Matchups} dailyDouble={csvDailyDouble} />
           <MatchupTable
             matchups={upcoming}
