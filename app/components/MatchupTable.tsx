@@ -198,7 +198,7 @@ export default function MatchupTable({
           </div>
 
           {/* ── Desktop table view ── */}
-          <div className="hidden sm:block overflow-x-auto">
+          <div className="hidden sm:block overflow-x-auto scrollbar-styled">
             <table className="w-full min-w-full sm:min-w-[1100px] text-sm table-auto">
               <colgroup>
                 {COLUMNS.map(col => (

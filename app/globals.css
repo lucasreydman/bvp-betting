@@ -9,3 +9,24 @@
     display: none;
   }
 }
+
+@layer utilities {
+  .scrollbar-styled {
+    scrollbar-width: thin;
+    scrollbar-color: #374151 transparent;
+  }
+  .scrollbar-styled::-webkit-scrollbar {
+    display: block;
+    height: 5px;
+  }
+  .scrollbar-styled::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-styled::-webkit-scrollbar-thumb {
+    background-color: #374151;
+    border-radius: 9999px;
+  }
+  .scrollbar-styled::-webkit-scrollbar-thumb:hover {
+    background-color: #4b5563;
+  }
+}
