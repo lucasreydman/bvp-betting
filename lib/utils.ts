@@ -10,6 +10,77 @@ export function formatTime(isoString: string): string {
   })
 }
 
+export function regressedAvg(avg: number, ab: number, leagueAvg = 0.26, regStrength = 50): number {
+  if (ab <= 0) return leagueAvg
+  const weight = ab / (ab + regStrength)
+  return weight * avg + (1 - weight) * leagueAvg
+}
+
+export function expectedAtBats(lineupPosition?: number): number {
+  if (lineupPosition == null) return 4.1
+  if (lineupPosition <= 3) return 4.45
+  if (lineupPosition === 4) return 4.25
+  if (lineupPosition <= 6) return 4.05
+  return 3.85
+}
+
+export function hitProbability(avg: number, atBats: number): number {
+  return 1 - Math.pow(1 - avg, atBats)
+}
+
+export interface DoublePairSuggestion {
+  first: MatchupResult
+  second: MatchupResult
+  combinedProbability: number
+}
+
+export function suggestDoublePairs(matchups: MatchupResult[]): DoublePairSuggestion[] {
+  const enriched = matchups.map(matchup => {
+    const adjustedAvg = regressedAvg(matchup.avg, matchup.ab)
+    const expectedAB = expectedAtBats(matchup.lineupPosition)
+    return {
+      matchup,
+      probability: hitProbability(adjustedAvg, expectedAB),
+    }
+  })
+
+  const pairs = [] as Array<DoublePairSuggestion & { batterIds: Set<number> }>
+
+  for (let i = 0; i < enriched.length; i += 1) {
+    for (let j = i + 1; j < enriched.length; j += 1) {
+      const a = enriched[i]
+      const b = enriched[j]
+      if (a.matchup.pitcherId === b.matchup.pitcherId) continue
+      pairs.push({
+        first: a.matchup,
+        second: b.matchup,
+        combinedProbability: a.probability * b.probability,
+        batterIds: new Set([a.matchup.batterId, b.matchup.batterId]),
+      })
+    }
+  }
+
+  pairs.sort((a, b) => b.combinedProbability - a.combinedProbability)
+
+  const selected: DoublePairSuggestion[] = []
+  const usedBatters = new Set<number>()
+
+  for (const pair of pairs) {
+    if (selected.length === 0) {
+      selected.push(pair)
+      pair.batterIds.forEach(id => usedBatters.add(id))
+      continue
+    }
+
+    if (![...pair.batterIds].some(id => usedBatters.has(id))) {
+      selected.push(pair)
+      break
+    }
+  }
+
+  return selected
+}
+
 /** Relative time until first pitch. Returns null if start is in the past or invalid. */
 export function formatCountdownToStart(isoString: string, nowMs: number): string | null {
   const start = new Date(isoString).getTime()

@@ -1,4 +1,4 @@
-import { formatTime, formatCountdownToStart, generateCSV, applyFilters, sortMatchups } from '@/lib/utils'
+import { formatTime, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, hitProbability, suggestDoublePairs } from '@/lib/utils'
 import { DEFAULT_FILTERS, type MatchupResult } from '@/lib/types'
 
 const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => ({
@@ -72,6 +72,58 @@ describe('sortMatchups', () => {
     const b = makeMatchup({ slg: 0.500 })
     const result = sortMatchups([a, b], { column: 'slg', direction: 'asc' })
     expect(result[0].slg).toBe(0.500)
+  })
+})
+
+describe('regressedAvg', () => {
+  it('moves small samples toward league average', () => {
+    expect(regressedAvg(0.400, 15)).toBeGreaterThan(0.260)
+    expect(regressedAvg(0.400, 15)).toBeLessThan(0.400)
+  })
+
+  it('returns league average for zero AB', () => {
+    expect(regressedAvg(0.500, 0)).toBe(0.260)
+  })
+})
+
+describe('expectedAtBats', () => {
+  it('estimates more ABs for top lineup spots', () => {
+    expect(expectedAtBats(2)).toBeGreaterThan(expectedAtBats(6))
+    expect(expectedAtBats(8)).toBeLessThan(expectedAtBats(4))
+  })
+
+  it('falls back to a default estimate when lineup position is missing', () => {
+    expect(expectedAtBats(undefined)).toBe(4.1)
+  })
+})
+
+describe('hitProbability', () => {
+  it('computes probability of at least one hit in multiple AB', () => {
+    expect(hitProbability(0.4, 4)).toBeCloseTo(0.8704)
+  })
+})
+
+describe('suggestDoublePairs', () => {
+  it('returns the two best disjoint doubles from available matchups', () => {
+    const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.300, ab: 40 })
+    const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.320, ab: 30 })
+    const c = makeMatchup({ batterId: 3, pitcherId: 3, avg: 0.350, ab: 20 })
+    const d = makeMatchup({ batterId: 4, pitcherId: 4, avg: 0.280, ab: 25 })
+    const suggestions = suggestDoublePairs([a, b, c, d])
+
+    expect(suggestions).toHaveLength(2)
+    expect(suggestions[0].first.batterId).not.toBe(suggestions[0].second.batterId)
+    expect(suggestions[0].first.pitcherId).not.toBe(suggestions[0].second.pitcherId)
+    expect(suggestions[1].first.batterId).not.toBe(suggestions[1].second.batterId)
+    expect(suggestions[1].first.pitcherId).not.toBe(suggestions[1].second.pitcherId)
+
+    const usedBatters = new Set([
+      suggestions[0].first.batterId,
+      suggestions[0].second.batterId,
+      suggestions[1].first.batterId,
+      suggestions[1].second.batterId,
+    ])
+    expect(usedBatters.size).toBe(4)
   })
 })
 
