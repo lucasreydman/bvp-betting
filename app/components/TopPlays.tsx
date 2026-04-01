@@ -140,8 +140,11 @@ export default function TopPlays({ matchups }: Props) {
         </div>
       ) : (
         <div className="mt-4 rounded-lg border border-gray-800 bg-gray-950 p-3 text-sm">
-          <div className="text-gray-400 uppercase tracking-wider text-[10px] font-semibold mb-1">Daily Double</div>
-          <p className="text-gray-500">No double recommendation available for the current top plays.</p>
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="text-gray-400 uppercase tracking-wider text-[10px] font-semibold">Daily Double</span>
+            <span className="text-gray-600 text-[10px] cursor-default" title="A Daily Double is a 2-leg parlay using the top plays with the highest combined hit probability, on different pitchers. If both legs also have an OPS above .950, it becomes a Smash Double.">ⓘ</span>
+          </div>
+          <p className="text-gray-500">{top5.length < 2 ? 'Only 1 upcoming play available. One or more top plays have already started and cannot be bet on. A parlay requires at least 2 upcoming legs.' : 'No double recommendation available for the current top plays.'}</p>
         </div>
       )}
     </div>
