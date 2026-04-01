@@ -18,6 +18,7 @@ function localToday(): string {
   return `${yyyy}-${mm}-${dd}`
 }
 
+
 export default function ClientShell() {
   const [date, setDate] = useState(localToday)
   const [allMatchups, setAllMatchups] = useState<MatchupResult[]>([])
@@ -26,6 +27,7 @@ export default function ClientShell() {
   const [sort, setSort] = useState<SortState>({ column: 'avg', direction: 'desc' })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [snapshot, setSnapshot] = useState<MatchupResult[] | null>(null)
 
   const fetchMatchups = useCallback(async (d: string) => {
     setIsLoading(true)
@@ -47,6 +49,22 @@ export default function ClientShell() {
     fetchMatchups(date)
   }, [date, fetchMatchups])
 
+  useEffect(() => {
+    const today = localToday()
+    if (date >= today) {
+      setSnapshot(null)
+      return
+    }
+    // Clear stale snapshot immediately so the previous date's data doesn't flash
+    setSnapshot(null)
+    let cancelled = false
+    fetch(`/api/snapshot?date=${date}`)
+      .then(r => r.json())
+      .then(data => { if (!cancelled) setSnapshot(data.top5 ?? null) })
+      .catch(() => { if (!cancelled) setSnapshot(null) })
+    return () => { cancelled = true }
+  }, [date])
+
   const handleSort = (column: keyof MatchupResult) => {
     setSort(prev => ({
       column,
@@ -64,6 +82,9 @@ export default function ClientShell() {
 
   const totalUpcoming = allMatchups.filter(m => !isStarted(m)).length
   const totalInProgress = allMatchups.filter(m => isStarted(m)).length
+
+  const isPast = date < localToday()
+  const topPlaysMatchups = isPast ? (snapshot ?? []) : upcoming
 
   return (
     <div>
@@ -88,7 +109,7 @@ export default function ClientShell() {
         <LoadingSkeleton />
       ) : (
         <>
-          <TopPlays matchups={upcoming} />
+          <TopPlays matchups={topPlaysMatchups} />
           <Filters filters={filters} onApply={setFilters} matchups={csvMatchups} />
           <MatchupTable
             matchups={upcoming}
