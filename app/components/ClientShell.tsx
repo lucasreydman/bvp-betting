@@ -30,7 +30,6 @@ export default function ClientShell() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [snapshot, setSnapshot] = useState<MatchupResult[] | null>(null)
-  const [savedDailyDouble, setSavedDailyDouble] = useState<DailyDouble | null>(null)
 
   const fetchMatchups = useCallback(async (d: string) => {
     setIsLoading(true)
@@ -56,17 +55,11 @@ export default function ClientShell() {
     // Always fetch the pre-game snapshot — for past dates it's the primary data source,
     // for today it's the fallback once all games have started.
     setSnapshot(null)
-    setSavedDailyDouble(null)
     let cancelled = false
     fetch(`/api/snapshot?date=${date}`)
       .then(r => r.json())
-      .then(data => {
-        if (!cancelled) {
-          setSnapshot(data.top5 ?? null)
-          setSavedDailyDouble(data.dailyDouble ?? null)
-        }
-      })
-      .catch(() => { if (!cancelled) { setSnapshot(null); setSavedDailyDouble(null) } })
+      .then(data => { if (!cancelled) setSnapshot(data.top5 ?? null) })
+      .catch(() => { if (!cancelled) setSnapshot(null) })
     return () => { cancelled = true }
   }, [date])
 
@@ -101,14 +94,9 @@ export default function ClientShell() {
     .sort((a, b) => top5Score(b) - top5Score(a) || b.avg - a.avg || b.ab - a.ab)
     .slice(0, 5)
 
-  // Daily Double: use the frozen pre-game snapshot once games have started or for past dates.
-  // While upcoming games still exist, compute live from the current top-5.
-  const allDayTop5 = [...filtered]
-    .sort((a, b) => top5Score(b) - top5Score(a) || b.avg - a.avg || b.ab - a.ab)
-    .slice(0, 5)
-  const csvDailyDouble: DailyDouble | null = isPast || allGamesStarted
-    ? savedDailyDouble
-    : suggestDailyDouble(allDayTop5)
+  // Daily Double always computed from the same filtered top-5 shown in TopPlays,
+  // so filters (min AB, min AVG) apply consistently to both.
+  const csvDailyDouble: DailyDouble | null = suggestDailyDouble(top5Matchups)
 
   return (
     <div>
