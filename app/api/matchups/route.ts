@@ -5,6 +5,7 @@ import { createCache } from '@/lib/cache'
 import { kvGet, kvSet } from '@/lib/kv'
 import { suggestDailyDouble, regressedAvg, expectedAtBats, hitProbability } from '@/lib/utils'
 import type { MatchupResult, MatchupsResponse } from '@/lib/types'
+import { DEFAULT_FILTERS } from '@/lib/types'
 
 // Module-level caches — survive across requests in the same serverless instance
 const bvpCache = createCache<ReturnType<typeof parseSplit>>(3600_000)  // 60 min
@@ -222,7 +223,13 @@ export async function GET(req: NextRequest) {
     kvGet<MatchupResult[]>(snapshotKey).then(async existing => {
       if (!existing) {
         const nowIso = new Date().toISOString()
-        const upcomingOnly = deduped.filter(r => r.gameTime > nowIso)
+        // Apply the same default client filters so the snapshot is consistent with
+        // what users see by default (min AB 15, min AVG .300).
+        const upcomingOnly = deduped.filter(r =>
+          r.gameTime > nowIso &&
+          r.ab >= DEFAULT_FILTERS.minAB &&
+          r.avg >= DEFAULT_FILTERS.minAVG
+        )
         if (upcomingOnly.length === 0) return  // no pre-game data to snapshot yet
 
         const top5 = [...upcomingOnly]

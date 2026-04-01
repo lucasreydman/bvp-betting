@@ -172,7 +172,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               </span>
             </span>
           </div>
-          <p className="text-gray-500">{top5.length < 2 ? 'Only 1 upcoming play available. One or more top plays have already started and cannot be bet on. A parlay requires at least 2 upcoming legs.' : 'No double recommendation available for the current top plays.'}</p>
+          <p className="text-gray-500">{top5.length < 2 ? 'Not enough qualified plays to form a parlay. Try lowering the Min AB or Min AVG filter to see more matchups.' : 'No double recommendation available for the current top plays.'}</p>
         </div>
       )}
     </div>
