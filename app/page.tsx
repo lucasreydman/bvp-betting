@@ -24,7 +24,7 @@ export default function Home() {
         </p>
         <p>
           <span className="text-yellow-400 font-semibold">Best bet: take the Daily Double.</span>
-          <span className="text-slate-300"> Parlay the two recommended legs together. If both hit, you double your money. It pays +100 or better, and the legs are chosen to give you the highest combined probability of both hitting on that day's slate.</span>
+          <span className="text-slate-300"> Parlay the two recommended legs together for +100 or better. The legs are chosen to give you the highest combined probability of both hitting on that day&apos;s slate.</span>
         </p>
         <p>
           <span className="text-orange-400 font-semibold">If it says Smash Double, even better.</span>
