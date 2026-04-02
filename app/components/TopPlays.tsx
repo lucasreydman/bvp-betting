@@ -1,6 +1,7 @@
 import type { MatchupResult } from '@/lib/types'
 import { formatTime, expectedAtBats, hitProbability, regressedAvg, suggestDailyDouble } from '@/lib/utils'
 import type { DailyDouble } from '@/lib/utils'
+import InfoTooltip from './InfoTooltip'
 
 interface Props {
   matchups: MatchupResult[]
@@ -160,17 +161,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
         <div className="mt-4 rounded-lg border border-gray-800 bg-gray-950 p-3 text-sm">
           <div className="flex items-center gap-1.5 mb-1">
             <span className="text-gray-400 uppercase tracking-wider text-[10px] font-semibold">Daily Double</span>
-            <span className="relative group inline-flex items-center">
-              <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full border border-gray-600 text-gray-500 text-[9px] font-bold cursor-default leading-none select-none hover:border-gray-400 hover:text-gray-300 transition-colors">i</span>
-              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
-                <span className="block bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-300 text-[11px] leading-4 shadow-xl">
-                  A Daily Double is a 2-leg parlay built from the top plays with the highest combined hit probability, keeping both legs on different pitchers. If both legs also have career OPS above .950, it upgrades to a Smash Double.
-                  <span className="block absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 overflow-hidden">
-                    <span className="block w-2 h-2 bg-gray-800 border-r border-b border-gray-700 rotate-45 -translate-y-1/2"></span>
-                  </span>
-                </span>
-              </span>
-            </span>
+            <InfoTooltip width="w-56" text="A Daily Double is a 2-leg parlay built from the top plays with the highest combined hit probability, keeping both legs on different pitchers. If both legs also have career OPS above .950, it upgrades to a Smash Double." />
           </div>
           <p className="text-gray-500">{top5.length < 2 ? 'Not enough qualified plays to form a parlay. Try lowering the Min AB or Min AVG filter to see more matchups.' : 'No double recommendation available for the current top plays.'}</p>
         </div>

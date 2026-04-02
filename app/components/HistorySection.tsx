@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import type { HistoryEntry, AllTimeStats, StatsBucket } from '@/lib/types'
+import InfoTooltip from './InfoTooltip'
 
 function formatDate(dateStr: string): string {
   // dateStr is YYYY-MM-DD — parse as local date to avoid UTC offset shifting the day
@@ -17,17 +18,6 @@ function pct(n: number, d: number): string {
   return `${Math.round((n / d) * 100)}%`
 }
 
-function Tooltip({ text }: { text: string }) {
-  return (
-    <span className="relative group inline-flex items-center ml-1">
-      <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full border border-gray-600 text-gray-500 text-[9px] font-bold cursor-default leading-none select-none hover:border-gray-400 hover:text-gray-300 transition-colors">i</span>
-      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
-        <span className="block bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-300 text-[11px] leading-4 shadow-xl">{text}</span>
-      </span>
-    </span>
-  )
-}
-
 function StatsBucketRow({ label, bucket, isSmash, tooltip }: { label: string; bucket: StatsBucket; isSmash?: boolean; tooltip: string }) {
   const resolved = bucket.total - bucket.pending
   const winRate = pct(bucket.wins, resolved)
@@ -36,7 +26,7 @@ function StatsBucketRow({ label, bucket, isSmash, tooltip }: { label: string; bu
   return (
     <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
       <span className={`font-semibold w-32 shrink-0 flex items-center ${color}`}>
-        {label}<Tooltip text={tooltip} />
+        {label}<InfoTooltip text={tooltip} />
       </span>
       <span className="text-gray-300 font-mono">
         <span className="text-green-400">{bucket.wins}W</span>
@@ -71,7 +61,7 @@ function AllTimeStatsCard({ stats }: { stats: AllTimeStats }) {
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm pt-1 border-t border-gray-800/60">
           <span className="text-gray-400 font-semibold w-32 shrink-0 flex items-center">
             Top 5 legs
-            <Tooltip text="Tracks whether each of the day's top 5 ranked plays got a hit — every batter counted individually, regardless of the parlay result. Shows the system's overall accuracy at picking hitters." />
+            <InfoTooltip text="Tracks whether each of the day's top 5 ranked plays got a hit — every batter counted individually, regardless of the parlay result. Shows the system's overall accuracy at picking hitters." />
           </span>
           <span className="text-gray-300 font-mono">
             {stats.legs.hits} / {stats.legs.total} hit
