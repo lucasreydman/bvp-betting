@@ -125,11 +125,11 @@ export default function ClientShell() {
             <div className="mb-4 rounded-lg border border-sky-800/50 bg-sky-950/20 px-4 py-3 text-sm text-sky-300">
               <p className="font-semibold mb-1">Some games have already started</p>
               <p className="text-sky-400/80 leading-relaxed">
-                Stats and the Daily Double are locked in from <span className="text-sky-300 font-medium">before first pitch</span> — they show career history against today&apos;s pitchers only, with nothing from today&apos;s game mixed in.
-                If a player you expected isn&apos;t showing up, it&apos;s likely because this page wasn&apos;t opened before their game began, so no pre-game snapshot was saved for them.
+                Stats and the Daily Double are locked in from <span className="text-sky-300 font-medium">before first pitch</span> — showing only career history against today&apos;s pitchers, with nothing from today&apos;s game mixed in.
+                If a player you expected isn&apos;t showing up, the page likely wasn&apos;t loaded before their game began, so no pre-game snapshot was saved for them.
               </p>
               <p className="mt-2 text-sky-400/60 text-xs">
-                To avoid this: <span className="text-sky-300">open or refresh this page before the first game starts each day.</span> That&apos;s all it takes to lock in the stats.
+                To avoid this: <span className="text-sky-300">open or refresh before the first game starts each day.</span>
               </p>
             </div>
           )}
