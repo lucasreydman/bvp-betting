@@ -20,3 +20,11 @@ export async function kvSet(key: string, value: unknown): Promise<void> {
     memStore.set(key, JSON.stringify(value))
   }
 }
+
+export async function kvDel(key: string): Promise<void> {
+  if (hasKv) {
+    await kv.del(key)
+  } else {
+    memStore.delete(key)
+  }
+}
