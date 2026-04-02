@@ -60,13 +60,13 @@ function AllTimeStatsCard({ stats }: { stats: AllTimeStats }) {
         <StatsBucketRow
           label="Daily Double"
           bucket={stats.overall}
-          tooltip="A 2-leg parlay recommended each day from the top plays. Both legs must get a hit to win. Requires each leg to have ≥15 AB and ≥.300 AVG vs their pitcher. Smash Doubles count here too."
+          tooltip="Daily 2-leg parlay. Both batters must get a hit to win. Each leg requires ≥15 AB and ≥.300 AVG vs their pitcher."
         />
         <StatsBucketRow
           label="Smash Double"
           bucket={stats.smash}
           isSmash
-          tooltip="A Daily Double where both legs also have OPS above .950 vs their pitcher — the strongest version of the parlay. Every Smash Double also counts in the Daily Double record above."
+          tooltip="A Daily Double where both legs also have OPS >.950 vs their pitcher. Subset of the Daily Double record — every Smash win counts there too."
         />
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm pt-1 border-t border-gray-800/60">
           <span className="text-gray-400 font-semibold w-32 shrink-0 flex items-center">
