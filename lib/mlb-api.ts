@@ -103,7 +103,7 @@ export async function fetchPlayerName(playerId: number): Promise<string> {
 // Returns null if the player wasn't found in the boxscore (DNP / game not started).
 export async function fetchGameBatterHits(gamePk: number, batterId: number): Promise<number | null> {
   const url = `${BASE}/game/${gamePk}/boxscore`
-  const res = await fetch(url, { next: { revalidate: 300 } }) // 5 min cache
+  const res = await fetch(url, { cache: 'no-store' })
   if (!res.ok) return null
   const data = await res.json()
   const playerKey = `ID${batterId}`
