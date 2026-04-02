@@ -45,9 +45,7 @@ function AllTimeStatsCard({ stats }: { stats: AllTimeStats }) {
       <div className="text-[11px] uppercase tracking-[0.2em] text-gray-500 font-semibold mb-3">All-Time Performance</div>
       <div className="space-y-2.5">
         <StatsBucketRow label="Daily Double" bucket={stats.overall} />
-        {stats.smash.total > 0 && (
-          <StatsBucketRow label="Smash Double" bucket={stats.smash} isSmash />
-        )}
+        <StatsBucketRow label="Smash Double" bucket={stats.smash} isSmash />
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm pt-1 border-t border-gray-800/60">
           <span className="text-gray-400 font-semibold w-32 shrink-0">Individual legs</span>
           <span className="text-gray-300 font-mono">
