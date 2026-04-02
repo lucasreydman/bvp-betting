@@ -6,13 +6,13 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 
 ## How to use it for best results
 
-**Check it in the morning** before any games start. Once games begin, those legs no longer have the same mathematical backing and will not show up in the Daily Double calculations.
+**Check it in the morning** before any games start. Once a game begins, those legs are locked in from the pre-game snapshot. The Top 5 and Daily Double will not update to reflect live results.
 
-**Best bet: take the Daily Double.** Parlay the two recommended legs together. If both hit, you double your money. It pays +100 or better, and the legs are chosen to give you the highest combined probability of both hitting on that day's slate.
+**Best bet: take the Daily Double.** Parlay the two recommended legs together for +100 or better. The legs are chosen to give you the highest combined probability of both hitting on that day's slate.
 
 **If it says Smash Double, even better.** A Smash Double is a Daily Double where both legs also have a career OPS above .950 against their pitcher. Same bet, higher conviction.
 
-**Prefer lower risk?** Pick your favorites out of the Top 5 Plays and take them as singles. You do not necessarily win more often, but you have lower risk per bet than a parlay.
+**Prefer lower risk?** Pick your favorites out of the Top 5 Plays and take them as singles. Less risk per bet than a parlay, with a smaller payout to match.
 
 **Consistency is everything for EV.** The edge here is statistical. It compounds over time. The more consistently you take these plays, the higher your expected value will be. Treat it like a system, not a tip.
 
@@ -42,17 +42,27 @@ hit chance   = 1 − (1 − adjusted AVG) ^ (expected AB)
 
 ## Daily Double and Smash Double
 
-The **Daily Double** is a single 2-leg parlay recommendation built from the Top 5 Plays. It picks the pair with the highest combined hit probability while keeping both legs on different pitchers. If both legs hit, you double your money (+100 or better).
+The **Daily Double** is a single 2-leg parlay recommendation built from the Top 5 Plays. Both legs must have at least 15 AB and a .300+ career AVG against their pitcher to qualify. It picks the pair with the highest combined hit probability while keeping both legs on different pitchers.
 
-The **Smash Double** is a Daily Double where both legs also carry a career OPS above .950 against their pitcher. The historical edge is stronger on both sides of the parlay.
+The **Smash Double** is a Daily Double where both legs also carry a career OPS above .950 against their pitcher. The historical edge is stronger on both sides of the parlay. Every Smash Double win also counts as a Daily Double win.
 
-If one or more legs are already in progress, the Daily Double card remains visible so you can track the bet or export it. The in-progress legs are marked and dimmed.
+If one or more legs are already in progress, the Daily Double card remains visible so you can track the bet or export it. In-progress legs are marked and dimmed.
 
-A first-time snapshot of the Daily Double is saved server-side when the matchups API is first called for each date. This ensures past-day recommendations are not affected by stats that updated after games were played.
+A first-time snapshot of the Daily Double and Top 5 is saved server-side when the matchups API is first called for each date. This ensures past-day recommendations are not affected by stats that updated after games were played.
+
+## All-time performance tracking
+
+The **Daily Double History** section (expandable on the home page) tracks cumulative results since April 2026:
+
+- **Daily Double record** — Win/Loss/Pending count and win rate for the 2-leg parlay.
+- **Smash Double record** — Same, but for Smash Double days only. A subset of the Daily Double record; every Smash win counts in both.
+- **Top 5 legs** — Tracks whether each of the day's top 5 ranked plays got a hit, counted individually regardless of the parlay result. Shows the system's accuracy at picking hitters over time.
+
+Outcomes are fetched live from MLB boxscores and cached to Vercel KV. Pending results resolve automatically once the games finish.
 
 ## Date navigation
 
-Only today and tomorrow are available. Once the day rolls over, yesterday's slate is no longer accessible — data is kept as current as possible. The forward arrow shows tomorrow's probable matchups; the back arrow returns to today's slate.
+±3 days from today are available. The forward and back arrows navigate by one day; clicking the date itself resets to today. Tomorrow shows probable matchups; past dates show the frozen pre-game snapshot.
 
 ## Filters
 
@@ -82,7 +92,7 @@ Sample size (career AB vs this pitcher):
 
 ## Data quality
 
-The API sometimes returns team-level aggregates instead of true individual BvP. After building the list, any raw stat line shared by **five or more** batters on the same team against the same pitcher is dropped. Smaller duplicate groups (2–4) are kept so real ties are not stripped.
+The API sometimes returns team-level aggregates instead of true individual BvP. After building the list, any raw stat line shared by **three or more** batters on the same team against the same pitcher is dropped. Smaller duplicate groups are kept so real ties are not stripped.
 
 ## Mobile layout
 
@@ -92,6 +102,7 @@ The site is fully responsive. On small screens:
 - **Tables** switch to a vertical card list with sort chips for AVG, AB, and Time.
 - **Export CSV** is hidden on mobile — use desktop for CSV export.
 - Team names are shown as abbreviations (NYY, LAD, SF, etc.).
+- **Tooltips** are tap-to-open on touch devices and close when tapping outside.
 
 ## Time zones
 
@@ -101,7 +112,7 @@ Game times render in the viewer's local browser time zone.
 
 - **Next.js 16** (App Router), **React 19**, **Tailwind CSS v4**
 - **MLB Stats API** (no auth)
-- **Upstash Redis** (via Vercel KV) for Daily Double snapshots
+- **Upstash Redis** (via Vercel KV) for Daily Double snapshots and historical outcome caching
 - Hosted on **Vercel**
 
 ## Local development
@@ -131,19 +142,31 @@ npm run build
 
 ```
 app/
-  api/matchups/    Schedule -> lineups -> BvP; saves Daily Double snapshot to KV
+  api/matchups/    Schedule -> lineups -> BvP; saves Daily Double + Top 5 snapshot to KV
   api/snapshot/    Retrieve stored Daily Double snapshot for a date
+  api/history/     Past Daily Double entries with outcomes for the last N days
+  api/stats/       All-time W/L stats across Daily Double, Smash Double, and Top 5 legs
   api/bvp/         Single BvP lookup (debug)
   api/schedule/    Schedule JSON for a date
   components/      UI
 lib/
-  types.ts         Shared types
+  types.ts         Shared types (MatchupResult, AllTimeStats, StatsBucket, HistoryEntry, ...)
   stats.ts         calcStats, assignConfidence, parseSplit
   utils.ts         Filters, sort, CSV, scoring, Daily Double logic
   mlb-api.ts       MLB Stats API fetch helpers
   cache.ts         In-memory TTL cache
   kv.ts            Vercel KV wrapper with in-memory fallback
 ```
+
+## KV schema
+
+| Key | Value | Purpose |
+|-----|-------|---------|
+| `dd:{date}` | `DailyDouble` | Pre-game Daily Double snapshot |
+| `top5:{date}` | `MatchupResult[]` | Pre-game Top 5 snapshot |
+| `pregame:{date}` | `Record<batterId, MatchupResult>` | Per-player pre-game stats |
+| `outcome:{date}` | `{firstHit, secondHit}` | Cached Daily Double outcome |
+| `top5outcome:{date}` | `(boolean \| null)[]` | Cached hit results for each Top 5 leg |
 
 ## License
 
