@@ -20,9 +20,6 @@ function pct(n: number, d: number): string {
 function StatsBucketRow({ label, bucket, isSmash }: { label: string; bucket: StatsBucket; isSmash?: boolean }) {
   const resolved = bucket.total - bucket.pending
   const winRate = pct(bucket.wins, resolved)
-  const legHits = bucket.wins * 2 + bucket.splits
-  const legTotal = resolved * 2
-  const legPct = pct(legHits, legTotal)
   const color = isSmash ? 'text-orange-400' : 'text-yellow-400'
 
   return (
@@ -31,13 +28,13 @@ function StatsBucketRow({ label, bucket, isSmash }: { label: string; bucket: Sta
       <span className="text-gray-300 font-mono">
         <span className="text-green-400">{bucket.wins}W</span>
         {' · '}
-        <span className="text-yellow-400">{bucket.splits}S</span>
-        {' · '}
         <span className="text-red-400">{bucket.losses}L</span>
         {bucket.pending > 0 && <span className="text-gray-600"> · {bucket.pending} pending</span>}
       </span>
-      <span className="text-gray-500 text-xs">{winRate} win rate · {legPct} legs hit</span>
-      {resolved === 0 && <span className="text-gray-600 text-xs">No resolved results yet</span>}
+      {resolved > 0
+        ? <span className="text-gray-500 text-xs">{winRate} win rate</span>
+        : <span className="text-gray-600 text-xs">No resolved results yet</span>
+      }
     </div>
   )
 }
@@ -71,10 +68,7 @@ function OutcomeBadge({ firstHit, secondHit }: { firstHit: boolean | null; secon
   if (firstHit && secondHit) {
     return <span className="text-[10px] font-bold text-green-400 border border-green-500/40 bg-green-950/30 rounded px-1.5 py-0.5 uppercase tracking-wide">Win</span>
   }
-  if (!firstHit && !secondHit) {
-    return <span className="text-[10px] font-bold text-red-400 border border-red-500/40 bg-red-950/30 rounded px-1.5 py-0.5 uppercase tracking-wide">Loss</span>
-  }
-  return <span className="text-[10px] font-bold text-yellow-400 border border-yellow-500/40 bg-yellow-950/20 rounded px-1.5 py-0.5 uppercase tracking-wide">Split</span>
+  return <span className="text-[10px] font-bold text-red-400 border border-red-500/40 bg-red-950/30 rounded px-1.5 py-0.5 uppercase tracking-wide">Loss</span>
 }
 
 function LegResult({ hit }: { hit: boolean | null }) {

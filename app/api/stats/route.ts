@@ -10,23 +10,23 @@ function dateStringDaysAgo(daysAgo: number): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function classify(outcome: HistoryOutcome): 'win' | 'split' | 'loss' | 'pending' {
+function classify(outcome: HistoryOutcome): 'win' | 'loss' | 'pending' {
   if (outcome.firstHit === null || outcome.secondHit === null) return 'pending'
-  if (outcome.firstHit && outcome.secondHit) return 'win'
-  if (!outcome.firstHit && !outcome.secondHit) return 'loss'
-  return 'split'
+  return outcome.firstHit && outcome.secondHit ? 'win' : 'loss'
 }
 
-function addToBucket(bucket: StatsBucket, result: 'win' | 'split' | 'loss' | 'pending') {
+function addToBucket(bucket: StatsBucket, result: 'win' | 'loss' | 'pending') {
   bucket.total++
-  bucket[result === 'win' ? 'wins' : result === 'split' ? 'splits' : result === 'loss' ? 'losses' : 'pending']++
+  if (result === 'win') bucket.wins++
+  else if (result === 'loss') bucket.losses++
+  else bucket.pending++
 }
 
 export async function GET() {
   try {
     const stats: AllTimeStats = {
-      overall: { total: 0, wins: 0, splits: 0, losses: 0, pending: 0 },
-      smash: { total: 0, wins: 0, splits: 0, losses: 0, pending: 0 },
+      overall: { total: 0, wins: 0, losses: 0, pending: 0 },
+      smash: { total: 0, wins: 0, losses: 0, pending: 0 },
       legs: { total: 0, hits: 0, pending: 0 },
     }
 
@@ -65,8 +65,8 @@ export async function GET() {
       }
 
       const result = classify(outcome)
-      addToBucket(stats.overall, result)
-      if (dd.isSmash) addToBucket(stats.smash, result)
+      addToBucket(stats.overall, result)           // all DDs count in overall
+      if (dd.isSmash) addToBucket(stats.smash, result)  // smash is a subset
 
       // Individual leg tallies (only count legs where outcome is known)
       if (outcome.firstHit !== null) {

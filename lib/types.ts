@@ -92,9 +92,8 @@ export interface HistoryEntry {
 
 export interface StatsBucket {
   total: number
-  wins: number     // both legs hit
-  splits: number   // one leg hit
-  losses: number   // neither hit
+  wins: number     // both legs hit (parlay wins)
+  losses: number   // one or neither leg hit (parlay loss)
   pending: number  // outcome not yet available
 }
 
