@@ -89,3 +89,17 @@ export interface HistoryEntry {
   dailyDoubleIsSmash: boolean
   outcome: HistoryOutcome | null
 }
+
+export interface StatsBucket {
+  total: number
+  wins: number     // both legs hit
+  splits: number   // one leg hit
+  losses: number   // neither hit
+  pending: number  // outcome not yet available
+}
+
+export interface AllTimeStats {
+  overall: StatsBucket   // all Daily Doubles (including Smash)
+  smash: StatsBucket     // Smash Doubles only
+  legs: { total: number; hits: number; pending: number }
+}

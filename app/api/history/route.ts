@@ -46,9 +46,10 @@ export async function GET(req: NextRequest) {
       const outcomeKey = `outcome:${date}`
       let outcome: HistoryOutcome | null = await kvGet<HistoryOutcome>(outcomeKey)
 
-      if (!outcome) {
-        // Compute outcomes from boxscore — only possible once the game has finished
-        // (we assume all games for a past date are done)
+      const isPending = outcome && outcome.firstHit === null && outcome.secondHit === null
+      if (!outcome || isPending) {
+        // Compute outcomes from boxscore — only possible once the game has finished.
+        // Re-fetch if previously cached as all-null (was pending when first checked).
         const [firstHits, secondHits] = await Promise.all([
           dd.first?.gamePk ? fetchGameBatterHits(dd.first.gamePk, dd.first.batterId) : Promise.resolve(null),
           dd.second?.gamePk ? fetchGameBatterHits(dd.second.gamePk, dd.second.batterId) : Promise.resolve(null),
@@ -59,10 +60,12 @@ export async function GET(req: NextRequest) {
           secondHit: secondHits === null ? null : secondHits > 0,
         }
 
-        // Cache the outcome so future visits don't re-fetch boxscores
-        kvSet(outcomeKey, outcome).catch(err =>
-          console.error('Failed to cache outcome:', err)
-        )
+        // Only cache once at least one leg has a real result — avoids freezing pending outcomes
+        if (outcome.firstHit !== null || outcome.secondHit !== null) {
+          kvSet(outcomeKey, outcome).catch(err =>
+            console.error('Failed to cache outcome:', err)
+          )
+        }
       }
 
       entries.push({

@@ -38,10 +38,12 @@ export interface DailyDouble {
 }
 
 export function suggestDailyDouble(matchups: MatchupResult[]): DailyDouble | null {
-  const enriched = matchups.map(matchup => ({
-    matchup,
-    probability: hitProbability(regressedAvg(matchup.avg, matchup.ab), expectedAtBats(matchup.lineupPosition)),
-  }))
+  const enriched = matchups
+    .filter(matchup => matchup.ab >= 15)
+    .map(matchup => ({
+      matchup,
+      probability: hitProbability(regressedAvg(matchup.avg, matchup.ab), expectedAtBats(matchup.lineupPosition)),
+    }))
 
   let best: DailyDouble | null = null
 
