@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { kvGet, kvSet } from '@/lib/kv'
 import { fetchGameBatterHits } from '@/lib/mlb-api'
-import type { HistoryOutcome, AllTimeStats, StatsBucket } from '@/lib/types'
+import type { HistoryOutcome, AllTimeStats, StatsBucket, MatchupResult } from '@/lib/types'
 import type { DailyDouble } from '@/lib/utils'
 
 function dateStringDaysAgo(daysAgo: number): string {
@@ -40,18 +40,16 @@ export async function GET() {
       const date = dateStringDaysAgo(i)
       const [dd, top5] = await Promise.all([
         kvGet<DailyDouble | null>(`dd:${date}`),
-        kvGet<unknown[]>(`top5:${date}`),
+        kvGet<MatchupResult[]>(`top5:${date}`),
       ])
 
       if (!dd) {
-        // Only count as empty if the site was never loaded for this date.
-        // A null DD with an existing top5 means we visited but no legs qualified —
-        // don't let those days incorrectly trigger the early-stop condition.
         if (!top5) consecutiveEmpty++
         continue
       }
       consecutiveEmpty = 0
 
+      // --- Daily Double win/loss ---
       const outcomeKey = `outcome:${date}`
       let outcome = await kvGet<HistoryOutcome>(outcomeKey)
 
@@ -71,21 +69,33 @@ export async function GET() {
       }
 
       const result = classify(outcome)
-      addToBucket(stats.overall, result)           // all DDs count in overall
-      if (dd.isSmash) addToBucket(stats.smash, result)  // smash is a subset
+      addToBucket(stats.overall, result)
+      if (dd.isSmash) addToBucket(stats.smash, result)
 
-      // Individual leg tallies (only count legs where outcome is known)
-      if (outcome.firstHit !== null) {
-        stats.legs.total++
-        if (outcome.firstHit) stats.legs.hits++
-      } else {
-        stats.legs.pending++
-      }
-      if (outcome.secondHit !== null) {
-        stats.legs.total++
-        if (outcome.secondHit) stats.legs.hits++
-      } else {
-        stats.legs.pending++
+      // --- Individual legs: all top 5 picks ---
+      if (top5 && top5.length > 0) {
+        const top5OutcomeKey = `top5outcome:${date}`
+        let top5Hits = await kvGet<(boolean | null)[]>(top5OutcomeKey)
+
+        const allResolved = top5Hits && top5Hits.every(h => h !== null)
+        if (!top5Hits || !allResolved) {
+          const hits = await Promise.all(
+            top5.map(m => m.gamePk ? fetchGameBatterHits(m.gamePk, m.batterId) : Promise.resolve(null))
+          )
+          top5Hits = hits.map(h => h === null ? null : h > 0)
+          if (top5Hits.some(h => h !== null)) {
+            kvSet(top5OutcomeKey, top5Hits).catch(err => console.error('Failed to cache top5 outcomes:', err))
+          }
+        }
+
+        for (const hit of top5Hits) {
+          if (hit !== null) {
+            stats.legs.total++
+            if (hit) stats.legs.hits++
+          } else {
+            stats.legs.pending++
+          }
+        }
       }
     }
 

@@ -17,14 +17,27 @@ function pct(n: number, d: number): string {
   return `${Math.round((n / d) * 100)}%`
 }
 
-function StatsBucketRow({ label, bucket, isSmash }: { label: string; bucket: StatsBucket; isSmash?: boolean }) {
+function Tooltip({ text }: { text: string }) {
+  return (
+    <span className="relative group inline-flex items-center ml-1">
+      <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full border border-gray-600 text-gray-500 text-[9px] font-bold cursor-default leading-none select-none hover:border-gray-400 hover:text-gray-300 transition-colors">i</span>
+      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
+        <span className="block bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-300 text-[11px] leading-4 shadow-xl">{text}</span>
+      </span>
+    </span>
+  )
+}
+
+function StatsBucketRow({ label, bucket, isSmash, tooltip }: { label: string; bucket: StatsBucket; isSmash?: boolean; tooltip: string }) {
   const resolved = bucket.total - bucket.pending
   const winRate = pct(bucket.wins, resolved)
   const color = isSmash ? 'text-orange-400' : 'text-yellow-400'
 
   return (
     <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
-      <span className={`font-semibold w-32 shrink-0 ${color}`}>{label}</span>
+      <span className={`font-semibold w-32 shrink-0 flex items-center ${color}`}>
+        {label}<Tooltip text={tooltip} />
+      </span>
       <span className="text-gray-300 font-mono">
         <span className="text-green-400">{bucket.wins}W</span>
         {' · '}
@@ -44,10 +57,22 @@ function AllTimeStatsCard({ stats }: { stats: AllTimeStats }) {
     <div className="mb-4 rounded-lg border border-gray-800 bg-gray-950 p-4">
       <div className="text-[11px] uppercase tracking-[0.2em] text-gray-500 font-semibold mb-3">All-Time Performance</div>
       <div className="space-y-2.5">
-        <StatsBucketRow label="Daily Double" bucket={stats.overall} />
-        <StatsBucketRow label="Smash Double" bucket={stats.smash} isSmash />
+        <StatsBucketRow
+          label="Daily Double"
+          bucket={stats.overall}
+          tooltip="A 2-leg parlay recommended each day from the top plays. Both legs must get a hit to win. Requires each leg to have ≥15 AB and ≥.300 AVG vs their pitcher. Smash Doubles count here too."
+        />
+        <StatsBucketRow
+          label="Smash Double"
+          bucket={stats.smash}
+          isSmash
+          tooltip="A Daily Double where both legs also have OPS above .950 vs their pitcher — the strongest version of the parlay. Every Smash Double also counts in the Daily Double record above."
+        />
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm pt-1 border-t border-gray-800/60">
-          <span className="text-gray-400 font-semibold w-32 shrink-0">Individual legs</span>
+          <span className="text-gray-400 font-semibold w-32 shrink-0 flex items-center">
+            Top 5 legs
+            <Tooltip text="Tracks how often any of the day's top 5 ranked plays got a hit, regardless of whether they were in the Daily Double. Each batter is counted individually. This measures the system's overall batter-picking accuracy." />
+          </span>
           <span className="text-gray-300 font-mono">
             {stats.legs.hits} / {stats.legs.total} hit
             {stats.legs.pending > 0 && <span className="text-gray-600"> · {stats.legs.pending} pending</span>}
