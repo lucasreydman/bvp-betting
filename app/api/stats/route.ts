@@ -38,10 +38,16 @@ export async function GET() {
       if (consecutiveEmpty >= STOP_AFTER_EMPTY) break
 
       const date = dateStringDaysAgo(i)
-      const dd = await kvGet<DailyDouble | null>(`dd:${date}`)
+      const [dd, top5] = await Promise.all([
+        kvGet<DailyDouble | null>(`dd:${date}`),
+        kvGet<unknown[]>(`top5:${date}`),
+      ])
 
       if (!dd) {
-        consecutiveEmpty++
+        // Only count as empty if the site was never loaded for this date.
+        // A null DD with an existing top5 means we visited but no legs qualified —
+        // don't let those days incorrectly trigger the early-stop condition.
+        if (!top5) consecutiveEmpty++
         continue
       }
       consecutiveEmpty = 0
