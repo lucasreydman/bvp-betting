@@ -9,7 +9,7 @@ export default function Footer() {
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Why AVG?</h3>
           <p className="leading-relaxed">
-            This prop wins on any hit — single through homer — so slugging and walks don&apos;t factor in. AVG is the direct measure:{' '}
+            This prop wins on any hit (single through homer), so slugging and walks don&apos;t factor in. AVG is the direct measure:{' '}
             <span className="text-gray-400 font-mono">P(1+ hit) = 1 − (1 − AVG)ⁿ</span> where n is
             at-bats in the game (~3.5 on average). A .300 BvP AVG implies roughly a 70% hit
             probability, which sits above most book implied odds of 60–63%.

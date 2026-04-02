@@ -120,7 +120,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <div className="text-[10px] text-gray-500">In progress. Export available below.</div>
             ) : (
               <div className={`text-[10px] ${dailyDouble.isSmash ? 'text-orange-400/70' : 'text-yellow-400/70'}`}>
-                {dailyDouble.isSmash ? 'Both legs OPS above .950 — strongest possible parlay' : 'Parlay these two legs for +100 or better'}
+                {dailyDouble.isSmash ? 'Both legs OPS above .950. Strongest possible parlay.' : 'Parlay these two legs for +100 or better'}
               </div>
             )}
           </div>
@@ -152,7 +152,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               {anyLegStarted
                 ? `This was today's recommended parlay before games started.`
                 : dailyDouble.isSmash
-                  ? `Both legs have career OPS above .950 against their pitchers — elite historical production on both sides of the parlay, not just strong AVG.`
+                  ? `Both legs have career OPS above .950 against their pitchers. Elite historical production on both sides of the parlay, not just strong AVG.`
                   : `Chosen from today's top plays: highest combined hit probability with both legs on different pitchers.`}
             </span>
           </div>

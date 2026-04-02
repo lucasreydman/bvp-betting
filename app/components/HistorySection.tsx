@@ -14,7 +14,7 @@ function formatDate(dateStr: string): string {
 }
 
 function pct(n: number, d: number): string {
-  if (d === 0) return '—'
+  if (d === 0) return '--'
   return `${Math.round((n / d) * 100)}%`
 }
 
@@ -56,12 +56,12 @@ function AllTimeStatsCard({ stats }: { stats: AllTimeStats }) {
           label="Smash Double"
           bucket={stats.smash}
           isSmash
-          tooltip="A Daily Double where both legs also have OPS >.950 vs their pitcher. Subset of the Daily Double record — every Smash win counts there too."
+          tooltip="A Daily Double where both legs also have OPS >.950 vs their pitcher. Subset of the Daily Double record. Every Smash win counts there too."
         />
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm pt-1 border-t border-gray-800/60">
           <span className="text-gray-400 font-semibold w-32 shrink-0 flex items-center">
             Top 5 legs
-            <InfoTooltip text="Tracks whether each of the day's top 5 ranked plays got a hit — every batter counted individually, regardless of the parlay result. Shows the system's overall accuracy at picking hitters." />
+            <InfoTooltip text="Tracks whether each of the day's top 5 ranked plays got a hit. Every batter is counted individually, regardless of the parlay result. Shows the system's overall accuracy at picking hitters." />
           </span>
           <span className="text-gray-300 font-mono">
             {stats.legs.hits} / {stats.legs.total} hit

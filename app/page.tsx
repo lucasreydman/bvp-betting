@@ -20,7 +20,7 @@ export default function Home() {
         <div className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">How to use this system for best results</div>
         <p>
           <span className="text-white font-semibold">Check it in the morning</span>
-          <span className="text-slate-300"> before any games start. Once a game begins, those legs are locked in from the pre-game snapshot — the Top 5 and Daily Double will not update to reflect live results.</span>
+          <span className="text-slate-300"> before any games start. Once a game begins, those legs are locked in from the pre-game snapshot. The Top 5 and Daily Double will not update to reflect live results.</span>
         </p>
         <p>
           <span className="text-yellow-400 font-semibold">Best bet: take the Daily Double.</span>
