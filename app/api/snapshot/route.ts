@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     let dailyDouble = savedDd
     if (top5 && top5.length >= 2 && dailyDouble === null) {
       dailyDouble = suggestDailyDouble(top5)
-      kvSet(`dd:${date}`, dailyDouble ?? null).catch(err =>
+      kvSet(`dd:${date}`, dailyDouble ?? null, 7_776_000).catch(err =>
         console.error('Failed to backfill daily double:', err)
       )
     }
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     await kvDel(`dd:${date}`)
     const dailyDouble = suggestDailyDouble(top5)
-    await kvSet(`dd:${date}`, dailyDouble ?? null)
+    await kvSet(`dd:${date}`, dailyDouble ?? null, 7_776_000)
 
     return NextResponse.json({ date, dailyDouble })
   } catch (err) {

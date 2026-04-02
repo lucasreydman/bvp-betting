@@ -79,7 +79,7 @@ export async function GET() {
               secondHit: secondHits === null ? null : secondHits > 0,
             }
             if (outcome.firstHit !== null || outcome.secondHit !== null) {
-              kvSet(`outcome:${date}`, outcome).catch(err => console.error('Failed to cache outcome:', err))
+              kvSet(`outcome:${date}`, outcome, 7_776_000).catch(err => console.error('Failed to cache outcome:', err))
             }
           }
           return { dd, outcome: outcome! }
@@ -97,7 +97,7 @@ export async function GET() {
             )
             hits = fetched.map(h => h === null ? null : h > 0)
             if (hits.some(h => h !== null)) {
-              kvSet(`top5outcome:${date}`, hits).catch(err => console.error('Failed to cache top5 outcomes:', err))
+              kvSet(`top5outcome:${date}`, hits, 7_776_000).catch(err => console.error('Failed to cache top5 outcomes:', err))
             }
           }
           return hits!

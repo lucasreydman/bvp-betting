@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
 
         // Only cache once at least one leg has a real result — avoids freezing pending outcomes
         if (outcome.firstHit !== null || outcome.secondHit !== null) {
-          kvSet(outcomeKey, outcome).catch(err =>
+          kvSet(outcomeKey, outcome, 7_776_000).catch(err =>
             console.error('Failed to cache outcome:', err)
           )
         }

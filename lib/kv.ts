@@ -13,9 +13,10 @@ export async function kvGet<T>(key: string): Promise<T | null> {
   return raw ? (JSON.parse(raw) as T) : null
 }
 
-export async function kvSet(key: string, value: unknown): Promise<void> {
+// ttlSeconds: optional time-to-live. Passed as { ex: ttlSeconds } to Vercel KV.
+export async function kvSet(key: string, value: unknown, ttlSeconds?: number): Promise<void> {
   if (hasKv) {
-    await kv.set(key, value)
+    await (ttlSeconds ? kv.set(key, value, { ex: ttlSeconds }) : kv.set(key, value))
   } else {
     memStore.set(key, JSON.stringify(value))
   }

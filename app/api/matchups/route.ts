@@ -61,6 +61,15 @@ export async function GET(req: NextRequest) {
   const date = req.nextUrl.searchParams.get('date') ?? new Date().toISOString().split('T')[0]
 
   try {
+    // Return a cached response if one was built within the last 5 minutes.
+    // The client-side upcoming/in-progress split uses Date.now() vs gameTime,
+    // so a cached results array is always safe to serve.
+    const responseCacheKey = `matchups-response:${date}`
+    const cached = await kvGet<MatchupsResponse>(responseCacheKey)
+    if (cached) {
+      return NextResponse.json(cached)
+    }
+
     const games = await fetchSchedule(date)
     let gamesScanned = 0
     let gamesSkipped = 0
@@ -191,7 +200,7 @@ export async function GET(req: NextRequest) {
 
     // Persist updated pre-game map to KV (fire-and-forget)
     if (pregameMapUpdated) {
-      kvSet(pregameKey, pregameMap).catch(err =>
+      kvSet(pregameKey, pregameMap, 7_776_000).catch(err =>
         console.error('Failed to save pregame snapshot:', err)
       )
     }
@@ -241,7 +250,7 @@ export async function GET(req: NextRequest) {
           )
           .slice(0, 5)
 
-        await kvSet(snapshotKey, top5).catch(err =>
+        await kvSet(snapshotKey, top5, 7_776_000).catch(err =>
           console.error('Failed to save top-5 snapshot:', err)
         )
 
@@ -252,12 +261,18 @@ export async function GET(req: NextRequest) {
             hitProbability(regressedAvg(m.avg, m.ab), expectedAtBats(m.lineupPosition))
           const enriched = top5.map(m => ({ m, probability: score(m) }))
           const dd = suggestDailyDouble(enriched.map(e => e.m))
-          await kvSet(ddKey, dd ?? null).catch(err =>
+          await kvSet(ddKey, dd ?? null, 7_776_000).catch(err =>
             console.error('Failed to save daily double snapshot:', err)
           )
         }
       }
     }).catch(err => console.error('Failed to read snapshot:', err))
+
+    // Cache the compiled response for 5 minutes to absorb concurrent users.
+    // Fire-and-forget — does not delay the response.
+    kvSet(responseCacheKey, response, 300).catch(err =>
+      console.error('Failed to cache matchups response:', err)
+    )
 
     return NextResponse.json(response)
   } catch (err) {

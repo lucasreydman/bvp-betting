@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export default function Footer() {
   const year = new Date().getFullYear()
 
@@ -77,7 +79,12 @@ export default function Footer() {
             GitHub
           </a>
         </p>
-        <p>&copy; {year} Lucas Reydman. For informational purposes only.</p>
+        <p>
+          &copy; {year} Lucas Reydman.{' '}
+          <Link href="/disclaimer" className="text-gray-500 hover:text-gray-400 transition-colors">
+            Disclaimer
+          </Link>
+        </p>
       </div>
 
     </footer>
