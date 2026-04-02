@@ -112,7 +112,8 @@ Game times render in the viewer's local browser time zone.
 
 - **Next.js 16** (App Router), **React 19**, **Tailwind CSS v4**
 - **MLB Stats API** (no auth)
-- **Upstash Redis** (via Vercel KV) for Daily Double snapshots and historical outcome caching
+- **Upstash Redis** (via Vercel KV) for Daily Double snapshots, historical outcome caching, and 5-minute response cache
+- **Vercel Analytics** for traffic tracking
 - Hosted on **Vercel**
 
 ## Local development
@@ -167,6 +168,13 @@ lib/
 | `pregame:{date}` | `Record<batterId, MatchupResult>` | Per-player pre-game stats |
 | `outcome:{date}` | `{firstHit, secondHit}` | Cached Daily Double outcome |
 | `top5outcome:{date}` | `(boolean \| null)[]` | Cached hit results for each Top 5 leg |
+| `matchups-response:{date}` | `MatchupsResponse` | Full compiled matchups (5-min TTL; absorbs concurrent load) |
+
+All historical keys use a 90-day TTL. The response cache uses a 5-minute TTL.
+
+## Disclaimer
+
+For informational purposes only. Not financial or gambling advice. See [/disclaimer](https://bvp-betting.vercel.app/disclaimer) for full terms.
 
 ## License
 
