@@ -9,8 +9,7 @@ export default function Footer() {
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Why AVG?</h3>
           <p className="leading-relaxed">
-            For a batter to get a hit, any hit (single through homer) wins, so slugging and walks
-            are irrelevant. AVG is the direct measure:{' '}
+            This prop wins on any hit — single through homer — so slugging and walks don&apos;t factor in. AVG is the direct measure:{' '}
             <span className="text-gray-400 font-mono">P(1+ hit) = 1 − (1 − AVG)ⁿ</span> where n is
             at-bats in the game (~3.5 on average). A .300 BvP AVG implies roughly a 70% hit
             probability, which sits above most book implied odds of 60–63%.
@@ -42,9 +41,7 @@ export default function Footer() {
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Optional OPS filter</h3>
           <p className="leading-relaxed">
             OPS is not the right primary metric for this prop: walks inflate it and slugging
-            overweights extra-base hits. It can still work as a secondary quality check. Filtering
-            by a minimum OPS removes batters who hit for average but produce very little overall
-            offense, which may indicate weaker overall contact. Enable it with the{' '}
+            overweights extra-base hits. It can still work as a secondary quality check. Setting a minimum OPS filters out batters who hit for average but produce little overall offense. Enable it with the{' '}
             <span className="text-gray-400">+ OPS filter</span> button above the table.
           </p>
         </div>

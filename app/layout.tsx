@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'MLB BvP',
   description:
-    'MLB batter vs pitcher stats for the batter to get a hit prop. Filter and sort by OPS, AVG, SLG, and AB.',
+    'Career batter vs pitcher stats for the Player to Record a Hit prop. Filter by AVG, AB, and OPS. Sort by any column.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

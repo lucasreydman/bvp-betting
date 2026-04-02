@@ -20,7 +20,7 @@ export default function Home() {
         <div className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">How to use this system for best results</div>
         <p>
           <span className="text-white font-semibold">Check it in the morning</span>
-          <span className="text-slate-300"> before any games start. Once games begin, those legs no longer have the same mathematical backing. They will not show up in the Daily Double calculations.</span>
+          <span className="text-slate-300"> before any games start. Once a game begins, those legs are locked in from the pre-game snapshot — the Top 5 and Daily Double will not update to reflect live results.</span>
         </p>
         <p>
           <span className="text-yellow-400 font-semibold">Best bet: take the Daily Double.</span>
@@ -32,7 +32,7 @@ export default function Home() {
         </p>
         <p>
           <span className="text-white font-semibold">Prefer lower risk?</span>
-          <span className="text-slate-300"> Pick your favorites out of the Top 5 Plays and take them as singles. You do not necessarily win more often, but you have lower risk per bet than a parlay.</span>
+          <span className="text-slate-300"> Pick your favorites from the Top 5 and take them as singles. Less risk per bet than a parlay, with a smaller payout to match.</span>
         </p>
         <p>
           <span className="text-green-300 font-semibold">Confirmed lineups make the hit chance more accurate.</span>

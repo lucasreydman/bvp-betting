@@ -119,7 +119,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <div className="text-[10px] text-gray-500">In progress. Export available below.</div>
             ) : (
               <div className={`text-[10px] ${dailyDouble.isSmash ? 'text-orange-400/70' : 'text-yellow-400/70'}`}>
-                {dailyDouble.isSmash ? 'Both legs elite OPS (>.950) — strongest possible parlay' : 'Parlay these two legs for +100 or better'}
+                {dailyDouble.isSmash ? 'Both legs OPS above .950 — strongest possible parlay' : 'Parlay these two legs for +100 or better'}
               </div>
             )}
           </div>
@@ -151,7 +151,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               {anyLegStarted
                 ? `This was today's recommended parlay before games started.`
                 : dailyDouble.isSmash
-                  ? `Both legs carry career OPS above .950 against their pitchers — that's elite historical production on both sides of the parlay, not just strong AVG.`
+                  ? `Both legs have career OPS above .950 against their pitchers — elite historical production on both sides of the parlay, not just strong AVG.`
                   : `Chosen from today's top plays: highest combined hit probability with both legs on different pitchers.`}
             </span>
           </div>
@@ -164,7 +164,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full border border-gray-600 text-gray-500 text-[9px] font-bold cursor-default leading-none select-none hover:border-gray-400 hover:text-gray-300 transition-colors">i</span>
               <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
                 <span className="block bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-300 text-[11px] leading-4 shadow-xl">
-                  A Daily Double is a 2-leg parlay built from the top plays with the highest combined hit probability, keeping both legs on different pitchers. If both legs also carry an OPS above .950, it upgrades to a Smash Double.
+                  A Daily Double is a 2-leg parlay built from the top plays with the highest combined hit probability, keeping both legs on different pitchers. If both legs also have career OPS above .950, it upgrades to a Smash Double.
                   <span className="block absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 overflow-hidden">
                     <span className="block w-2 h-2 bg-gray-800 border-r border-b border-gray-700 rotate-45 -translate-y-1/2"></span>
                   </span>

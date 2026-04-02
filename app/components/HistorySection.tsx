@@ -71,7 +71,7 @@ function AllTimeStatsCard({ stats }: { stats: AllTimeStats }) {
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm pt-1 border-t border-gray-800/60">
           <span className="text-gray-400 font-semibold w-32 shrink-0 flex items-center">
             Top 5 legs
-            <Tooltip text="Tracks how often any of the day's top 5 ranked plays got a hit, regardless of whether they were in the Daily Double. Each batter is counted individually. This measures the system's overall batter-picking accuracy." />
+            <Tooltip text="Tracks whether each of the day's top 5 ranked plays got a hit — every batter counted individually, regardless of the parlay result. Shows the system's overall accuracy at picking hitters." />
           </span>
           <span className="text-gray-300 font-mono">
             {stats.legs.hits} / {stats.legs.total} hit
