@@ -3,9 +3,7 @@ import { fetchSchedule, fetchConfirmedLineup, fetchActiveRoster, fetchCareerPA, 
 import { parseSplit } from '@/lib/stats'
 import { createCache } from '@/lib/cache'
 import { kvGet, kvSet } from '@/lib/kv'
-import { suggestDailyDouble, regressedAvg, expectedAtBats, hitProbability } from '@/lib/utils'
 import type { MatchupResult, MatchupsResponse } from '@/lib/types'
-import { DEFAULT_FILTERS } from '@/lib/types'
 
 // Module-level caches — survive across requests in the same serverless instance
 const bvpCache = createCache<ReturnType<typeof parseSplit>>(3600_000)  // 60 min
@@ -133,16 +131,6 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Load the pre-game stats snapshot for this date from KV.
-    // This map is populated before games start and never overwritten once a game begins,
-    // so it always reflects career BvP stats as of pre-game (not updated by live game stats).
-    const pregameKey = `pregame:${date}`
-    const pregameMap: Record<string, ReturnType<typeof parseSplit>> =
-      await kvGet<Record<string, ReturnType<typeof parseSplit>>>(pregameKey) ?? {}
-    let pregameMapUpdated = false
-
-    const nowMs = Date.now()
-
     // Fetch BvP data in batches of 20 with 200ms pause between batches
     const results: MatchupResult[] = []
     for (let i = 0; i < allPairs.length; i += BATCH_SIZE) {
@@ -150,34 +138,16 @@ export async function GET(req: NextRequest) {
       const batchResults = await Promise.allSettled(
         batch.map(async pair => {
           const cacheKey = `${pair.batterId}:${pair.pitcherId}`
-          const gameStarted = new Date(pair.gameTime).getTime() <= nowMs
 
-          let stats: ReturnType<typeof parseSplit> | undefined
-
-          if (gameStarted && pregameMap[cacheKey]) {
-            // Game has started — serve frozen pre-game stats from KV.
-            // Never re-fetch from the live API so today's game stats don't contaminate
-            // the career BvP numbers we use for betting decisions.
-            stats = pregameMap[cacheKey]
-          } else {
-            // Game hasn't started (or no frozen snapshot yet): use in-memory cache → API
-            stats = bvpCache.get(cacheKey)
-            if (!stats) {
-              const fetched = await fetchBvP(pair.batterId, pair.pitcherId)
-              if (!fetched || fetched.stat.atBats === 0) return null
-              stats = parseSplit(fetched.stat)
-              bvpCache.set(cacheKey, stats)
-            }
-
-            // Persist pre-game stats to KV only while the game hasn't started.
-            // Once saved, they're never overwritten, locking in the pre-game numbers.
-            if (!gameStarted && !pregameMap[cacheKey]) {
-              pregameMap[cacheKey] = stats
-              pregameMapUpdated = true
-            }
+          let stats = bvpCache.get(cacheKey)
+          if (!stats) {
+            const fetched = await fetchBvP(pair.batterId, pair.pitcherId)
+            if (!fetched || fetched.stat.atBats === 0) return null
+            stats = parseSplit(fetched.stat)
+            bvpCache.set(cacheKey, stats)
           }
 
-          if (!stats || stats.ab < 10) return null
+          if (stats.ab < 10) return null
 
           const batterName = await getPlayerName(pair.batterId)
 
@@ -198,13 +168,6 @@ export async function GET(req: NextRequest) {
       if (i + BATCH_SIZE < allPairs.length) await sleep(BATCH_DELAY_MS)
     }
 
-    // Persist updated pre-game map to KV (fire-and-forget)
-    if (pregameMapUpdated) {
-      kvSet(pregameKey, pregameMap, 7_776_000).catch(err =>
-        console.error('Failed to save pregame snapshot:', err)
-      )
-    }
-
     // Drop results where 3+ batters on the same team vs the same pitcher share
     // identical raw stats — the MLB API sometimes returns team-aggregate data
     // instead of individual BvP records, making many batters look identical.
@@ -223,50 +186,6 @@ export async function GET(req: NextRequest) {
       matchupsFound: deduped.length,
       results: deduped,
     }
-
-    // Persist top-5 + daily double snapshot the first time this date is requested.
-    // Only include games that haven't started yet so the snapshot reflects
-    // pre-game top plays, not post-game ones.
-    // Fire-and-forget — do not await, so it doesn't delay the response.
-    const snapshotKey = `top5:${date}`
-    const ddKey = `dd:${date}`
-    kvGet<MatchupResult[]>(snapshotKey).then(async existing => {
-      if (!existing) {
-        const nowIso = new Date().toISOString()
-        // Apply the same default client filters so the snapshot is consistent with
-        // what users see by default (min AB 15, min AVG .300).
-        const upcomingOnly = deduped.filter(r =>
-          r.gameTime > nowIso &&
-          r.ab >= DEFAULT_FILTERS.minAB &&
-          r.avg >= DEFAULT_FILTERS.minAVG
-        )
-        if (upcomingOnly.length === 0) return  // no pre-game data to snapshot yet
-
-        const top5 = [...upcomingOnly]
-          .sort((a, b) =>
-            b.avg * Math.min(b.ab / 30, 1) - a.avg * Math.min(a.ab / 30, 1) ||
-            b.avg - a.avg ||
-            b.ab - a.ab
-          )
-          .slice(0, 5)
-
-        await kvSet(snapshotKey, top5, 7_776_000).catch(err =>
-          console.error('Failed to save top-5 snapshot:', err)
-        )
-
-        // Also save the daily double for this date (from pre-game top-5 only)
-        const existingDd = await kvGet(ddKey).catch(() => null)
-        if (!existingDd) {
-          const score = (m: MatchupResult) =>
-            hitProbability(regressedAvg(m.avg, m.ab), expectedAtBats(m.lineupPosition))
-          const enriched = top5.map(m => ({ m, probability: score(m) }))
-          const dd = suggestDailyDouble(enriched.map(e => e.m))
-          await kvSet(ddKey, dd ?? null, 7_776_000).catch(err =>
-            console.error('Failed to save daily double snapshot:', err)
-          )
-        }
-      }
-    }).catch(err => console.error('Failed to read snapshot:', err))
 
     // Cache the compiled response for 5 minutes to absorb concurrent users.
     // Fire-and-forget — does not delay the response.

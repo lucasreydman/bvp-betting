@@ -10,7 +10,6 @@ import LoadingSkeleton from './LoadingSkeleton'
 import TopPlays from './TopPlays'
 import Filters from './Filters'
 import MatchupTable from './MatchupTable'
-import HistorySection from './HistorySection'
 
 function localToday(): string {
   const d = new Date()
@@ -29,7 +28,6 @@ export default function ClientShell() {
   const [sort, setSort] = useState<SortState>({ column: 'avg', direction: 'desc' })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [snapshot, setSnapshot] = useState<MatchupResult[] | null>(null)
 
   const fetchMatchups = useCallback(async (d: string) => {
     setIsLoading(true)
@@ -51,18 +49,6 @@ export default function ClientShell() {
     fetchMatchups(date)
   }, [date, fetchMatchups])
 
-  useEffect(() => {
-    // Always fetch the pre-game snapshot — for past dates it's the primary data source,
-    // for today it's the fallback once all games have started.
-    setSnapshot(null)
-    let cancelled = false
-    fetch(`/api/snapshot?date=${date}`)
-      .then(r => r.json())
-      .then(data => { if (!cancelled) setSnapshot(data.top5 ?? null) })
-      .catch(() => { if (!cancelled) setSnapshot(null) })
-    return () => { cancelled = true }
-  }, [date])
-
   const handleSort = (column: keyof MatchupResult) => {
     setSort(prev => ({
       column,
@@ -81,16 +67,10 @@ export default function ClientShell() {
   const totalUpcoming = allMatchups.filter(m => !isStarted(m)).length
   const totalInProgress = allMatchups.filter(m => isStarted(m)).length
 
-  const isPast = date < localToday()
-  // For today: show live upcoming games; once all have started fall back to the
-  // pre-game snapshot so the Top 5 and Daily Double remain visible all day.
-  const allGamesStarted = !isPast && upcoming.length === 0 && totalInProgress > 0
-  const topPlaysMatchups = isPast || allGamesStarted ? applyFilters(snapshot ?? [], filters) : upcoming
-
   const top5Score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
 
   // Top 5 for display + "Top 5 Plays" CSV: upcoming only (bettable)
-  const top5Matchups = [...topPlaysMatchups]
+  const top5Matchups = [...upcoming]
     .sort((a, b) => top5Score(b) - top5Score(a) || b.avg - a.avg || b.ab - a.ab)
     .slice(0, 5)
 
@@ -121,19 +101,7 @@ export default function ClientShell() {
         <LoadingSkeleton />
       ) : (
         <>
-          {!isPast && totalInProgress > 0 && (
-            <div className="mb-4 rounded-lg border border-sky-800/50 bg-sky-950/20 px-4 py-3 text-sm text-sky-300">
-              <p className="font-semibold mb-1">Some games have already started</p>
-              <p className="text-sky-400/80 leading-relaxed">
-                Stats and the Daily Double are locked in from <span className="text-sky-300 font-medium">before first pitch</span>, showing only career history against today&apos;s pitchers with nothing from today&apos;s game mixed in.
-                If a player you expected isn&apos;t showing up, the page likely wasn&apos;t loaded before their game began, so no pre-game snapshot was saved for them.
-              </p>
-              <p className="mt-2 text-sky-400/60 text-xs">
-                To avoid this: <span className="text-sky-300">open or refresh before the first game starts each day.</span>
-              </p>
-            </div>
-          )}
-          <TopPlays matchups={topPlaysMatchups} overrideDailyDouble={csvDailyDouble} now={now} />
+          <TopPlays matchups={upcoming} overrideDailyDouble={csvDailyDouble} now={now} />
           <Filters filters={filters} onApply={setFilters} matchups={csvMatchups} top5={top5Matchups} dailyDouble={csvDailyDouble} />
           <MatchupTable
             matchups={upcoming}
@@ -157,7 +125,6 @@ export default function ClientShell() {
           )}
         </>
       )}
-      <HistorySection />
     </div>
   )
 }
