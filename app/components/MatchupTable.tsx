@@ -1,5 +1,6 @@
 'use client'
 import type { MatchupResult, SortState } from '@/lib/types'
+import { teamAbbr } from '@/lib/utils'
 import MatchupRow from './MatchupRow'
 import GameTimeCell from './GameTimeCell'
 
@@ -16,7 +17,6 @@ interface Props {
 
 const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> = [
   { key: 'batterName', label: 'Batter', cls: 'min-w-[9rem]' },
-  { key: 'batterTeam', label: 'Team', cls: 'hidden sm:table-cell min-w-[11rem]' },
   { key: 'pitcherName', label: 'Pitcher', cls: 'min-w-[14rem]' },
   { key: 'avg', label: 'AVG', cls: 'min-w-[4.5rem]' },
   { key: 'h', label: 'H', cls: 'min-w-[3rem]' },
@@ -31,44 +31,6 @@ const MOBILE_SORT_COLS: Array<{ key: keyof MatchupResult; label: string }> = [
   { key: 'ab', label: 'AB' },
   { key: 'gameTime', label: 'Time' },
 ]
-
-const TEAM_ABBR: Record<string, string> = {
-  'Arizona Diamondbacks': 'ARI',
-  'Atlanta Braves': 'ATL',
-  'Baltimore Orioles': 'BAL',
-  'Boston Red Sox': 'BOS',
-  'Chicago White Sox': 'CWS',
-  'Chicago Cubs': 'CHC',
-  'Cincinnati Reds': 'CIN',
-  'Cleveland Guardians': 'CLE',
-  'Colorado Rockies': 'COL',
-  'Detroit Tigers': 'DET',
-  'Houston Astros': 'HOU',
-  'Kansas City Royals': 'KC',
-  'Los Angeles Angels': 'LAA',
-  'Los Angeles Dodgers': 'LAD',
-  'Miami Marlins': 'MIA',
-  'Milwaukee Brewers': 'MIL',
-  'Minnesota Twins': 'MIN',
-  'New York Yankees': 'NYY',
-  'New York Mets': 'NYM',
-  'Athletics': 'ATH',
-  'Oakland Athletics': 'OAK',
-  'Philadelphia Phillies': 'PHI',
-  'Pittsburgh Pirates': 'PIT',
-  'San Diego Padres': 'SD',
-  'San Francisco Giants': 'SF',
-  'Seattle Mariners': 'SEA',
-  'St. Louis Cardinals': 'STL',
-  'Tampa Bay Rays': 'TB',
-  'Texas Rangers': 'TEX',
-  'Toronto Blue Jays': 'TOR',
-  'Washington Nationals': 'WSH',
-}
-
-function abbr(teamName: string): string {
-  return TEAM_ABBR[teamName] ?? teamName.split(' ').map(w => w[0]).join('').toUpperCase()
-}
 
 const CARD_LEFT_BORDER: Record<string, string> = {
   high: 'border-l-green-500',
@@ -171,10 +133,10 @@ export default function MatchupTable({
 
                   {/* Row 2: Team vs Pitcher */}
                   <div className="mt-0.5 flex items-center gap-1.5 text-xs min-w-0">
-                    <span className="shrink-0 text-gray-400 font-mono">{abbr(m.batterTeam)}</span>
+                    <span className="shrink-0 text-gray-400 font-mono">{teamAbbr(m.batterTeam)}</span>
                     <span className="text-gray-600 shrink-0">vs</span>
                     <span className="text-gray-400 truncate flex-1 min-w-0">{m.pitcherName}</span>
-                    <span className="text-gray-600 shrink-0 font-mono">({abbr(m.pitcherTeam)})</span>
+                    <span className="text-gray-600 shrink-0 font-mono">[{teamAbbr(m.pitcherTeam)}]</span>
                   </div>
 
                   {/* Row 3: H/AB + lineup badge + game time */}

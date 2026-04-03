@@ -1,4 +1,5 @@
 import type { MatchupResult } from '@/lib/types'
+import { teamAbbr } from '@/lib/utils'
 import GameTimeCell from './GameTimeCell'
 
 interface Props {
@@ -25,17 +26,15 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
     <tr className={`border-t ${CONFIDENCE_ROW_COLORS[m.confidence]} hover:bg-gray-800/50 transition-colors`}>
       <td className="px-3 py-2 font-medium text-white whitespace-normal sm:whitespace-nowrap break-words">
         {m.batterName}
+        <span className="ml-1.5 text-gray-600 text-xs font-normal">[{teamAbbr(m.batterTeam)}]</span>
         {m.lineupPosition && (
           <span className="ml-1 text-gray-500 text-xs">#{m.lineupPosition}</span>
         )}
       </td>
-      <td className="px-3 py-2 text-gray-300 text-sm align-top break-words hidden sm:table-cell min-w-[11rem] max-w-[16rem]">
-        {m.batterTeam}
-      </td>
       <td className="px-3 py-2 text-gray-400 text-sm align-top min-w-[14rem] max-w-[22rem] break-words">
         <span className="break-words">
           {m.pitcherName}{' '}
-          <span className="text-gray-600 text-xs">({m.pitcherTeam})</span>
+          <span className="text-gray-600 text-xs">[{teamAbbr(m.pitcherTeam)}]</span>
         </span>
       </td>
       <td className={`px-3 py-2 font-mono text-sm font-bold ${CONFIDENCE_TEXT_COLORS[m.confidence]}`}>
