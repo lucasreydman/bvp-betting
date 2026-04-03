@@ -53,7 +53,7 @@ const SKIP_STATES = new Set(['Postponed', 'Cancelled', 'Suspended'])
 
 export async function fetchSchedule(date: string): Promise<MLBGame[]> {
   const url = `${BASE}/schedule?sportId=1&date=${date}&hydrate=probablePitcher,lineups`
-  const res = await fetch(url, { next: { revalidate: 900 } }) // 15 min
+  const res = await fetch(url, { cache: 'no-store' }) // always fresh — KV response cache throttles actual usage
   if (!res.ok) throw new Error(`Schedule fetch failed: ${res.status}`)
   const data = await res.json()
   const games: MLBGame[] = data.dates?.[0]?.games ?? []
