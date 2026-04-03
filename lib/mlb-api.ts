@@ -107,20 +107,25 @@ export async function fetchPlayerName(playerId: number): Promise<string> {
   return data.people?.[0]?.fullName ?? `Player ${playerId}`
 }
 
-// Returns number of hits the batter recorded in a specific game (from boxscore).
-// Returns null if the player wasn't found in the boxscore (DNP / game not started).
-export async function fetchGameBatterHits(gamePk: number, batterId: number): Promise<number | null> {
+/**
+ * Returns a map of playerId → { h } for all batters in the game.
+ * Fetches the boxscore once regardless of how many players are queried.
+ * Returns an empty Map on fetch failure (safe default — callers treat missing as 0 hits).
+ */
+export async function fetchBoxscoreHitting(gamePk: number): Promise<Map<number, { h: number }>> {
   const url = `${BASE}/game/${gamePk}/boxscore`
   const res = await fetch(url, { cache: 'no-store' })
-  if (!res.ok) return null
+  if (!res.ok) return new Map()
   const data = await res.json()
-  const playerKey = `ID${batterId}`
+  const result = new Map<number, { h: number }>()
   for (const side of ['home', 'away'] as const) {
-    const player = data.teams?.[side]?.players?.[playerKey]
-    if (player) {
-      const hits = player?.stats?.batting?.hits
-      return typeof hits === 'number' ? hits : null
+    const players = data.teams?.[side]?.players ?? {}
+    for (const [key, player] of Object.entries(players)) {
+      const id = Number(key.replace('ID', ''))
+      if (!id) continue
+      const h = (player as { stats?: { batting?: { hits?: number } } }).stats?.batting?.hits
+      if (typeof h === 'number') result.set(id, { h })
     }
   }
-  return null
+  return result
 }
