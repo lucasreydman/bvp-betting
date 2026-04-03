@@ -10,9 +10,14 @@ interface MLBProbablePitcher {
 interface MLBGame {
   gamePk: number
   gameDate: string  // ISO string
+  status: { detailedState: string }
   teams: {
     home: { team: { id: number; name: string }; probablePitcher?: MLBProbablePitcher }
     away: { team: { id: number; name: string }; probablePitcher?: MLBProbablePitcher }
+  }
+  lineups?: {
+    homePlayers?: Array<{ id: number }>
+    awayPlayers?: Array<{ id: number }>
   }
 }
 
@@ -44,17 +49,20 @@ interface MLBCareerSplit {
 
 // --- Public API functions ---
 
+const SKIP_STATES = new Set(['Postponed', 'Cancelled', 'Suspended'])
+
 export async function fetchSchedule(date: string): Promise<MLBGame[]> {
   const url = `${BASE}/schedule?sportId=1&date=${date}&hydrate=probablePitcher,lineups`
   const res = await fetch(url, { next: { revalidate: 900 } }) // 15 min
   if (!res.ok) throw new Error(`Schedule fetch failed: ${res.status}`)
   const data = await res.json()
-  return data.dates?.[0]?.games ?? []
+  const games: MLBGame[] = data.dates?.[0]?.games ?? []
+  return games.filter(g => !SKIP_STATES.has(g.status?.detailedState))
 }
 
 export async function fetchConfirmedLineup(gamePk: number, teamId: number): Promise<number[] | null> {
   const url = `${BASE}/game/${gamePk}/boxscore`
-  const res = await fetch(url, { next: { revalidate: 900 } }) // 15 min
+  const res = await fetch(url, { cache: 'no-store' }) // always fresh — lineups change up to first pitch
   if (!res.ok) return null
   const data = await res.json()
   const side = data.teams?.home?.team?.id === teamId ? 'home' : 'away'
