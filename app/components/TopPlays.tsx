@@ -132,15 +132,21 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             ] as const).map(({ leg, prob }, i) => {
               const legStarted = isStarted(leg)
               return (
-                <div key={leg.batterId} className={`flex flex-wrap items-baseline gap-x-2 gap-y-0.5 ${legStarted ? 'opacity-50' : ''}`}>
-                  <span className="text-gray-500 font-mono text-xs w-4 shrink-0">#{i + 1}</span>
-                  <span className="text-white font-medium">{leg.batterName}</span>
-                  <span className="text-gray-500">vs {leg.pitcherName}</span>
-                  <span className={`font-mono font-bold text-xs ${CONFIDENCE_COLORS[leg.confidence]}`}>{leg.avg.toFixed(3)} AVG</span>
-                  <span className={`font-mono text-xs ${dailyDouble.isSmash ? 'text-orange-300' : 'text-gray-400'}`}>{leg.ops.toFixed(3)} OPS</span>
-                  <span className="text-gray-500 font-mono text-xs">{leg.ab} AB</span>
-                  <span className="text-green-300 font-semibold text-xs">{(prob * 100).toFixed(0)}% hit chance</span>
-                  {legStarted && <span className="text-[9px] font-bold text-amber-400 border border-amber-400/40 rounded px-1 py-0.5 uppercase tracking-wide leading-none">In Progress</span>}
+                <div key={leg.batterId} className={legStarted ? 'opacity-50' : ''}>
+                  {/* Row 1: index + name + AVG */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500 font-mono text-xs w-4 shrink-0">#{i + 1}</span>
+                    <span className="text-white font-medium text-sm flex-1 min-w-0 truncate">{leg.batterName}</span>
+                    <span className={`font-mono font-bold text-sm shrink-0 ${CONFIDENCE_COLORS[leg.confidence]}`}>{leg.avg.toFixed(3)} AVG</span>
+                  </div>
+                  {/* Row 2: pitcher + OPS + AB + hit% */}
+                  <div className="flex items-center gap-2 pl-6 mt-0.5">
+                    <span className="text-gray-500 text-xs flex-1 min-w-0 truncate">vs {leg.pitcherName}</span>
+                    <span className={`font-mono text-xs shrink-0 ${dailyDouble.isSmash ? 'text-orange-300' : 'text-gray-400'}`}>{leg.ops.toFixed(3)} OPS</span>
+                    <span className="text-gray-500 font-mono text-xs shrink-0">{leg.ab} AB</span>
+                    <span className="text-green-300 font-semibold text-xs shrink-0">{(prob * 100).toFixed(0)}% hit chance</span>
+                    {legStarted && <span className="text-[9px] font-bold text-amber-400 border border-amber-400/40 rounded px-1 py-0.5 uppercase tracking-wide leading-none shrink-0">In Progress</span>}
+                  </div>
                 </div>
               )
             })}
