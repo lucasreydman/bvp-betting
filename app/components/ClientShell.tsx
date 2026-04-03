@@ -82,15 +82,15 @@ export default function ClientShell() {
   }
 
   const now = Date.now() + tick * 0 // tick dependency keeps this fresh every 60s
-  const isStarted = (m: MatchupResult) => new Date(m.gameTime).getTime() <= now
 
-  const filtered = applyFilters(allMatchups, filters)
-  const upcoming = sortMatchups(filtered.filter(m => !isStarted(m)), sort)
-  const inProgress = sortMatchups(filtered.filter(m => isStarted(m)), sort)
+  const upcomingAll = allMatchups.filter(m => m.gameStatus === 'upcoming')
+  const upcoming    = sortMatchups(applyFilters(upcomingAll, filters), sort)
+  const inProgress  = sortMatchups(allMatchups.filter(m => m.gameStatus === 'inProgress'), sort)
+  const settled     = allMatchups.filter(m => m.gameStatus === 'settled')
   const csvMatchups = [...upcoming, ...inProgress]
 
-  const totalUpcoming = allMatchups.filter(m => !isStarted(m)).length
-  const totalInProgress = allMatchups.filter(m => isStarted(m)).length
+  const totalUpcoming   = upcomingAll.length
+  const totalInProgress = inProgress.length
 
   const top5Score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
 
@@ -136,7 +136,7 @@ export default function ClientShell() {
             onResetFilters={() => setFilters(DEFAULT_FILTERS)}
             gameKind="upcoming"
           />
-          {(inProgress.length > 0 || totalInProgress > 0) && (
+          {inProgress.length > 0 && (
             <div className="mt-6">
               <MatchupTable
                 matchups={inProgress}
@@ -145,6 +145,18 @@ export default function ClientShell() {
                 totalMatchups={totalInProgress}
                 title="In progress"
                 gameKind="inProgress"
+              />
+            </div>
+          )}
+          {settled.length > 0 && (
+            <div className="mt-6">
+              <MatchupTable
+                matchups={settled}
+                sort={sort}
+                onSort={() => {}}
+                totalMatchups={settled.length}
+                title="Settled"
+                gameKind="settled"
               />
             </div>
           )}
