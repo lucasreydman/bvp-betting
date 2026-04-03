@@ -5,8 +5,8 @@ import { formatCountdownToStart, formatTime } from '@/lib/utils'
 
 interface Props {
   gameTime: string
-  /** Rows in the Upcoming table vs In progress table */
-  variant: 'upcoming' | 'inProgress'
+  /** Rows in the Upcoming table vs In progress table vs settled games */
+  variant: 'upcoming' | 'inProgress' | 'settled'
 }
 
 const TICK_MS = 30_000
@@ -18,6 +18,15 @@ export default function GameTimeCell({ gameTime, variant }: Props) {
     const id = setInterval(() => setNow(Date.now()), TICK_MS)
     return () => clearInterval(id)
   }, [])
+
+  if (variant === 'settled') {
+    return (
+      <div className="text-xs leading-snug">
+        <span className="font-medium text-gray-400">Final</span>
+        <span className="mt-0.5 block text-gray-500">{formatTime(gameTime)}</span>
+      </div>
+    )
+  }
 
   if (variant === 'inProgress') {
     return (
