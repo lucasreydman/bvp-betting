@@ -4,7 +4,7 @@ import GameTimeCell from './GameTimeCell'
 
 interface Props {
   matchup: MatchupResult
-  gameKind: 'upcoming' | 'inProgress'
+  gameKind: 'upcoming' | 'inProgress' | 'settled'
 }
 
 const CONFIDENCE_ROW_COLORS = {
@@ -20,6 +20,14 @@ const CONFIDENCE_TEXT_COLORS = {
 }
 
 const fmt3 = (n: number) => n.toFixed(3)
+
+function ResultBadge({ hitResult }: { hitResult: MatchupResult['hitResult'] }) {
+  if (hitResult === 'win')
+    return <span className="inline-flex text-xs px-2 py-0.5 rounded font-medium bg-green-900/40 text-green-400">HIT</span>
+  if (hitResult === 'loss')
+    return <span className="inline-flex text-xs px-2 py-0.5 rounded font-medium bg-red-900/40 text-red-400">NO HIT</span>
+  return <span className="inline-flex text-xs px-2 py-0.5 rounded font-medium bg-gray-800 text-gray-500">–</span>
+}
 
 export default function MatchupRow({ matchup: m, gameKind }: Props) {
   return (
@@ -46,6 +54,11 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
       <td className="px-3 py-2 align-top">
         <GameTimeCell gameTime={m.gameTime} variant={gameKind} />
       </td>
+      {gameKind !== 'upcoming' && (
+        <td className="px-3 py-2">
+          <ResultBadge hitResult={m.hitResult} />
+        </td>
+      )}
       <td className="px-3 py-2 hidden sm:table-cell">
         <span className={`inline-flex text-xs px-2 py-0.5 rounded font-medium ${
           m.lineupSource === 'confirmed'
