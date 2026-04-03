@@ -54,7 +54,7 @@ export default function Footer() {
         <p>
           Built by{' '}
           <a
-            href="https://lucasreydman.github.io/cv/"
+            href="https://lucasreydman.xyz/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 font-medium hover:text-white transition-colors"
@@ -80,8 +80,8 @@ export default function Footer() {
           </a>
         </p>
         <p>
-          &copy; {year} Lucas Reydman.{' '}
-          <Link href="/disclaimer" className="text-gray-500 hover:text-gray-400 transition-colors">
+          &copy; {year} Lucas Reydman. All rights reserved.{' '}
+          <Link href="/disclaimer" className="text-gray-400 hover:text-white transition-colors">
             Disclaimer
           </Link>
         </p>

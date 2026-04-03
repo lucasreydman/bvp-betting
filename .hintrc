@@ -13,6 +13,7 @@
           "scrollbar-width: thin"
         ]
       }
-    ]
+    ],
+    "no-inline-styles": "off"
   }
 }
