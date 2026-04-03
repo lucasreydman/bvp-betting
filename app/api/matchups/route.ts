@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { fetchSchedule, fetchConfirmedLineup, fetchActiveRoster, fetchCareerPA, fetchBvP, fetchPlayerName } from '@/lib/mlb-api'
+import { fetchSchedule, fetchConfirmedLineup, fetchActiveRoster, fetchCareerPA, fetchBvP, fetchPlayerName, fetchBoxscoreHitting } from '@/lib/mlb-api'
+import { getGameStatus, computeHitResult } from '@/lib/game-status'
 import { parseSplit } from '@/lib/stats'
 import { createCache } from '@/lib/cache'
 import { kvGet, kvSet } from '@/lib/kv'
@@ -78,9 +79,6 @@ export async function GET(req: NextRequest) {
   const date = req.nextUrl.searchParams.get('date') ?? new Date().toISOString().split('T')[0]
 
   try {
-    // Return a cached response if one was built within the last 5 minutes.
-    // The client-side upcoming/in-progress split uses Date.now() vs gameTime,
-    // so a cached results array is always safe to serve.
     const responseCacheKey = `matchups-response:${date}`
     const cached = await kvGet<MatchupsResponse>(responseCacheKey)
     if (cached) {
@@ -91,7 +89,9 @@ export async function GET(req: NextRequest) {
     const nowMs = Date.now()
     let gamesScanned = 0
     let gamesSkipped = 0
-    const allPairs: Array<{
+
+    // ── Separate upcoming from in-progress/settled ──────────────────────────
+    const upcomingPairs: Array<{
       batterId: number
       batterTeam: string
       batterTeamId: number
@@ -105,6 +105,11 @@ export async function GET(req: NextRequest) {
       lineupPosition?: number
     }> = []
 
+    const nonUpcomingGames: Array<{
+      game: typeof games[number]
+      gameStatus: 'inProgress' | 'settled'
+    }> = []
+
     for (const game of games) {
       gamesScanned++
       const { home, away } = game.teams
@@ -113,56 +118,63 @@ export async function GET(req: NextRequest) {
         continue
       }
 
-      const gameStarted = new Date(game.gameDate).getTime() <= nowMs
-      const homeScheduleIds = game.lineups?.homePlayers?.map(p => p.id) ?? []
-      const awayScheduleIds = game.lineups?.awayPlayers?.map(p => p.id) ?? []
+      const gameStatus = getGameStatus(game.status.detailedState)
 
-      const [homeLineup, awayLineup] = await Promise.all([
-        getLineupPlayerIds(game.gamePk, home.team.id, gameStarted, homeScheduleIds),
-        getLineupPlayerIds(game.gamePk, away.team.id, gameStarted, awayScheduleIds),
-      ])
+      if (gameStatus === 'upcoming') {
+        // gameStarted is used only by getLineupPlayerIds to decide lineup source.
+        // It is NOT used for routing to upcoming vs non-upcoming — that is gameStatus's job.
+        const gameStarted = new Date(game.gameDate).getTime() <= nowMs
+        const homeScheduleIds = game.lineups?.homePlayers?.map(p => p.id) ?? []
+        const awayScheduleIds = game.lineups?.awayPlayers?.map(p => p.id) ?? []
 
-      homeLineup.ids.forEach((batterId, i) => {
-        allPairs.push({
-          batterId,
-          batterTeam: home.team.name,
-          batterTeamId: home.team.id,
-          pitcherId: away.probablePitcher!.id,
-          pitcherName: away.probablePitcher!.fullName,
-          pitcherTeam: away.team.name,
-          gamePk: game.gamePk,
-          gameTime: game.gameDate,
-          isHome: true,
-          lineupSource: homeLineup.source,
-          lineupPosition: homeLineup.source === 'confirmed' ? i + 1 : undefined,
+        const [homeLineup, awayLineup] = await Promise.all([
+          getLineupPlayerIds(game.gamePk, home.team.id, gameStarted, homeScheduleIds),
+          getLineupPlayerIds(game.gamePk, away.team.id, gameStarted, awayScheduleIds),
+        ])
+
+        homeLineup.ids.forEach((batterId, i) => {
+          upcomingPairs.push({
+            batterId,
+            batterTeam: home.team.name,
+            batterTeamId: home.team.id,
+            pitcherId: away.probablePitcher!.id,
+            pitcherName: away.probablePitcher!.fullName,
+            pitcherTeam: away.team.name,
+            gamePk: game.gamePk,
+            gameTime: game.gameDate,
+            isHome: true,
+            lineupSource: homeLineup.source,
+            lineupPosition: homeLineup.source === 'confirmed' ? i + 1 : undefined,
+          })
         })
-      })
 
-      awayLineup.ids.forEach((batterId, i) => {
-        allPairs.push({
-          batterId,
-          batterTeam: away.team.name,
-          batterTeamId: away.team.id,
-          pitcherId: home.probablePitcher!.id,
-          pitcherName: home.probablePitcher!.fullName,
-          pitcherTeam: home.team.name,
-          gamePk: game.gamePk,
-          gameTime: game.gameDate,
-          isHome: false,
-          lineupSource: awayLineup.source,
-          lineupPosition: awayLineup.source === 'confirmed' ? i + 1 : undefined,
+        awayLineup.ids.forEach((batterId, i) => {
+          upcomingPairs.push({
+            batterId,
+            batterTeam: away.team.name,
+            batterTeamId: away.team.id,
+            pitcherId: home.probablePitcher!.id,
+            pitcherName: home.probablePitcher!.fullName,
+            pitcherTeam: home.team.name,
+            gamePk: game.gamePk,
+            gameTime: game.gameDate,
+            isHome: false,
+            lineupSource: awayLineup.source,
+            lineupPosition: awayLineup.source === 'confirmed' ? i + 1 : undefined,
+          })
         })
-      })
+      } else {
+        nonUpcomingGames.push({ game, gameStatus })
+      }
     }
 
-    // Fetch BvP data in batches of 20 with 200ms pause between batches
-    const results: MatchupResult[] = []
-    for (let i = 0; i < allPairs.length; i += BATCH_SIZE) {
-      const batch = allPairs.slice(i, i + BATCH_SIZE)
+    // ── Fetch BvP for upcoming pairs (batched, existing logic) ───────────────
+    const upcomingRaw: MatchupResult[] = []
+    for (let i = 0; i < upcomingPairs.length; i += BATCH_SIZE) {
+      const batch = upcomingPairs.slice(i, i + BATCH_SIZE)
       const batchResults = await Promise.allSettled(
         batch.map(async pair => {
           const cacheKey = `${pair.batterId}:${pair.pitcherId}`
-
           let stats = bvpCache.get(cacheKey)
           if (!stats) {
             const fetched = await fetchBvP(pair.batterId, pair.pitcherId)
@@ -170,49 +182,72 @@ export async function GET(req: NextRequest) {
             stats = parseSplit(fetched.stat)
             bvpCache.set(cacheKey, stats)
           }
-
           if (stats.ab < 10) return null
-
           const batterName = await getPlayerName(pair.batterId)
-
           return {
             ...pair,
             batterName,
             ...stats,
+            gameStatus: 'upcoming' as const,
           } satisfies MatchupResult
         })
       )
-
       for (const r of batchResults) {
         if (r.status === 'fulfilled' && r.value !== null) {
-          results.push(r.value)
+          upcomingRaw.push(r.value)
         }
       }
-
-      if (i + BATCH_SIZE < allPairs.length) await sleep(BATCH_DELAY_MS)
+      if (i + BATCH_SIZE < upcomingPairs.length) await sleep(BATCH_DELAY_MS)
     }
 
-    // Drop results where 3+ batters on the same team vs the same pitcher share
-    // identical raw stats — the MLB API sometimes returns team-aggregate data
-    // instead of individual BvP records, making many batters look identical.
-    // 3 players from the same team with perfectly identical BvP lines is impossible in real data.
+    // ── Dedup (upcoming only) ────────────────────────────────────────────────
     const statKey = (r: MatchupResult) =>
       `${r.pitcherId}:${r.batterTeamId}:${r.ab}:${r.h}:${r.doubles}:${r.triples}:${r.hr}:${r.bb}:${r.hbp}:${r.sf}`
     const keyCounts = new Map<string, number>()
-    for (const r of results) keyCounts.set(statKey(r), (keyCounts.get(statKey(r)) ?? 0) + 1)
-    const deduped = results.filter(r => keyCounts.get(statKey(r))! < 3)
+    for (const r of upcomingRaw) keyCounts.set(statKey(r), (keyCounts.get(statKey(r)) ?? 0) + 1)
+    const upcomingResults = upcomingRaw.filter(r => keyCounts.get(statKey(r))! < 3)
 
+    // ── Write per-game KV snapshots for upcoming games (fire-and-forget) ─────
+    const byGame = new Map<number, MatchupResult[]>()
+    for (const m of upcomingResults) {
+      const arr = byGame.get(m.gamePk) ?? []
+      arr.push(m)
+      byGame.set(m.gamePk, arr)
+    }
+    for (const [gamePk, matchups] of byGame) {
+      kvSet(`game-qualifying:${gamePk}`, matchups, 86400).catch(err =>
+        console.error(`Failed to write snapshot for game ${gamePk}:`, err)
+      )
+    }
+
+    // ── Process in-progress and settled games from KV snapshots ─────────────
+    const nonUpcomingResults: MatchupResult[] = []
+    for (const { game, gameStatus } of nonUpcomingGames) {
+      const snapshot = await kvGet<MatchupResult[]>(`game-qualifying:${game.gamePk}`)
+      if (!snapshot) continue   // no pre-game snapshot — cannot verify qualification
+
+      const hitsMap = await fetchBoxscoreHitting(game.gamePk)
+      for (const m of snapshot) {
+        const h = hitsMap.get(m.batterId)?.h ?? 0
+        nonUpcomingResults.push({
+          ...m,
+          gameStatus,
+          hitResult: computeHitResult(h, gameStatus),
+        })
+      }
+    }
+
+    // ── Build and cache response ─────────────────────────────────────────────
+    const results = [...upcomingResults, ...nonUpcomingResults]
     const response: MatchupsResponse = {
       date,
       fetchedAt: new Date().toISOString(),
       gamesScanned,
       gamesSkipped,
-      matchupsFound: deduped.length,
-      results: deduped,
+      matchupsFound: results.length,
+      results,
     }
 
-    // Cache the compiled response for 5 minutes to absorb concurrent users.
-    // Fire-and-forget — does not delay the response.
     kvSet(responseCacheKey, response, 300).catch(err =>
       console.error('Failed to cache matchups response:', err)
     )
