@@ -27,14 +27,33 @@ async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-async function getLineupPlayerIds(gamePk: number, teamId: number): Promise<{ ids: number[]; source: 'confirmed' | 'estimated' }> {
-  // Try confirmed lineup first
+async function getLineupPlayerIds(
+  gamePk: number,
+  teamId: number,
+  gameStarted: boolean,
+  scheduleLineup: number[],
+): Promise<{ ids: number[]; source: 'confirmed' | 'estimated' }> {
+  // Schedule hydration gives us the posted pre-game lineup — use it if complete
+  if (scheduleLineup.length >= 8) {
+    return { ids: scheduleLineup, source: 'confirmed' }
+  }
+
+  // Boxscore has actual batters (in-progress/final) or posted lineup (pre-game)
   const confirmed = await fetchConfirmedLineup(gamePk, teamId)
-  if (confirmed && confirmed.length >= 8) {
+
+  // Pre-game: require a full lineup (≥8) to be confident it's the real batting order
+  // In-progress/final: accept any batters — even early innings have the right players
+  if (confirmed && (confirmed.length >= 8 || (gameStarted && confirmed.length > 0))) {
     return { ids: confirmed, source: 'confirmed' }
   }
 
-  // Fall back to top-9 active roster by career PA
+  // Game has started but we have no lineup data — don't fall back to estimated
+  // roster; those players likely didn't bat or we have no reliable data.
+  if (gameStarted) {
+    return { ids: [], source: 'confirmed' }
+  }
+
+  // Pre-game estimated fallback: top-9 active roster by career PA
   const cacheKey = `roster:${teamId}`
   const cached = rosterCache.get(cacheKey)
   if (cached) return { ids: cached, source: 'estimated' }
@@ -69,6 +88,7 @@ export async function GET(req: NextRequest) {
     }
 
     const games = await fetchSchedule(date)
+    const nowMs = Date.now()
     let gamesScanned = 0
     let gamesSkipped = 0
     const allPairs: Array<{
@@ -93,9 +113,13 @@ export async function GET(req: NextRequest) {
         continue
       }
 
+      const gameStarted = new Date(game.gameDate).getTime() <= nowMs
+      const homeScheduleIds = game.lineups?.homePlayers?.map(p => p.id) ?? []
+      const awayScheduleIds = game.lineups?.awayPlayers?.map(p => p.id) ?? []
+
       const [homeLineup, awayLineup] = await Promise.all([
-        getLineupPlayerIds(game.gamePk, home.team.id),
-        getLineupPlayerIds(game.gamePk, away.team.id),
+        getLineupPlayerIds(game.gamePk, home.team.id, gameStarted, homeScheduleIds),
+        getLineupPlayerIds(game.gamePk, away.team.id, gameStarted, awayScheduleIds),
       ])
 
       homeLineup.ids.forEach((batterId, i) => {
