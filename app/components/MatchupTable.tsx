@@ -12,7 +12,7 @@ interface Props {
   title?: string
   onResetFilters?: () => void
   /** Drives Game column: countdown vs live badge */
-  gameKind?: 'upcoming' | 'inProgress'
+  gameKind?: 'upcoming' | 'inProgress' | 'settled'
 }
 
 const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> = [
@@ -42,6 +42,16 @@ const CARD_AVG_COLOR: Record<string, string> = {
   high: 'text-green-400',
   medium: 'text-yellow-400',
   low: 'text-red-400',
+}
+
+function HitBadge({ hitResult }: { hitResult: MatchupResult['hitResult'] }) {
+  if (hitResult === 'win')
+    return <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-green-900/40 text-green-400">HIT</span>
+  if (hitResult === 'loss')
+    return <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-red-900/40 text-red-400">NO HIT</span>
+  if (hitResult === 'pending')
+    return <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-gray-800 text-gray-500">–</span>
+  return null
 }
 
 export default function MatchupTable({
@@ -90,26 +100,28 @@ export default function MatchupTable({
           {/* ── Mobile card view ── */}
           <div className="sm:hidden">
             {/* Sort chips */}
-            <div className="px-4 py-2 border-b border-gray-800 flex items-center gap-2">
-              <span className="text-xs text-gray-600">Sort:</span>
-              <div className="flex gap-1.5">
-                {MOBILE_SORT_COLS.map(col => (
-                  <button
-                    key={col.key}
-                    type="button"
-                    onClick={() => onSort(col.key)}
-                    className={`text-xs px-2.5 py-1 rounded-full border transition-colors touch-manipulation ${
-                      sort.column === col.key
-                        ? 'bg-blue-600/20 border-blue-500/50 text-blue-400'
-                        : 'border-gray-700 text-gray-500 active:text-gray-300'
-                    }`}
-                  >
-                    {col.label}
-                    {sort.column === col.key ? (sort.direction === 'desc' ? ' ↓' : ' ↑') : ''}
-                  </button>
-                ))}
+            {gameKind !== 'settled' && (
+              <div className="px-4 py-2 border-b border-gray-800 flex items-center gap-2">
+                <span className="text-xs text-gray-600">Sort:</span>
+                <div className="flex gap-1.5">
+                  {MOBILE_SORT_COLS.map(col => (
+                    <button
+                      key={col.key}
+                      type="button"
+                      onClick={() => onSort(col.key)}
+                      className={`text-xs px-2.5 py-1 rounded-full border transition-colors touch-manipulation ${
+                        sort.column === col.key
+                          ? 'bg-blue-600/20 border-blue-500/50 text-blue-400'
+                          : 'border-gray-700 text-gray-500 active:text-gray-300'
+                      }`}
+                    >
+                      {col.label}
+                      {sort.column === col.key ? (sort.direction === 'desc' ? ' ↓' : ' ↑') : ''}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Cards */}
             <div className="divide-y divide-gray-800/60">
@@ -118,7 +130,7 @@ export default function MatchupTable({
                   key={`${m.batterId}-${m.pitcherId}-${m.gameTime}`}
                   className={`px-4 py-3 border-l-4 ${CARD_LEFT_BORDER[m.confidence]}`}
                 >
-                  {/* Row 1: Batter name + AVG */}
+                  {/* Row 1: Batter name + AVG + hit badge (in-progress/settled only) */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <span className="font-medium text-white text-sm truncate">{m.batterName}</span>
@@ -126,9 +138,12 @@ export default function MatchupTable({
                         <span className="text-gray-500 text-xs shrink-0">#{m.lineupPosition}</span>
                       )}
                     </div>
-                    <span className={`font-mono font-bold text-sm shrink-0 ${CARD_AVG_COLOR[m.confidence]}`}>
-                      {m.avg.toFixed(3)}
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {gameKind !== 'upcoming' && <HitBadge hitResult={m.hitResult} />}
+                      <span className={`font-mono font-bold text-sm ${CARD_AVG_COLOR[m.confidence]}`}>
+                        {m.avg.toFixed(3)}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Row 2: Team vs Pitcher */}
@@ -166,18 +181,26 @@ export default function MatchupTable({
                 {COLUMNS.map(col => (
                   <col key={col.key} className={col.cls} />
                 ))}
+                {gameKind !== 'upcoming' && (
+                  <col className="hidden sm:table-column min-w-[5rem]" />
+                )}
               </colgroup>
               <thead>
                 <tr className="bg-gray-800/60">
                   {COLUMNS.map(col => (
                     <th
                       key={col.key}
-                      onClick={() => onSort(col.key)}
-                      className={`px-3 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white select-none whitespace-nowrap ${col.cls}`}
+                      {...(gameKind !== 'settled' ? { onClick: () => onSort(col.key) } : {})}
+                      className={`px-3 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider select-none whitespace-nowrap ${col.cls} ${gameKind !== 'settled' ? 'cursor-pointer hover:text-white' : ''}`}
                     >
-                      {col.label}{sortIcon(col.key)}
+                      {col.label}{gameKind !== 'settled' && sortIcon(col.key)}
                     </th>
                   ))}
+                  {gameKind !== 'upcoming' && (
+                    <th className="px-3 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
+                      Result
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
