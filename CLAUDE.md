@@ -17,23 +17,19 @@ app/
     matchups/route.ts    # Main endpoint: all BvP pairs for a date; 5-min KV response cache
     bvp/route.ts         # Debug: single batter vs pitcher lookup
     schedule/route.ts    # Schedule for a date
-    snapshot/route.ts    # Read/recompute stored Daily Double snapshot for a date
-    history/route.ts     # Past Daily Double entries with outcomes for last N days
-    stats/route.ts       # All-time W/L stats across Daily Double, Smash Double, Top 5 legs
   components/
-    ClientShell.tsx      # Root client component; owns state
-    DatePicker.tsx       # ±3 day nav, UTC-safe date arithmetic
+    ClientShell.tsx      # Root client component; owns state; auto-refreshes every 5 min (silent) + re-renders every 60s
+    DatePicker.tsx       # Today + tomorrow nav, UTC-safe date arithmetic
     StatusBar.tsx        # Last updated, games scanned, refresh; stacks vertically on mobile
     Filters.tsx          # Min AB + Min AVG + optional OPS filter; Apply / Reset / Export CSV (CSV hidden on mobile)
-    TopPlays.tsx         # Top 5 by AVG×confidence (AB-scaled); upcoming only; 2-row card layout on mobile
+    TopPlays.tsx         # Top 5 by AVG×confidence (AB-scaled); upcoming only; 2-row card layout on mobile; Daily Double/Smash Double card
     MatchupTable.tsx     # Sortable table (sm+) + card list (mobile); sort chips on mobile; TEAM_ABBR map for mobile cards
     MatchupRow.tsx       # Single <tr> row; used only in the sm+ table path
-    HistorySection.tsx   # Collapsible Daily Double history + all-time stats card
-    InfoTooltip.tsx      # Hover/tap tooltip used in history and top plays
+    InfoTooltip.tsx      # Hover/tap tooltip used in top plays
     GameTimeCell.tsx     # Game time display cell used in table rows
     LoadingSkeleton.tsx  # Loading state with elapsed timer and progress messages
 lib/
-  types.ts    # MatchupResult, FilterState, DEFAULT_FILTERS, SortState, HistoryEntry, AllTimeStats, StatsBucket
+  types.ts    # MatchupResult, FilterState, DEFAULT_FILTERS, SortState, MatchupsResponse
   stats.ts    # calcStats(), assignConfidence(), parseSplit()
   utils.ts    # applyFilters(), sortMatchups(), generateCSV(), formatTime(), suggestDailyDouble(), hitProbability(), regressedAvg(), expectedAtBats()
   mlb-api.ts  # MLB Stats API fetch helpers
@@ -45,17 +41,18 @@ lib/
 
 1. `ClientShell` fetches `/api/matchups?date=YYYY-MM-DD` on mount and date change.
 2. Route checks a 5-minute KV response cache (`matchups-response:{date}`) and returns immediately if found.
-3. On cache miss: loads schedule, then lineups (boxscore or estimated top 9 by career PA), then BvP in batches of 20 with 200 ms delays.
+3. On cache miss: loads schedule (filtered for PPD/cancelled/suspended), then lineups (schedule hydration → boxscore → estimated top 9 by career PA pre-game only), then BvP in batches of 20 with 200 ms delays.
 4. Server excludes rows with fewer than 10 AB, then dedupes rows where **3+** batters on the same team vs the same pitcher share identical raw stats. Client applies filters: minAB, minAVG, and optional minOPS.
 5. Client splits into `upcoming` vs `inProgress` using `Date.now()` vs `gameTime`.
 6. `TopPlays` and the first table use `upcoming` only; second table is **In progress**.
 7. CSV export includes both upcoming and in-progress rows that pass filters.
 8. `applyFilters` and `sortMatchups` run each render (pure, fast; on the order of hundreds of rows).
+9. `ClientShell` silently re-fetches data every 5 min and re-renders every 60s to keep the upcoming/in-progress split current.
 
 ## Key Invariants
 
 - **Filters:** AND logic across active filters (minAB/minAVG and optional minOPS). Same filters apply to Upcoming and In progress.
-- **Upcoming vs In progress:** Client-side split from `Date.now()` vs `m.gameTime`; refresh moves rows between sections.
+- **Upcoming vs In progress:** Client-side split from `Date.now()` vs `m.gameTime`; updates automatically every 60s via tick state.
 - **TopPlays:** Only `upcoming` matchups (not the full unfiltered list).
 - **Default sort:** AVG desc by default (table). Top 5 card uses AVG × min(AB/30, 1) with tiebreakers raw AVG then AB.
 - **Confidence:** AB vs this pitcher: high ≥30, medium 15–29, low 10–14 (green / yellow / red).
@@ -63,19 +60,17 @@ lib/
 - **`parseSplit(stat)`:** Single mapping from MLB stat fields to raw + calculated fields; use in both API routes.
 - **Aggregate dedup:** Drop rows where `keyCounts(statKey) >= 3` for identical raw lines (same team vs same pitcher). 3+ identical BvP lines from the same team is impossible in real data.
 - **`formatTime()`:** Uses `Intl.DateTimeFormat().resolvedOptions().timeZone` (browser local time, not hardcoded ET).
-- **Mobile layout:** `MatchupTable` renders a card list (`sm:hidden`) and a full table (`hidden sm:block`). Cards show batter, AVG, team abbreviation vs pitcher, H/AB, lineup badge, and `GameTimeCell`. Sort chips (AVG / AB / Time) replace column-header sorting on mobile. `TopPlays` uses `sm:hidden` / `hidden sm:flex` to switch between a 2-row card and the single-row desktop layout. `StatusBar` stacks clock + "Updated" on the left with the refresh button on the right on mobile; "games scanned" text is `hidden sm:inline`.
+- **Mobile layout:** `MatchupTable` renders a card list (`sm:hidden`) and a full table (`hidden sm:block`). Cards show batter, AVG, team abbreviation vs pitcher, H/AB, lineup badge, and `GameTimeCell`. Sort chips (AVG / AB / Time) replace column-header sorting on mobile. `TopPlays` uses `sm:hidden` / `hidden sm:flex` to switch between a 2-row card and the single-row desktop layout. Daily Double / Smash Double legs use a 2-row card on all screen sizes (name+AVG row 1, pitcher+OPS+AB+hit% row 2). `StatusBar` stacks clock + "Updated" on the left with the refresh button on the right on mobile; "games scanned" text is `hidden sm:inline`.
 - **Team abbreviations:** `TEAM_ABBR` map in `MatchupTable.tsx` covers all 30 MLB teams; `abbr()` falls back to initials for unknown names.
-- **KV TTLs:** All historical keys (`dd:`, `top5:`, `pregame:`, `outcome:`, `top5outcome:`) use a 90-day TTL. Response cache uses 5-min TTL. `kvSet` accepts an optional third argument `ttlSeconds`.
+- **KV TTLs:** Response cache uses 5-min TTL. `kvSet` accepts an optional third argument `ttlSeconds`.
+- **PPD/cancelled games:** Filtered in `fetchSchedule` before any lineup or BvP work. Status checked via `g.status.detailedState`.
+- **Lineup sources (priority order):** 1) Schedule hydration (`lineups.homePlayers/awayPlayers`, ≥8), 2) Boxscore `batters` array (always `cache: 'no-store'`), 3) Estimated top-9 roster by career PA — **only pre-game**. Once a game has started, if no confirmed batters exist, return empty rather than estimated.
+- **Date range:** Today and tomorrow only (no past dates). `DatePicker` enforces `minDate = today`, `maxDate = today + 1`.
 
 ## KV Schema
 
 | Key | Value | TTL | Purpose |
 |-----|-------|-----|---------|
-| `dd:{date}` | `DailyDouble` | 90 days | Pre-game Daily Double snapshot |
-| `top5:{date}` | `MatchupResult[]` | 90 days | Pre-game Top 5 snapshot |
-| `pregame:{date}` | `Record<"batterId:pitcherId", ParsedSplit>` | 90 days | Per-player pre-game stats (frozen once game starts) |
-| `outcome:{date}` | `{firstHit, secondHit}` | 90 days | Cached Daily Double outcome |
-| `top5outcome:{date}` | `(boolean \| null)[]` | 90 days | Cached hit results for each Top 5 leg |
 | `matchups-response:{date}` | `MatchupsResponse` | 5 min | Full compiled matchups response cache |
 
 ## MLB Stats API
@@ -84,8 +79,8 @@ Base: `https://statsapi.mlb.com/api/v1`
 
 Key endpoints:
 
-- `/schedule?sportId=1&date=DATE&hydrate=probablePitcher,lineups`
-- `/game/{gamePk}/boxscore` (batting order)
+- `/schedule?sportId=1&date=DATE&hydrate=probablePitcher,lineups` — always `cache: 'no-store'`
+- `/game/{gamePk}/boxscore` — always `cache: 'no-store'` (lineup confirmation)
 - `/teams/{teamId}/roster?rosterType=active`
 - `/people/{playerId}/stats?stats=career&group=hitting`
 - `/people/{batterId}/stats?stats=vsPlayerTotal&opposingPlayerId={pitcherId}&group=hitting` (career BvP)

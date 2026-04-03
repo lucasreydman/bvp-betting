@@ -28,6 +28,7 @@ export default function ClientShell() {
   const [sort, setSort] = useState<SortState>({ column: 'avg', direction: 'desc' })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [tick, setTick] = useState(0)
 
   const fetchMatchups = useCallback(async (d: string) => {
     setIsLoading(true)
@@ -49,6 +50,30 @@ export default function ClientShell() {
     fetchMatchups(date)
   }, [date, fetchMatchups])
 
+  // Re-render every 60s so the upcoming/in-progress split stays current
+  // without requiring a manual refresh.
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 60_000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Silently refresh data every 5 min (matches KV cache TTL).
+  // No loading spinner — data swaps in when ready.
+  useEffect(() => {
+    const id = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/matchups?date=${date}`)
+        if (!res.ok) return
+        const data: MatchupsResponse = await res.json()
+        setAllMatchups(data.results)
+        setMeta({ date: data.date, fetchedAt: data.fetchedAt, gamesScanned: data.gamesScanned, gamesSkipped: data.gamesSkipped, matchupsFound: data.matchupsFound })
+      } catch {
+        // silent — don't disrupt the user for a background refresh failure
+      }
+    }, 300_000)
+    return () => clearInterval(id)
+  }, [date])
+
   const handleSort = (column: keyof MatchupResult) => {
     setSort(prev => ({
       column,
@@ -56,7 +81,7 @@ export default function ClientShell() {
     }))
   }
 
-  const now = Date.now()
+  const now = Date.now() + tick * 0 // tick dependency keeps this fresh every 60s
   const isStarted = (m: MatchupResult) => new Date(m.gameTime).getTime() <= now
 
   const filtered = applyFilters(allMatchups, filters)
