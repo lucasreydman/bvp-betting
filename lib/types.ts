@@ -32,6 +32,8 @@ export interface MatchupResult {
   xbh: number
 
   confidence: 'high' | 'medium' | 'low'  // 30+ AB, 15-29 AB, 10-14 AB
+  gameStatus: 'upcoming' | 'inProgress' | 'settled'
+  hitResult?: 'win' | 'loss' | 'pending'   // only present on inProgress and settled rows
 }
 
 export interface FilterState {
