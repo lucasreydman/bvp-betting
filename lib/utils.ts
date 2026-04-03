@@ -48,7 +48,9 @@ export function formatTime(isoString: string): string {
   })
 }
 
-export function regressedAvg(avg: number, ab: number, leagueAvg = 0.26, regStrength = 50): number {
+// Regression target is ~0.320 (conditional mean of pre-filtered matchups: min 15 AB, min .300 AVG)
+// rather than the league-wide average of .260, which undershoots this pre-selected population.
+export function regressedAvg(avg: number, ab: number, leagueAvg = 0.32, regStrength = 50): number {
   if (ab <= 0) return leagueAvg
   const weight = ab / (ab + regStrength)
   return weight * avg + (1 - weight) * leagueAvg

@@ -31,7 +31,7 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
           <span className="ml-1 text-gray-500 text-xs">#{m.lineupPosition}</span>
         )}
       </td>
-      <td className="px-3 py-2 text-gray-400 text-sm align-top min-w-[14rem] max-w-[22rem] break-words">
+      <td className="px-3 py-2 text-gray-400 text-sm min-w-[14rem] max-w-[22rem] break-words">
         <span className="break-words">
           {m.pitcherName}{' '}
           <span className="text-gray-600 text-xs">[{teamAbbr(m.pitcherTeam)}]</span>

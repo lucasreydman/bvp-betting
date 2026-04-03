@@ -9,6 +9,7 @@ const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => (
   pitcherId: 2,
   pitcherName: 'Test Pitcher',
   pitcherTeam: 'BOS',
+  gamePk: 123456,
   gameTime: '2026-04-01T18:05:00Z',
   isHome: true,
   lineupSource: 'confirmed',
@@ -77,12 +78,12 @@ describe('sortMatchups', () => {
 
 describe('regressedAvg', () => {
   it('moves small samples toward league average', () => {
-    expect(regressedAvg(0.400, 15)).toBeGreaterThan(0.260)
+    expect(regressedAvg(0.400, 15)).toBeGreaterThan(0.320)
     expect(regressedAvg(0.400, 15)).toBeLessThan(0.400)
   })
 
-  it('returns league average for zero AB', () => {
-    expect(regressedAvg(0.500, 0)).toBe(0.260)
+  it('returns conditional mean for zero AB', () => {
+    expect(regressedAvg(0.500, 0)).toBe(0.320)
   })
 })
 

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description:
     'Career batter vs pitcher stats for the Player to Record a Hit prop. Daily Double parlay picks for FanDuel, Bet365, and theScore. Filter by AVG, AB, and OPS.',
   openGraph: {
-    title: 'MLB BvP — Daily Hit Prop Picks',
+    title: 'MLB BvP: Daily Hit Prop Picks',
     description:
       "Today's best batter vs pitcher matchups ranked by career batting average. Daily Double parlay picks for FanDuel, Bet365, and theScore.",
     type: 'website',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MLB BvP — Daily Hit Prop Picks',
+    title: 'MLB BvP: Daily Hit Prop Picks',
     description:
       "Today's best batter vs pitcher matchups ranked by career batting average. Daily Double parlay picks.",
   },

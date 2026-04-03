@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Disclaimer — MLB BvP',
+  title: 'Disclaimer | MLB BvP',
   description: 'Terms of use and disclaimer for MLB BvP.',
 }
 
@@ -44,12 +44,12 @@ export default function DisclaimerPage() {
           <ul className="mt-3 space-y-1 text-gray-400">
             <li>
               <span className="text-white font-medium">USA:</span>{' '}
-              National Problem Gambling Helpline — 1-800-522-4700 &middot;{' '}
+              National Problem Gambling Helpline: 1-800-522-4700 &middot;{' '}
               <span className="text-sky-400">ncpgambling.org</span>
             </li>
             <li>
               <span className="text-white font-medium">Canada:</span>{' '}
-              Connex Ontario — 1-866-531-2600 &middot;{' '}
+              Connex Ontario: 1-866-531-2600 &middot;{' '}
               <span className="text-sky-400">connexontario.ca</span>
             </li>
           </ul>

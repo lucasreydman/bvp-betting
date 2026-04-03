@@ -20,7 +20,7 @@ export default function Home() {
         <div className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">How to use this system for best results</div>
         <p>
           <span className="text-white font-semibold">The page stays current automatically.</span>
-          <span className="text-slate-300"> Data refreshes silently every 5 minutes — no manual refresh needed. Top 5 and the Daily Double show upcoming games only. Once a game starts, those players drop out of the Top 5 and move to the In Progress section on their own. Check back after lineups confirm (usually 3–4 hours before first pitch) for exact hit chance numbers.</span>
+          <span className="text-slate-300"> Data refreshes silently every 5 minutes. No manual refresh needed. Top 5 and the Daily Double show upcoming games only. Once a game starts, those players drop out of the Top 5 and move to the In Progress section on their own. Check back after lineups confirm (usually 3–4 hours before first pitch) for exact hit chance numbers.</span>
         </p>
         <p>
           <span className="text-yellow-400 font-semibold">Best bet: take the Daily Double.</span>

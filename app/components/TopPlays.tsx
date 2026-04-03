@@ -35,6 +35,10 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
   const isStarted = (leg: MatchupResult) => new Date(leg.gameTime).getTime() <= now
   const anyLegStarted = dailyDouble ? isStarted(dailyDouble.first) || isStarted(dailyDouble.second) : false
 
+  const unconfirmedLegs = dailyDouble
+    ? [dailyDouble.first, dailyDouble.second].filter(leg => leg.lineupSource === 'estimated').length
+    : 0
+
   const header = (
     <div className="mb-4">
       <div className="flex items-center gap-2 mb-3">
@@ -53,7 +57,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             <span className="text-green-300 font-semibold">Hit chance %:</span>
             <span className="text-green-300"> estimated chance of ≥1 hit using a regressed AVG and expected ABs.</span>
           </p>
-          <p className="text-slate-400 pl-3">adjusted AVG = (AB / (AB + 50)) × AVG + (50 / (AB + 50)) × 0.260</p>
+          <p className="text-slate-400 pl-3">adjusted AVG = (AB / (AB + 50)) × AVG + (50 / (AB + 50)) × 0.320</p>
           <p className="text-slate-400 pl-3">hit chance = 1 − (1 − adjusted AVG)^(expected AB)</p>
         </div>
       </div>
@@ -80,6 +84,12 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <div className="flex items-center gap-2">
                 <span className="text-sky-400 w-4 shrink-0 font-mono text-xs">{i + 1}.</span>
                 <span className="text-white font-medium text-sm flex-1 min-w-0 truncate">{m.batterName}</span>
+                <span
+                  className={`text-xs shrink-0 ${m.lineupSource === 'confirmed' ? 'text-green-500' : 'text-amber-500/70'}`}
+                  title={m.lineupSource === 'confirmed' ? 'Lineup confirmed' : 'Lineup not yet confirmed'}
+                >
+                  {m.lineupSource === 'confirmed' ? '✓' : '?'}
+                </span>
                 <span className={`font-mono font-bold text-sm shrink-0 ${CONFIDENCE_COLORS[m.confidence]}`}>
                   {m.avg.toFixed(3)}
                 </span>
@@ -88,7 +98,10 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
                 <span className="text-gray-400 text-xs flex-1 min-w-0 truncate">vs {m.pitcherName}</span>
                 <span className="text-gray-500 text-xs shrink-0 font-mono">{m.ab} AB</span>
                 <span className="text-gray-400 text-xs shrink-0">Est. {expectedAB.toFixed(1)} AB</span>
-                <span className="text-green-300 text-xs shrink-0 font-semibold" title="Chance of at least one hit, using regressed AVG and expected ABs.">{(hitPct * 100).toFixed(0)}%</span>
+                <span className="inline-flex items-center gap-0.5 text-green-300 text-xs shrink-0 font-semibold">
+                  {(hitPct * 100).toFixed(0)}%
+                  <InfoTooltip width="w-64" text="Hit chance uses a regressed AVG that pulls toward .320 (the conditional mean of pre-filtered matchups) based on sample size — smaller samples get pulled more. A higher raw AVG matters more here than ABs, which is the opposite of the ranking score (AVG × confidence). This is why a lower-ranked play can have a higher hit % and get picked for the parlay." />
+                </span>
                 <span className="text-gray-600 text-xs shrink-0">{formatTime(m.gameTime)}</span>
               </div>
             </div>
@@ -96,6 +109,12 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             <div className="hidden sm:flex items-baseline gap-3 text-sm">
               <span className="text-sky-400 w-4 font-mono">{i + 1}.</span>
               <span className="text-white font-medium">{m.batterName}</span>
+              <span
+                className={`text-xs ${m.lineupSource === 'confirmed' ? 'text-green-500' : 'text-amber-500/70'}`}
+                title={m.lineupSource === 'confirmed' ? 'Lineup confirmed' : 'Lineup not yet confirmed'}
+              >
+                {m.lineupSource === 'confirmed' ? '✓' : '?'}
+              </span>
               <span className="text-gray-400">vs {m.pitcherName}</span>
               <span className={`font-mono font-bold ${CONFIDENCE_COLORS[m.confidence]}`}>
                 {m.avg.toFixed(3)} AVG
@@ -103,7 +122,10 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <span className="text-gray-500 font-mono">{m.ops.toFixed(3)} OPS</span>
               <span className="text-gray-500 font-mono">{m.ab} AB</span>
               <span className="text-gray-400 font-mono">Est. {expectedAB.toFixed(1)} AB</span>
-              <span className="text-green-300 font-semibold" title="Chance of at least one hit, using regressed AVG and expected ABs.">{(hitPct * 100).toFixed(0)}%</span>
+              <span className="inline-flex items-center gap-0.5 text-green-300 font-semibold">
+                {(hitPct * 100).toFixed(0)}%
+                <InfoTooltip width="w-72" text="Hit chance uses a regressed AVG that pulls toward .320 (the conditional mean of pre-filtered matchups) based on sample size — smaller samples get pulled more. A higher raw AVG matters more here than ABs, which is the opposite of the ranking score (AVG × confidence). This is why a lower-ranked play can have a higher hit % and get picked for the parlay." />
+              </span>
               <span className="text-gray-600 text-xs ml-auto">{formatTime(m.gameTime)}</span>
             </div>
           </li>
@@ -113,8 +135,9 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
       {dailyDouble ? (
         <div className={`mt-4 rounded-lg border p-3 text-sm ${dailyDouble.isSmash ? 'border-orange-500/50 bg-orange-950/20' : 'border-gray-800 bg-gray-950'}`}>
           <div className="flex items-baseline gap-2 mb-1">
-            <div className={`uppercase tracking-wider text-[10px] font-semibold ${dailyDouble.isSmash ? 'text-orange-400' : 'text-yellow-400'}`}>
+            <div className={`inline-flex items-center gap-1 uppercase tracking-wider text-[10px] font-semibold ${dailyDouble.isSmash ? 'text-orange-400' : 'text-yellow-400'}`}>
               {dailyDouble.isSmash ? 'Smash Double' : 'Daily Double'}
+              <InfoTooltip width="w-80" text="Legs are chosen by highest combined hit probability, not by list rank. Ranking uses AVG × confidence (rewards sample size). Hit chance uses regressed AVG (pulls toward league average based on sample size, rewarding raw AVG more). A lower-ranked play with a higher raw AVG can end up with a higher hit chance and edge out the #1 play. Both legs must also face different pitchers." />
             </div>
             {anyLegStarted ? (
               <div className="text-[10px] text-gray-500">In progress. Export available below.</div>
@@ -162,6 +185,16 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
                   : `Chosen from today's top plays: highest combined hit probability with both legs on different pitchers.`}
             </span>
           </div>
+          {!anyLegStarted && unconfirmedLegs > 0 && (
+            <div className="mt-2 flex items-start gap-1.5 text-[11px] text-amber-500/70 leading-relaxed">
+              <span className="shrink-0 mt-px">⚠</span>
+              <span>
+                {unconfirmedLegs === 2
+                  ? 'Lineups not yet confirmed. Hit chance will update once batting order is set, but both matchups remain strong plays.'
+                  : 'One lineup is not yet confirmed. Hit chance for that leg may shift once batting order is set, but the matchup remains a strong play.'}
+              </span>
+            </div>
+          )}
         </div>
       ) : (
         <div className="mt-4 rounded-lg border border-gray-800 bg-gray-950 p-3 text-sm">
