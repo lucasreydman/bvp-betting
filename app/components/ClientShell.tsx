@@ -95,7 +95,7 @@ export default function ClientShell() {
     .sort((a, b) => top5Score(b) - top5Score(a) || b.avg - a.avg || b.ab - a.ab)
     .slice(0, 5)
 
-  // Daily Double always computed from the same filtered top-5 shown in TopPlays,
+  // Recommended Double always computed from the same filtered top-5 shown in TopPlays,
   // so filters (min AB, min AVG) apply consistently to both.
   const csvDailyDouble: DailyDouble | null = suggestDailyDouble(top5Matchups)
 

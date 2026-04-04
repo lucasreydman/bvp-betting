@@ -138,16 +138,16 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
         <div className={`mt-4 rounded-lg border p-3 text-sm ${dailyDouble.isSmash ? 'border-orange-500/50 bg-orange-950/20' : 'border-gray-800 bg-gray-950'}`}>
           <div className="flex items-baseline gap-2 mb-1">
             <div className={`inline-flex items-center gap-1 uppercase tracking-wider text-[10px] font-semibold ${dailyDouble.isSmash ? 'text-orange-400' : 'text-yellow-400'}`}>
-              {dailyDouble.isSmash ? 'Smash Double' : 'Daily Double'}
+              {dailyDouble.isSmash ? 'Smash Double' : 'Recommended Double'}
               <span className="normal-case tracking-normal">
-                <InfoTooltip width="w-80" text="Legs are chosen by highest combined hit probability, not by list rank. Ranking uses AVG × confidence (rewards sample size). Hit chance uses regressed AVG (pulls toward .320 based on sample size, rewarding raw AVG more). A lower-ranked play with a higher raw AVG can end up with a higher hit chance and edge out the #1 play. Both legs must also face different pitchers." />
+                <InfoTooltip width="w-80" text="These legs are chosen from the current upcoming slate by highest combined hit probability, not by list rank. Ranking uses AVG × confidence, while hit chance uses regressed AVG plus expected at-bats. Before games start, this is the top 2-leg recommendation on the board. After games begin, it updates with the remaining upcoming slate." />
               </span>
             </div>
             {anyLegStarted ? (
-              <div className="text-[10px] text-gray-500">In progress. Export available below.</div>
+              <div className="text-[10px] text-gray-500">Current recommendation updates as the upcoming slate changes.</div>
             ) : (
               <div className={`text-[10px] ${dailyDouble.isSmash ? 'text-orange-400/70' : 'text-yellow-400/70'}`}>
-                {dailyDouble.isSmash ? 'Both legs OPS above .950 with 7+ hits. Strongest possible parlay.' : 'Parlay these two legs for +100 or better'}
+                {dailyDouble.isSmash ? 'Both legs OPS above .950 with 7+ hits. Strongest possible current parlay.' : 'Current recommended 2-leg parlay.'}
               </div>
             )}
           </div>
@@ -183,10 +183,10 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             <span className="text-green-300 font-semibold">Combined: {(dailyDouble.combinedProbability * 100).toFixed(2)}%</span>
             <span className="text-gray-500 text-xs">
               {anyLegStarted
-                ? `This was today's recommended parlay before games started.`
+                ? `This card reflects the current recommendation from the remaining upcoming slate.`
                 : dailyDouble.isSmash
-                  ? `Both legs have career OPS above .950 against their pitchers. Elite historical production on both sides of the parlay, not just strong AVG.`
-                  : `Chosen from today's top plays: highest combined hit probability with both legs on different pitchers.`}
+                  ? `Current top recommendation: both legs have career OPS above .950 against their pitchers, with at least 7 hits each.`
+                  : `Current top recommendation from the upcoming slate: highest combined hit probability with both legs on different pitchers.`}
             </span>
           </div>
           {!anyLegStarted && unconfirmedLegs > 0 && (
@@ -203,10 +203,10 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
       ) : (
         <div className="mt-4 rounded-lg border border-gray-800 bg-gray-950 p-3 text-sm">
           <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-gray-400 uppercase tracking-wider text-[10px] font-semibold">Daily Double</span>
-            <InfoTooltip width="w-64" text="A Daily Double is a 2-leg parlay built from the top plays with the highest combined hit probability, keeping both legs on different pitchers. If both legs also have career OPS above .950 and at least 7 hits against their pitcher, it upgrades to a Smash Double." />
+            <span className="text-gray-400 uppercase tracking-wider text-[10px] font-semibold">Recommended Double</span>
+            <InfoTooltip width="w-64" text="A Recommended Double is the current 2-leg parlay built from the upcoming slate with the highest combined hit probability, keeping both legs on different pitchers. If both legs also have career OPS above .950 and at least 7 hits against their pitcher, it upgrades to a Smash Double." />
           </div>
-          <p className="text-gray-500">{top5.length < 2 ? 'Not enough qualified plays to form a parlay. Fewer than 2 matchups meet the 15 AB / .300 AVG requirements today.' : 'No double recommendation available for the current top plays.'}</p>
+          <p className="text-gray-500">{top5.length < 2 ? 'Not enough qualified plays to form a recommended double. Fewer than 2 matchups meet the 15 AB / .300 AVG requirements today.' : 'No recommended double is available from the current upcoming slate.'}</p>
         </div>
       )}
     </div>

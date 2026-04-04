@@ -88,7 +88,7 @@ export default function Image() {
             display: 'flex',
           }}
         >
-          Career BvP stats for the Player Hits prop — min 15 AB, .300 AVG. Daily Double parlay picks ranked by weighted average.
+          Career BvP stats for the Player Hits prop — min 15 AB, .300 AVG. Recommended Double parlay picks ranked by weighted average.
         </div>
 
         {/* Sportsbook pills */}

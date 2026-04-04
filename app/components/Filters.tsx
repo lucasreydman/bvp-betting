@@ -226,11 +226,11 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
                 <button
                   type="button"
                   disabled={!dailyDouble}
-                  onClick={() => dailyDouble && downloadCSV([dailyDouble.first, dailyDouble.second], 'daily-double')}
+                  onClick={() => dailyDouble && downloadCSV([dailyDouble.first, dailyDouble.second], 'recommended-double')}
                   className="w-full text-left px-4 py-2.5 hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   <div className={`text-sm font-medium ${dailyDouble?.isSmash ? 'text-orange-400' : 'text-yellow-400'}`}>
-                    {dailyDouble?.isSmash ? 'Smash Double' : 'Daily Double'}
+                    {dailyDouble?.isSmash ? 'Smash Double' : 'Recommended Double'}
                   </div>
                   <div className="text-xs text-gray-500 mt-0.5">2 legs</div>
                 </button>
