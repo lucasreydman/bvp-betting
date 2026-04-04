@@ -11,19 +11,18 @@ export default function Footer() {
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Why AVG?</h3>
           <p className="leading-relaxed">
-            This prop wins on any hit (single through homer), so slugging and walks don&apos;t factor in. AVG is the direct measure:{' '}
+            This prop wins on any hit — single through homer — so slugging and walks don&apos;t factor in. AVG is the direct measure:{' '}
             <span className="text-gray-400 font-mono">P(1+ hit) = 1 − (1 − AVG)ⁿ</span> where n is
-            expected at-bats (4.1 unconfirmed; 3.85–4.45 by lineup position once confirmed). A .300 BvP AVG translates to roughly a 79–82% hit
-            probability, well above most book implied odds of 60–63%.
+            expected at-bats (4.1 unconfirmed; 3.85–4.45 by lineup spot once confirmed). A .300 BvP AVG means roughly a 79–82% hit probability, well above typical book lines of 60–63%.
           </p>
         </div>
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Minimum requirements</h3>
           <p className="leading-relaxed">
             Only matchups with at least 15 career AB and a .300+ BvP AVG are shown. Below 15 AB
-            the margin of error (±.145) is wide enough that a single fluky at-bat can swing the
-            average significantly, making the data unreliable for prop betting. The .300 floor
-            ensures every listed matchup reflects a historically meaningful edge over the pitcher.
+            the margin of error (±.145) is wide enough that a single at-bat can swing the average
+            significantly. The .300 floor ensures every listed matchup reflects a historically
+            meaningful edge over the pitcher.
           </p>
         </div>
         <div>
@@ -33,18 +32,16 @@ export default function Footer() {
             <span className="text-yellow-500">yellow</span> = 20–29 AB,{' '}
             <span className="text-red-500">red</span> = 15–19 AB.
             Top 5 Plays ranks by{' '}
-            <span className="text-gray-400 font-mono">AVG × min(AB / 30, 1)</span>, so a .350 in
-            30 AB scores higher than a .500 in 15 AB. Larger samples carry less variance and are
-            generally more reliable bets at the same AVG.
+            <span className="text-gray-400 font-mono">AVG × min(AB / 30, 1)</span>, so a .350 in 30 AB
+            scores higher than a .500 in 15 AB. Larger samples carry less variance and are generally more reliable at the same AVG.
           </p>
         </div>
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Optional filters</h3>
           <p className="leading-relaxed">
-            Two optional filters add a secondary confidence layer without changing the core logic.{' '}
-            <span className="text-gray-400">OPS</span> filters out batters who hit for average but produce little overall offense — useful, though walks and slugging matter less for this prop than raw hit rate.{' '}
-            <span className="text-gray-400">Hits</span> raises the minimum contact count, narrowing to batters with more demonstrated success against the pitcher beyond just AVG and AB.
-            Neither is required — both are personal tightening tools.
+            Both are optional and don&apos;t change the core logic — they narrow the list for personal conviction.{' '}
+            <span className="text-gray-400">OPS</span> filters out batters who hit for average but produce little overall offense; walks and slugging matter less here than raw hit rate.{' '}
+            <span className="text-gray-400">Hits</span> targets batters with more demonstrated contact against the pitcher, beyond just AVG and AB.
           </p>
         </div>
       </div>
