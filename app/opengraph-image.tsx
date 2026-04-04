@@ -131,7 +131,7 @@ export default function Image() {
             display: 'flex',
           }}
         >
-          mlbbvp.vercel.app
+          bvp-betting.vercel.app
         </div>
       </div>
     ),
