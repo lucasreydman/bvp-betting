@@ -32,27 +32,29 @@ lib/
   types.ts    # MatchupResult, FilterState, DEFAULT_FILTERS, SortState, MatchupsResponse
   stats.ts    # calcStats(), assignConfidence(), parseSplit()
   utils.ts    # applyFilters(), sortMatchups(), generateCSV(), formatTime(), suggestDailyDouble(), hitProbability(), regressedAvg(), expectedAtBats()
-  mlb-api.ts  # MLB Stats API fetch helpers
-  cache.ts    # createCache<T>(ttlMs), in-memory TTL cache
-  kv.ts       # Vercel KV wrapper with in-memory fallback; kvGet/kvSet(key, value, ttlSeconds?)/kvDel
+  mlb-api.ts       # MLB Stats API fetch helpers
+  game-status.ts   # Pure helpers: getGameStatus(), computeHitResult()
+  cache.ts         # createCache<T>(ttlMs), in-memory TTL cache
+  kv.ts            # Vercel KV wrapper with in-memory fallback; kvGet/kvSet(key, value, ttlSeconds?)/kvDel
 ```
 
 ## Data Flow
 
 1. `ClientShell` fetches `/api/matchups?date=YYYY-MM-DD` on mount and date change.
 2. Route checks a 5-minute KV response cache (`matchups-response:{date}`) and returns immediately if found.
-3. On cache miss: loads schedule (filtered for PPD/cancelled/suspended), then lineups (schedule hydration → boxscore → estimated top 9 by career PA pre-game only), then BvP in batches of 20 with 200 ms delays.
-4. Server excludes rows with fewer than 10 AB, then dedupes rows where **3+** batters on the same team vs the same pitcher share identical raw stats. Client applies filters: minAB, minAVG, and optional minOPS.
-5. Client splits into `upcoming` vs `inProgress` using `Date.now()` vs `gameTime`.
-6. `TopPlays` and the first table use `upcoming` only; second table is **In progress**.
-7. CSV export includes both upcoming and in-progress rows that pass filters.
-8. `applyFilters` and `sortMatchups` run each render (pure, fast; on the order of hundreds of rows).
-9. `ClientShell` silently re-fetches data every 5 min and re-renders every 60s to keep the upcoming/in-progress split current.
+3. On cache miss: separates games by `getGameStatus(detailedState)` → upcoming vs in-progress/settled. For upcoming: loads lineups then BvP in batches of 20 with 200 ms delays. For in-progress/settled: reads a frozen KV snapshot.
+4. Server excludes rows with fewer than 10 AB, then dedupes rows where **3+** batters on the same team vs the same pitcher share identical raw stats. After dedup, writes per-game KV snapshots (`game-qualifying:{gamePk}`, 24h TTL) for upcoming games.
+5. For in-progress/settled games, reads the pre-game KV snapshot and attaches live hit counts from `fetchBoxscoreHitting`. `computeHitResult` stamps each row `win/loss/pending`.
+6. Client receives every row with a server-set `gameStatus` field (`upcoming | inProgress | settled`). `ClientShell` splits `allMatchups` by `gameStatus`; filters apply to upcoming only.
+7. `TopPlays` and the first table use `upcoming` only; second table is **In progress**; third table is **Settled**.
+8. CSV export includes both upcoming and in-progress rows that pass filters.
+9. `applyFilters` and `sortMatchups` run each render (pure, fast; on the order of hundreds of rows).
+10. `ClientShell` silently re-fetches data every 5 min and re-renders every 60s.
 
 ## Key Invariants
 
-- **Filters:** AND logic across active filters (minAB/minAVG and optional minOPS). Same filters apply to Upcoming and In progress.
-- **Upcoming vs In progress:** Client-side split from `Date.now()` vs `m.gameTime`; updates automatically every 60s via tick state.
+- **Filters:** AND logic across active filters (minAB/minAVG and optional minOPS). Filters apply to Upcoming only; In progress and Settled show all qualifying rows unfiltered.
+- **Game status split:** Server-driven via `gameStatus` field on each `MatchupResult`. `getGameStatus(detailedState)` maps MLB API states → `upcoming | inProgress | settled`. Client reads `gameStatus` directly — no time-based split.
 - **TopPlays:** Only `upcoming` matchups (not the full unfiltered list).
 - **Default sort:** AVG desc by default (table). Top 5 card uses AVG × min(AB/30, 1) with tiebreakers raw AVG then AB.
 - **Confidence:** AB vs this pitcher: high ≥30, medium 15–29, low 10–14 (green / yellow / red).
@@ -72,6 +74,7 @@ lib/
 | Key | Value | TTL | Purpose |
 |-----|-------|-----|---------|
 | `matchups-response:{date}` | `MatchupsResponse` | 5 min | Full compiled matchups response cache |
+| `game-qualifying:{gamePk}` | `MatchupResult[]` | 24 hr | Pre-game qualifying snapshot; read for in-progress/settled games; written fire-and-forget for upcoming games after dedup |
 
 ## MLB Stats API
 
@@ -104,4 +107,4 @@ npx vercel --prod # deploy
 
 ## Tests
 
-Unit tests in `__tests__/` cover `lib/stats.ts`, `lib/utils.ts`, `lib/cache.ts`. Run with `npm test`. No component or route tests.
+Unit tests in `__tests__/` cover `lib/stats.ts`, `lib/utils.ts`, `lib/cache.ts`, `lib/game-status.ts`. Run with `npm test`. No component or route tests.

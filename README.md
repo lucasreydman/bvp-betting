@@ -22,8 +22,9 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 2. Builds each lineup: official order from the schedule or boxscore when available, otherwise the top 9 active players by career plate appearances.
 3. Fetches career BvP for each batter vs the opposing starter (minimum 10 AB to show a row).
 4. Computes AVG, OPS, SLG, OBP, and XBH from the split.
-5. Splits the UI into **Upcoming** and **In progress** after first pitch. The split updates automatically every 60 seconds.
-6. Data refreshes silently in the background every 5 minutes — no manual refresh needed.
+5. Splits results into **Upcoming**, **In progress**, and **Settled** tables based on game status from the MLB API. The qualifying player list for each game is frozen at game start — no new players can enter or leave mid-game.
+6. In-progress rows show whether each batter has gotten a hit yet (HIT / —). Settled rows show the final result (HIT / NO HIT).
+7. Data refreshes silently in the background every 5 minutes — no manual refresh needed.
 7. Sorts tables client-side (default: **AVG desc**).
 
 **Why BvP for this prop:** Any hit (single through homer) wins. This app uses career hit stats vs that specific pitcher; walks/HBP do not count as hits.
@@ -59,7 +60,7 @@ Today and tomorrow are available. The forward arrow peeks at tomorrow's probable
 | Min AVG | .300 | Batting average |
 | Min OPS | Off | Optional OPS filter (toggle on/off) |
 
-All active filters apply at once (AND logic). The same filters apply to Upcoming and In progress rows.
+All active filters apply at once (AND logic). Filters apply to the Upcoming table only — In progress and Settled tables show all qualifying rows regardless of filter settings.
 
 ## Export CSV
 
@@ -80,7 +81,8 @@ Sample size (career AB vs this pitcher):
 ## Data quality
 
 - The API sometimes returns team-level aggregates instead of true individual BvP. Any raw stat line shared by **three or more** batters on the same team against the same pitcher is dropped.
-- Once a game starts, only batters confirmed in the boxscore are shown — no estimated roster fallback after first pitch.
+- When a game is upcoming, the qualifying matchups for that game are snapshotted to KV. Once the game starts, only players from that pre-game snapshot appear in the In progress and Settled tables — no new players can enter mid-game.
+- If no pre-game snapshot exists for a game (e.g. the server first saw it already in progress), that game is omitted from In progress and Settled rather than showing unverified data.
 - Lineup data is always fetched fresh (no caching) so scratches and late lineup changes propagate within the 5-minute response cache window.
 
 ## Mobile layout
@@ -151,6 +153,7 @@ lib/
 | Key | Value | TTL | Purpose |
 |-----|-------|-----|---------|
 | `matchups-response:{date}` | `MatchupsResponse` | 5 min | Full compiled matchups response; absorbs concurrent load |
+| `game-qualifying:{gamePk}` | `MatchupResult[]` | 24 hr | Pre-game snapshot of qualifying matchups; frozen at game start for in-progress/settled display |
 
 ## Disclaimer
 
