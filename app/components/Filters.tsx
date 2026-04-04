@@ -2,7 +2,7 @@
 import { useId, useState, useEffect, useRef } from 'react'
 import type { FilterState, MatchupResult } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
-import { generateCSV } from '@/lib/utils'
+import { formatLocalDate, generateCSV } from '@/lib/utils'
 import type { DailyDouble } from '@/lib/utils'
 
 interface Props {
@@ -82,7 +82,7 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `bvp-${label}-${new Date().toISOString().split('T')[0]}.csv`
+    a.download = `bvp-${label}-${formatLocalDate()}.csv`
     a.click()
     URL.revokeObjectURL(url)
     setShowExportMenu(false)

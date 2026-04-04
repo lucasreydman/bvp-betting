@@ -48,6 +48,13 @@ export function formatTime(isoString: string): string {
   })
 }
 
+export function formatLocalDate(date = new Date()): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 // Regression target is ~0.320 (conditional mean of pre-filtered matchups: min 15 AB, min .300 AVG)
 // rather than the league-wide average of .260, which undershoots this pre-selected population.
 export function regressedAvg(avg: number, ab: number, leagueAvg = 0.32, regStrength = 50): number {

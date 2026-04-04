@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { MatchupResult, FilterState, MatchupsResponse, SortState } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
-import { applyFilters, sortMatchups, suggestDailyDouble } from '@/lib/utils'
+import { applyFilters, formatLocalDate, sortMatchups, suggestDailyDouble } from '@/lib/utils'
 import type { DailyDouble } from '@/lib/utils'
 import StatusBar from './StatusBar'
 import DatePicker from './DatePicker'
@@ -11,17 +11,9 @@ import TopPlays from './TopPlays'
 import Filters from './Filters'
 import MatchupTable from './MatchupTable'
 
-function localToday(): string {
-  const d = new Date()
-  const yyyy = d.getFullYear()
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
-  return `${yyyy}-${mm}-${dd}`
-}
-
 
 export default function ClientShell() {
-  const [date, setDate] = useState(localToday)
+  const [date, setDate] = useState(formatLocalDate)
   const [allMatchups, setAllMatchups] = useState<MatchupResult[]>([])
   const [meta, setMeta] = useState<Omit<MatchupsResponse, 'results'> | null>(null)
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)

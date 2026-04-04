@@ -1,4 +1,4 @@
-import { formatTime, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, hitProbability, suggestDailyDouble } from '@/lib/utils'
+import { formatTime, formatLocalDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, hitProbability, suggestDailyDouble } from '@/lib/utils'
 import { DEFAULT_FILTERS, type MatchupResult } from '@/lib/types'
 
 const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => ({
@@ -37,6 +37,24 @@ describe('formatTime', () => {
     const result = formatTime('2026-04-01T18:05:00Z')
     expect(result).toMatch(/\d{1,2}:\d{2}/)
     expect(result).toMatch(/AM|PM/)
+  })
+})
+
+describe('formatLocalDate', () => {
+  it('uses local calendar fields instead of UTC ISO date slicing', () => {
+    const date = new Date('2026-04-04T01:30:00Z')
+    const getFullYearSpy = jest.spyOn(date, 'getFullYear').mockReturnValue(2026)
+    const getMonthSpy = jest.spyOn(date, 'getMonth').mockReturnValue(3)
+    const getDateSpy = jest.spyOn(date, 'getDate').mockReturnValue(3)
+    const toISOStringSpy = jest.spyOn(date, 'toISOString').mockReturnValue('2026-04-04T01:30:00.000Z')
+
+    expect(formatLocalDate(date)).toBe('2026-04-03')
+    expect(toISOStringSpy).not.toHaveBeenCalled()
+
+    getFullYearSpy.mockRestore()
+    getMonthSpy.mockRestore()
+    getDateSpy.mockRestore()
+    toISOStringSpy.mockRestore()
   })
 })
 

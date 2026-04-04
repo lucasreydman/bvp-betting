@@ -1,5 +1,7 @@
 'use client'
 
+import { formatLocalDate } from '@/lib/utils'
+
 interface Props {
   date: string        // YYYY-MM-DD
   onChange: (date: string) => void
@@ -17,7 +19,7 @@ function formatDisplay(dateStr: string): string {
 }
 
 export default function DatePicker({ date, onChange }: Props) {
-  const today = new Date().toISOString().split('T')[0]
+  const today = formatLocalDate()
   const minDate = today
   const maxDate = addDays(today, 1)
 
