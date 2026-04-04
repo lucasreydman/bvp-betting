@@ -4,7 +4,7 @@ import type { FilterState, MatchupResult } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
 import { formatLocalDate, generateCSV } from '@/lib/utils'
 import type { DailyDouble } from '@/lib/utils'
-import InfoTooltip from './InfoTooltip'
+
 
 interface Props {
   filters: FilterState
@@ -14,8 +14,8 @@ interface Props {
   dailyDouble?: DailyDouble | null
 }
 
-const DEFAULT_OPS_VALUE = 0.700
-const DEFAULT_H_VALUE = 5
+const DEFAULT_OPS_VALUE = 0.950
+const DEFAULT_H_VALUE = 7
 
 export default function Filters({ filters, onApply, matchups, top5, dailyDouble }: Props) {
   const minOpsId = useId()
@@ -96,21 +96,13 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
           </span>
 
           {/* 15 AB chip */}
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-800 border border-gray-700 text-xs font-mono text-gray-300">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-800 border border-gray-700 text-xs font-mono text-gray-300">
             15 AB
-            <InfoTooltip
-              width="w-64"
-              text="Minimum 15 career at-bats vs this pitcher. Below 15 AB the margin of error (±.145) is too wide — a single at-bat can swing the average significantly."
-            />
           </span>
 
           {/* .300 AVG chip */}
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-800 border border-gray-700 text-xs font-mono text-gray-300">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-800 border border-gray-700 text-xs font-mono text-gray-300">
             .300 AVG
-            <InfoTooltip
-              width="w-64"
-              text="Minimum .300 career batting average vs this pitcher. Ensures every listed matchup reflects a historically meaningful edge — roughly a 79–82% hit probability over a full game."
-            />
           </span>
         </div>
 
@@ -131,10 +123,6 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
               onChange={e => setOpsDisplay(e.target.value)}
               onBlur={e => setOpsDisplay(Number(e.target.value).toFixed(3))}
               className="w-14 bg-transparent text-blue-200 text-xs font-mono focus:outline-none"
-            />
-            <InfoTooltip
-              width="w-72"
-              text="OPS (on-base + slugging) is a secondary quality check. It can filter out batters who hit for average but produce little overall offense. Not the primary metric for this prop — walks and slugging are less relevant than raw hit rate."
             />
             <button
               type="button"
@@ -171,10 +159,6 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
               onChange={e => setHDisplay(e.target.value)}
               onBlur={e => setHDisplay(String(Math.max(1, Math.round(Number(e.target.value)))))}
               className="w-8 bg-transparent text-blue-200 text-xs font-mono focus:outline-none"
-            />
-            <InfoTooltip
-              width="w-72"
-              text="Minimum career hits vs this pitcher. Filters for batters with more demonstrated contact — useful for narrowing to higher-conviction plays. Doesn't change the core logic; just raises the sample quality bar alongside the required .300 AVG."
             />
             <button
               type="button"
