@@ -26,25 +26,25 @@ export default function StatusBar({ fetchedAt, gamesScanned, gamesSkipped, onRef
 
   return (
     <div className="flex items-center gap-3 sm:gap-6 text-gray-400 w-full sm:w-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-5 flex-1 min-w-0">
 
-        {/* Current time + Last updated */}
-        <div className="flex items-center gap-4">
+      {/* Times: stacked on mobile, row on desktop */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-5 flex-1 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4">
           {now && (
             <div className="flex items-baseline gap-1.5">
               <span className="text-[10px] uppercase tracking-wider text-gray-600 font-semibold">Now</span>
-              <span className="font-mono text-xs text-gray-400 whitespace-nowrap">{now}</span>
+              <span className="font-mono text-xs text-gray-400">{now}</span>
             </div>
           )}
           {fetchedAt && (
             <div className="flex items-baseline gap-1.5">
               <span className="text-[10px] uppercase tracking-wider text-gray-600 font-semibold">Updated</span>
-              <span className="font-mono text-xs text-gray-400 whitespace-nowrap">{formatTime(fetchedAt)}</span>
+              <span className="font-mono text-xs text-gray-400">{formatTime(fetchedAt)}</span>
             </div>
           )}
         </div>
 
-        {/* Games scanned / skipped */}
+        {/* Games scanned / skipped — desktop only */}
         {gamesScanned > 0 && (
           <div className="hidden sm:flex items-center gap-1 text-xs text-gray-600 whitespace-nowrap">
             <span>{gamesScanned} games scanned</span>
@@ -66,7 +66,7 @@ export default function StatusBar({ fetchedAt, gamesScanned, gamesSkipped, onRef
         type="button"
         onClick={onRefresh}
         disabled={isLoading}
-        className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 sm:px-4 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:opacity-50 text-white rounded text-xs font-semibold transition-colors touch-manipulation ml-auto sm:ml-0"
+        className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 sm:px-4 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:opacity-50 text-white rounded text-xs font-semibold transition-colors touch-manipulation"
       >
         <span className={isLoading ? 'animate-spin inline-block' : ''}>↻</span>
         <span>{isLoading ? 'Loading…' : 'Refresh'}</span>
