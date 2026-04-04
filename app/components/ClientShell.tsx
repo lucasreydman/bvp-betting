@@ -118,7 +118,7 @@ export default function ClientShell() {
       )}
 
       {isLoading ? (
-        <LoadingSkeleton />
+        <LoadingSkeleton date={date} />
       ) : (
         <>
           <TopPlays matchups={upcoming} overrideDailyDouble={csvDailyDouble} now={now} />

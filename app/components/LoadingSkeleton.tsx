@@ -1,7 +1,21 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { formatLocalDate } from '@/lib/utils'
 
-export default function LoadingSkeleton() {
+interface Props {
+  date: string  // YYYY-MM-DD
+}
+
+function dateLabel(date: string): string {
+  const today = formatLocalDate()
+  const yesterday = formatLocalDate(new Date(Date.now() - 86400000))
+  const tomorrow = formatLocalDate(new Date(Date.now() + 86400000))
+  if (date === yesterday) return "yesterday's"
+  if (date === tomorrow) return "tomorrow's"
+  return "today's"
+}
+
+export default function LoadingSkeleton({ date }: Props) {
   const [elapsed, setElapsed] = useState(0)
 
   useEffect(() => {
@@ -12,7 +26,7 @@ export default function LoadingSkeleton() {
 
   const message =
     elapsed < 5
-      ? 'Fetching today\'s matchups\u2026'
+      ? `Fetching ${dateLabel(date)} matchups\u2026`
       : elapsed < 15
         ? 'Loading lineups and BvP data\u2026'
         : elapsed < 30
