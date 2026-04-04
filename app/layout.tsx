@@ -16,11 +16,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: 'MLB BvP Betting',
   description:
-    'Career batter vs pitcher stats for the Player to Record a Hit prop. Daily Double parlay picks for FanDuel, Bet365, and theScore. Filter by AVG, AB, and OPS.',
+    'Career batter vs pitcher stats for the Player to Record a Hit prop. Daily Double parlay picks for all major sportsbooks. Filter by AVG, AB, and OPS.',
   openGraph: {
     title: 'MLB BvP Betting: Daily Hit Prop Picks',
     description:
-      "Today's best batter vs pitcher matchups ranked by career batting average. Daily Double parlay picks for FanDuel, Bet365, and theScore.",
+      "Today's best batter vs pitcher matchups ranked by career batting average. Daily Double parlay picks for all major sportsbooks.",
     type: 'website',
     url: SITE_URL,
     images: [{ url: '/opengraph-image' }],
