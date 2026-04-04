@@ -1,3 +1,6 @@
 {
-  "css.lint.validProperties": ["scrollbar-width", "scrollbar-color"]
+  "css.lint.validProperties": ["scrollbar-width", "scrollbar-color"],
+  "chat.editing.autoAcceptDelay": 100,
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000
 }

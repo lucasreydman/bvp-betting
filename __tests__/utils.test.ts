@@ -29,6 +29,7 @@ const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => (
   ops: 1.178,
   xbh: 4,
   confidence: 'medium',
+  gameStatus: 'upcoming',
   ...overrides,
 })
 
