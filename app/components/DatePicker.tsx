@@ -20,7 +20,7 @@ function formatDisplay(dateStr: string): string {
 
 export default function DatePicker({ date, onChange }: Props) {
   const today = formatLocalDate()
-  const minDate = today
+  const minDate = addDays(today, -1)
   const maxDate = addDays(today, 1)
 
   return (
@@ -29,7 +29,7 @@ export default function DatePicker({ date, onChange }: Props) {
         <button
           type="button"
           onClick={() => onChange(addDays(date, -1))}
-          title="Return to today's slate"
+          title={date === today ? "View yesterday's results" : "Return to today's slate"}
           className="text-gray-500 hover:text-white transition-colors text-lg leading-none"
         >
           ‹

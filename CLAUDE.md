@@ -67,14 +67,14 @@ lib/
 - **KV TTLs:** Response cache uses 5-min TTL. `kvSet` accepts an optional third argument `ttlSeconds`.
 - **PPD/cancelled games:** Filtered in `fetchSchedule` before any lineup or BvP work. Status checked via `g.status.detailedState`.
 - **Lineup sources (priority order):** 1) Schedule hydration (`lineups.homePlayers/awayPlayers`, ≥8), 2) Boxscore `batters` array (always `cache: 'no-store'`), 3) Estimated top-9 roster by career PA — **only pre-game**. Once a game has started, if no confirmed batters exist, return empty rather than estimated.
-- **Date range:** Today and tomorrow only (no past dates). `DatePicker` enforces `minDate = today`, `maxDate = today + 1`.
+- **Date range:** Yesterday, today, and tomorrow. `DatePicker` enforces `minDate = today - 1`, `maxDate = today + 1`. Yesterday shows settled results only (reads `game-qualifying` KV snapshots; rows won't appear if the 24h TTL expired).
 
 ## KV Schema
 
 | Key | Value | TTL | Purpose |
 |-----|-------|-----|---------|
 | `matchups-response:{date}` | `MatchupsResponse` | 5 min | Full compiled matchups response cache |
-| `game-qualifying:{gamePk}` | `MatchupResult[]` | 24 hr | Pre-game qualifying snapshot; read for in-progress/settled games; written fire-and-forget for upcoming games after dedup |
+| `game-qualifying:{gamePk}` | `MatchupResult[]` | 36 hr | Pre-game qualifying snapshot; read for in-progress/settled games; written fire-and-forget for upcoming games after dedup |
 
 ## MLB Stats API
 

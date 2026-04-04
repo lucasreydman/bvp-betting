@@ -215,7 +215,7 @@ export async function GET(req: NextRequest) {
       byGame.set(m.gamePk, arr)
     }
     for (const [gamePk, matchups] of byGame) {
-      kvSet(`game-qualifying:${gamePk}`, matchups, 86400).catch(err =>
+      kvSet(`game-qualifying:${gamePk}`, matchups, 129600).catch(err =>
         console.error(`Failed to write snapshot for game ${gamePk}:`, err)
       )
     }
