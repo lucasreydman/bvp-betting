@@ -15,26 +15,18 @@ interface Props {
 
 const DEFAULT_OPS_VALUE = 0.700
 
-function initDisplay(f: FilterState): { minAB: string; minOPS: string; minAVG: string } {
-  return {
-    minAB: String(f.minAB),
-    minOPS: f.minOPS !== null ? f.minOPS.toFixed(3) : DEFAULT_OPS_VALUE.toFixed(3),
-    minAVG: f.minAVG.toFixed(3),
-  }
-}
-
 export default function Filters({ filters, onApply, matchups, top5, dailyDouble }: Props) {
-  const minAbId = useId()
-  const minAvgId = useId()
   const minOpsId = useId()
-  const [local, setLocal] = useState(() => initDisplay(filters))
+  const [opsDisplay, setOpsDisplay] = useState(
+    filters.minOPS !== null ? filters.minOPS.toFixed(3) : DEFAULT_OPS_VALUE.toFixed(3)
+  )
   const [opsEnabled, setOpsEnabled] = useState(filters.minOPS !== null)
   const [flash, setFlash] = useState<'apply' | 'reset' | 'export' | null>(null)
   const [showExportMenu, setShowExportMenu] = useState(false)
   const exportRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    setLocal(initDisplay(filters))
+    setOpsDisplay(filters.minOPS !== null ? filters.minOPS.toFixed(3) : DEFAULT_OPS_VALUE.toFixed(3))
     setOpsEnabled(filters.minOPS !== null)
   }, [filters])
 
@@ -54,24 +46,14 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
     setTimeout(() => setFlash(null), 1500)
   }
 
-  const set = (key: keyof typeof local, value: string) => {
-    setLocal(prev => ({ ...prev, [key]: value }))
-  }
-
-  const parseLocal = (): FilterState => ({
-    minAB: Number(local.minAB),
-    minOPS: opsEnabled ? Number(local.minOPS) : null,
-    minAVG: Number(local.minAVG),
-  })
-
   const handleApply = () => {
-    onApply(parseLocal())
+    onApply({ minOPS: opsEnabled ? Number(opsDisplay) : null })
     flashFor('apply')
   }
 
   const handleReset = () => {
-    setLocal(initDisplay(DEFAULT_FILTERS))
-    setOpsEnabled(DEFAULT_FILTERS.minOPS !== null)
+    setOpsDisplay(DEFAULT_OPS_VALUE.toFixed(3))
+    setOpsEnabled(false)
     onApply(DEFAULT_FILTERS)
     flashFor('reset')
   }
@@ -89,49 +71,20 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
     flashFor('export')
   }
 
-  const handleToggleOPS = () => {
-    setOpsEnabled(prev => !prev)
-  }
-
-  const field = (label: string, key: keyof typeof local, step: string, id: string) => (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-xs text-gray-400">
-        {label}
-      </label>
-      <input
-        id={id}
-        type="number"
-        value={local[key]}
-        step={step}
-        onChange={e => set(key, e.target.value)}
-        onBlur={e => set(key, Number(e.target.value).toFixed(3))}
-        className="w-20 bg-gray-800 text-white text-sm px-2 py-1.5 rounded border border-gray-700 focus:outline-none focus:border-blue-500 font-mono"
-      />
-    </div>
-  )
-
   return (
     <div className="bg-gray-900 rounded-lg p-4 mb-4">
       <div className="flex flex-wrap items-end gap-4">
         <div className="flex flex-col gap-1">
-          <label htmlFor={minAbId} className="text-xs text-gray-400">Min AB</label>
-          <input
-            id={minAbId}
-            type="number"
-            value={local.minAB}
-            step="1"
-            onChange={e => set('minAB', e.target.value)}
-            className="w-20 bg-gray-800 text-white text-sm px-2 py-1.5 rounded border border-gray-700 focus:outline-none focus:border-blue-500 font-mono"
-          />
+          <span className="text-xs text-gray-500">Requirements</span>
+          <span className="text-sm text-gray-400 font-mono py-1.5">15 AB · .300 AVG</span>
         </div>
-        {field('Min AVG', 'minAVG', '0.001', minAvgId)}
         {opsEnabled ? (
           <div className="flex flex-col gap-1">
             <label htmlFor={minOpsId} className="text-xs text-gray-400 flex items-center gap-1">
               Min OPS
               <button
                 type="button"
-                onClick={handleToggleOPS}
+                onClick={() => setOpsEnabled(false)}
                 className="text-gray-600 hover:text-gray-400 text-xs leading-none p-0.5 touch-manipulation"
                 title="Remove OPS filter"
               >
@@ -141,10 +94,10 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
             <input
               id={minOpsId}
               type="number"
-              value={local.minOPS}
+              value={opsDisplay}
               step="0.001"
-              onChange={e => set('minOPS', e.target.value)}
-              onBlur={e => set('minOPS', Number(e.target.value).toFixed(3))}
+              onChange={e => setOpsDisplay(e.target.value)}
+              onBlur={e => setOpsDisplay(Number(e.target.value).toFixed(3))}
               className="w-20 bg-gray-800 text-white text-sm px-2 py-1.5 rounded border border-gray-700 focus:outline-none focus:border-blue-500 font-mono"
             />
           </div>
@@ -152,7 +105,7 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
           <div className="flex flex-col justify-end gap-1">
             <button
               type="button"
-              onClick={handleToggleOPS}
+              onClick={() => setOpsEnabled(true)}
               className="text-xs text-gray-500 hover:text-gray-300 border border-dashed border-gray-700 hover:border-gray-500 px-2 py-1.5 rounded transition-colors touch-manipulation"
             >
               + OPS filter

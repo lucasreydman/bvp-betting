@@ -31,21 +31,17 @@ export interface MatchupResult {
   ops: number
   xbh: number
 
-  confidence: 'high' | 'medium' | 'low'  // 30+ AB, 15-29 AB, 10-14 AB
+  confidence: 'high' | 'medium' | 'low'  // 30+ AB, 15-29 AB (low never shown; server enforces 15 AB min)
   gameStatus: 'upcoming' | 'inProgress' | 'settled'
   hitResult?: 'win' | 'loss' | 'pending'   // only present on inProgress and settled rows
 }
 
 export interface FilterState {
-  minAB: number
-  minOPS: number | null  // null = not active
-  minAVG: number
+  minOPS: number | null  // null = not active; minAB (15) and minAVG (0.300) are server-enforced
 }
 
 export const DEFAULT_FILTERS: FilterState = {
-  minAB: 15,
   minOPS: null,
-  minAVG: 0.300,
 }
 
 export interface MatchupsResponse {
@@ -53,7 +49,7 @@ export interface MatchupsResponse {
   fetchedAt: string
   gamesScanned: number      // each game in a doubleheader counted separately
   gamesSkipped: number      // games skipped due to missing probable pitcher
-  matchupsFound: number     // count after server-side AB < 10 exclusion
+  matchupsFound: number     // count after server-side AB < 15 / AVG < .300 exclusion
   results: MatchupResult[]
 }
 

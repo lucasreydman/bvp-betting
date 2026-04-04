@@ -86,7 +86,6 @@ export interface DailyDouble {
 
 export function suggestDailyDouble(matchups: MatchupResult[]): DailyDouble | null {
   const enriched = matchups
-    .filter(matchup => matchup.ab >= 15 && matchup.avg >= 0.300)
     .map(matchup => ({
       matchup,
       probability: hitProbability(regressedAvg(matchup.avg, matchup.ab), expectedAtBats(matchup.lineupPosition)),
@@ -135,8 +134,6 @@ export function formatCountdownToStart(isoString: string, nowMs: number): string
 
 export function applyFilters(matchups: MatchupResult[], filters: FilterState): MatchupResult[] {
   return matchups.filter(m =>
-    m.ab >= filters.minAB &&
-    m.avg >= filters.minAVG &&
     (filters.minOPS === null || m.ops >= filters.minOPS)
   )
 }

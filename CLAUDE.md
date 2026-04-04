@@ -53,11 +53,11 @@ lib/
 
 ## Key Invariants
 
-- **Filters:** AND logic across active filters (minAB/minAVG and optional minOPS). Filters apply to Upcoming only; In progress and Settled show all qualifying rows unfiltered.
+- **Filters:** minAB (15) and minAVG (.300) are server-enforced hard minimums — not user-editable. Only minOPS is user-configurable (optional). OPS filter applies to all three tables (upcoming, inProgress, settled).
 - **Game status split:** Server-driven via `gameStatus` field on each `MatchupResult`. `getGameStatus(detailedState)` maps MLB API states → `upcoming | inProgress | settled`. Client reads `gameStatus` directly — no time-based split.
 - **TopPlays:** Only `upcoming` matchups (not the full unfiltered list).
 - **Default sort:** AVG desc by default (table). Top 5 card uses AVG × min(AB/30, 1) with tiebreakers raw AVG then AB.
-- **Confidence:** AB vs this pitcher: high ≥30, medium 15–29, low 10–14 (green / yellow / red).
+- **Confidence:** AB vs this pitcher: high ≥30, medium 15–29 (green / yellow). Low (10–14 AB) never appears since server enforces 15 AB minimum.
 - **Caches:** Module-level only for BvP and roster/name TTL caches (not recreated inside the handler). Response-level KV cache at `matchups-response:{date}` with 5-min TTL.
 - **`parseSplit(stat)`:** Single mapping from MLB stat fields to raw + calculated fields; use in both API routes.
 - **Aggregate dedup:** Drop rows where `keyCounts(statKey) >= 3` for identical raw lines (same team vs same pitcher). 3+ identical BvP lines from the same team is impossible in real data.

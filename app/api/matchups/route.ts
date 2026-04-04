@@ -182,7 +182,7 @@ export async function GET(req: NextRequest) {
             stats = parseSplit(fetched.stat)
             bvpCache.set(cacheKey, stats)
           }
-          if (stats.ab < 10) return null
+          if (stats.ab < 15 || stats.avg < 0.300) return null
           const batterName = await getPlayerName(pair.batterId)
           return {
             ...pair,

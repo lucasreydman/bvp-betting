@@ -75,14 +75,17 @@ export default function ClientShell() {
 
   const now = Date.now() + tick * 0 // tick dependency keeps this fresh every 60s
 
-  const upcomingAll = allMatchups.filter(m => m.gameStatus === 'upcoming')
-  const upcoming    = sortMatchups(applyFilters(upcomingAll, filters), sort)
-  const inProgress  = sortMatchups(allMatchups.filter(m => m.gameStatus === 'inProgress'), sort)
-  const settled     = allMatchups.filter(m => m.gameStatus === 'settled')
+  const allUpcoming   = allMatchups.filter(m => m.gameStatus === 'upcoming')
+  const allInProgress = allMatchups.filter(m => m.gameStatus === 'inProgress')
+  const allSettled    = allMatchups.filter(m => m.gameStatus === 'settled')
+
+  const upcoming   = sortMatchups(applyFilters(allUpcoming, filters), sort)
+  const inProgress = sortMatchups(applyFilters(allInProgress, filters), sort)
+  const settled    = applyFilters(allSettled, filters)
   const csvMatchups = [...upcoming, ...inProgress]
 
-  const totalUpcoming   = upcomingAll.length
-  const totalInProgress = inProgress.length
+  const totalUpcoming   = allUpcoming.length
+  const totalInProgress = allInProgress.length
 
   const top5Score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
 
@@ -146,7 +149,7 @@ export default function ClientShell() {
                 matchups={settled}
                 sort={sort}
                 onSort={() => {}}
-                totalMatchups={settled.length}
+                totalMatchups={allSettled.length}
                 title="Settled"
                 gameKind="settled"
               />
