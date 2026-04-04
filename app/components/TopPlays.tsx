@@ -199,7 +199,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             <span className="text-gray-400 uppercase tracking-wider text-[10px] font-semibold">Daily Double</span>
             <InfoTooltip width="w-56" text="A Daily Double is a 2-leg parlay built from the top plays with the highest combined hit probability, keeping both legs on different pitchers. If both legs also have career OPS above .950, it upgrades to a Smash Double." />
           </div>
-          <p className="text-gray-500">{top5.length < 2 ? 'Not enough qualified plays to form a parlay. Try lowering the Min AB or Min AVG filter to see more matchups.' : 'No double recommendation available for the current top plays.'}</p>
+          <p className="text-gray-500">{top5.length < 2 ? 'Not enough qualified plays to form a parlay. Fewer than 2 matchups meet the 15 AB / .300 AVG requirements today.' : 'No double recommendation available for the current top plays.'}</p>
         </div>
       )}
     </div>

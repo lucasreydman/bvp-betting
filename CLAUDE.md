@@ -57,7 +57,7 @@ lib/
 - **Game status split:** Server-driven via `gameStatus` field on each `MatchupResult`. `getGameStatus(detailedState)` maps MLB API states → `upcoming | inProgress | settled`. Client reads `gameStatus` directly — no time-based split.
 - **TopPlays:** Only `upcoming` matchups (not the full unfiltered list).
 - **Default sort:** AVG desc by default (table). Top 5 card uses AVG × min(AB/30, 1) with tiebreakers raw AVG then AB.
-- **Confidence:** AB vs this pitcher: high ≥30, medium 15–29 (green / yellow). Low (10–14 AB) never appears since server enforces 15 AB minimum.
+- **Confidence:** AB vs this pitcher: high ≥30 (green), medium 20–29 (yellow), low 15–19 (red). Server enforces 15 AB minimum so all three tiers are reachable.
 - **Caches:** Module-level only for BvP and roster/name TTL caches (not recreated inside the handler). Response-level KV cache at `matchups-response:{date}` with 5-min TTL.
 - **`parseSplit(stat)`:** Single mapping from MLB stat fields to raw + calculated fields; use in both API routes.
 - **Aggregate dedup:** Drop rows where `keyCounts(statKey) >= 3` for identical raw lines (same team vs same pitcher). 3+ identical BvP lines from the same team is impossible in real data.

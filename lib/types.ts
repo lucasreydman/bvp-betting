@@ -31,7 +31,7 @@ export interface MatchupResult {
   ops: number
   xbh: number
 
-  confidence: 'high' | 'medium' | 'low'  // 30+ AB, 15-29 AB (low never shown; server enforces 15 AB min)
+  confidence: 'high' | 'medium' | 'low'  // 30+ AB = high, 20-29 AB = medium, 15-19 AB = low
   gameStatus: 'upcoming' | 'inProgress' | 'settled'
   hitResult?: 'win' | 'loss' | 'pending'   // only present on inProgress and settled rows
 }

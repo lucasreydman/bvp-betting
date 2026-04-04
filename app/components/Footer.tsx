@@ -18,25 +18,24 @@ export default function Footer() {
           </p>
         </div>
         <div>
-          <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Defaults are recommended</h3>
+          <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Minimum requirements</h3>
           <p className="leading-relaxed">
-            The defaults (15 AB, .300 AVG) are set to show only reliable, meaningful matchups out of
-            the box. All filters are customizable. Dropping min AB to 10 reveals smaller samples
-            shown in <span className="text-red-500">red</span>: real data, but with a margin of
-            error wide enough (±.145) that a single fluky at-bat can swing the AVG significantly.
-            Raising min AVG tightens the list to the strongest historical matchups only.
+            Only matchups with at least 15 career AB and a .300+ BvP AVG are shown. Below 15 AB
+            the margin of error (±.145) is wide enough that a single fluky at-bat can swing the
+            average significantly, making the data unreliable for prop betting. The .300 floor
+            ensures every listed matchup reflects a historically meaningful edge over the pitcher.
           </p>
         </div>
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Confidence &amp; Top 5</h3>
           <p className="leading-relaxed">
             Confidence reflects sample size: <span className="text-green-500">green</span> = 30+ AB,{' '}
-            <span className="text-yellow-500">yellow</span> = 15–29 AB,{' '}
-            <span className="text-red-500">red</span> = 10–14 AB (visible when min AB is lowered).
+            <span className="text-yellow-500">yellow</span> = 20–29 AB,{' '}
+            <span className="text-red-500">red</span> = 15–19 AB.
             Top 5 Plays ranks by{' '}
             <span className="text-gray-400 font-mono">AVG × min(AB / 30, 1)</span>, so a .350 in
-            30 AB scores higher than a .500 in 8 AB. Lowering min AB can shift the top 5, but
-            smaller samples carry wider variance and are not automatically better bets.
+            30 AB scores higher than a .500 in 15 AB. Larger samples carry less variance and are
+            generally more reliable bets at the same AVG.
           </p>
         </div>
         <div>
