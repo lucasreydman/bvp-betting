@@ -7,7 +7,6 @@ interface Props {
 }
 
 function dateLabel(date: string): string {
-  const today = formatLocalDate()
   const yesterday = formatLocalDate(new Date(Date.now() - 86400000))
   const tomorrow = formatLocalDate(new Date(Date.now() + 86400000))
   if (date === yesterday) return "yesterday's"

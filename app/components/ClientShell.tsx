@@ -88,6 +88,7 @@ export default function ClientShell() {
   const totalInProgress = allInProgress.length
 
   const top5Score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
+  const filtersKey = `${filters.minOPS ?? 'none'}-${filters.minH ?? 'none'}`
 
   // Top 5 for display + "Top 5 Plays" CSV: upcoming only (bettable)
   const top5Matchups = [...upcoming]
@@ -122,7 +123,14 @@ export default function ClientShell() {
       ) : (
         <>
           <TopPlays matchups={upcoming} overrideDailyDouble={csvDailyDouble} now={now} />
-          <Filters filters={filters} onApply={setFilters} matchups={csvMatchups} top5={top5Matchups} dailyDouble={csvDailyDouble} />
+          <Filters
+            key={filtersKey}
+            filters={filters}
+            onApply={setFilters}
+            matchups={csvMatchups}
+            top5={top5Matchups}
+            dailyDouble={csvDailyDouble}
+          />
           <MatchupTable
             matchups={upcoming}
             sort={sort}

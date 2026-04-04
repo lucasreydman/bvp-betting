@@ -33,13 +33,6 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
   const exportRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    setOpsDisplay(filters.minOPS !== null ? filters.minOPS.toFixed(3) : DEFAULT_OPS_VALUE.toFixed(3))
-    setOpsEnabled(filters.minOPS !== null)
-    setHDisplay(filters.minH !== null ? String(filters.minH) : String(DEFAULT_H_VALUE))
-    setHEnabled(filters.minH !== null)
-  }, [filters])
-
-  useEffect(() => {
     if (!showExportMenu) return
     const handler = (e: MouseEvent) => {
       if (exportRef.current && !exportRef.current.contains(e.target as Node)) {
