@@ -5,9 +5,12 @@ import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
-const SITE_URL = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL
+  ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000')
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -20,12 +23,14 @@ export const metadata: Metadata = {
       "Today's best batter vs pitcher matchups ranked by career batting average. Daily Double parlay picks for FanDuel, Bet365, and theScore.",
     type: 'website',
     url: SITE_URL,
+    images: [{ url: '/opengraph-image' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'MLB BvP Betting: Daily Hit Prop Picks',
     description:
       "Today's best batter vs pitcher matchups ranked by career batting average. Daily Double parlay picks.",
+    images: ['/opengraph-image'],
   },
 }
 
