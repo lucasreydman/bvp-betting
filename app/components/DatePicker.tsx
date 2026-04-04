@@ -29,7 +29,6 @@ export default function DatePicker({ date, onChange }: Props) {
         <button
           type="button"
           onClick={() => onChange(addDays(date, -1))}
-          title={date === today ? "View yesterday's results" : "Return to today's slate"}
           className="text-gray-500 hover:text-white transition-colors text-lg leading-none"
         >
           ‹
@@ -40,7 +39,6 @@ export default function DatePicker({ date, onChange }: Props) {
         <button
           type="button"
           onClick={() => onChange(addDays(date, 1))}
-          title="Peek at tomorrow's slate"
           className="text-gray-500 hover:text-white transition-colors text-lg leading-none"
         >
           ›
