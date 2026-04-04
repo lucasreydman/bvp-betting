@@ -15,6 +15,11 @@ const CONFIDENCE_COLORS = {
   low: 'text-red-400',
 }
 
+const LINEUP_BADGE_STYLES = {
+  confirmed: 'bg-gray-800 text-gray-300',
+  estimated: 'bg-amber-900/40 text-amber-400',
+} as const
+
 export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) {
   const score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
 
@@ -87,10 +92,10 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
                 <span className="text-sky-400 w-4 shrink-0 font-mono text-xs">{i + 1}.</span>
                 <span className="text-white font-medium text-sm flex-1 min-w-0 truncate">{m.batterName}</span>
                 <span
-                  className={`text-xs shrink-0 ${m.lineupSource === 'confirmed' ? 'text-green-500' : 'text-amber-500/70'}`}
+                  className={`inline-flex shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${LINEUP_BADGE_STYLES[m.lineupSource]}`}
                   title={m.lineupSource === 'confirmed' ? 'Lineup confirmed' : 'Lineup not yet confirmed'}
                 >
-                  {m.lineupSource === 'confirmed' ? '✓' : '?'}
+                  {m.lineupSource === 'confirmed' ? 'Confirmed' : 'Estimated'}
                 </span>
                 <span className={`font-mono font-bold text-sm shrink-0 ${CONFIDENCE_COLORS[m.confidence]}`}>
                   {m.avg.toFixed(3)}
@@ -109,10 +114,10 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <span className="text-sky-400 w-4 font-mono">{i + 1}.</span>
               <span className="text-white font-medium">{m.batterName}</span>
               <span
-                className={`text-xs ${m.lineupSource === 'confirmed' ? 'text-green-500' : 'text-amber-500/70'}`}
+                className={`inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${LINEUP_BADGE_STYLES[m.lineupSource]}`}
                 title={m.lineupSource === 'confirmed' ? 'Lineup confirmed' : 'Lineup not yet confirmed'}
               >
-                {m.lineupSource === 'confirmed' ? '✓' : '?'}
+                {m.lineupSource === 'confirmed' ? 'Confirmed' : 'Estimated'}
               </span>
               <span className="text-gray-400">vs {m.pitcherName}</span>
               <span className={`font-mono font-bold ${CONFIDENCE_COLORS[m.confidence]}`}>

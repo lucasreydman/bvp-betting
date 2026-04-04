@@ -54,11 +54,6 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
       <td className="px-3 py-2 align-top">
         <GameTimeCell gameTime={m.gameTime} variant={gameKind} />
       </td>
-      {gameKind !== 'upcoming' && (
-        <td className="px-3 py-2">
-          <ResultBadge hitResult={m.hitResult} />
-        </td>
-      )}
       <td className="px-3 py-2 hidden sm:table-cell">
         <span className={`inline-flex text-xs px-2 py-0.5 rounded font-medium ${
           m.lineupSource === 'confirmed'
@@ -68,6 +63,11 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
           {m.lineupSource === 'confirmed' ? 'Confirmed' : 'Estimated'}
         </span>
       </td>
+      {gameKind !== 'upcoming' && (
+        <td className="px-3 py-2">
+          <ResultBadge hitResult={m.hitResult} />
+        </td>
+      )}
     </tr>
   )
 }

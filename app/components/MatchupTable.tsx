@@ -139,7 +139,12 @@ export default function MatchupTable({
                       )}
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      {gameKind !== 'upcoming' && <HitBadge hitResult={m.hitResult} />}
+                      {gameKind !== 'upcoming' && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-600">Result</span>
+                          <HitBadge hitResult={m.hitResult} />
+                        </div>
+                      )}
                       <span className={`font-mono font-bold text-sm ${CARD_AVG_COLOR[m.confidence]}`}>
                         {m.avg.toFixed(3)}
                       </span>
@@ -154,11 +159,12 @@ export default function MatchupTable({
                     <span className="text-gray-600 shrink-0 font-mono">[{teamAbbr(m.pitcherTeam)}]</span>
                   </div>
 
-                  {/* Row 3: H/AB + lineup badge + game time */}
+                  {/* Row 3: H/AB + lineup status + game time */}
                   <div className="mt-1.5 flex items-center justify-between gap-2 text-xs">
                     <div className="flex items-center gap-2 text-gray-500">
                       <span className="font-mono">{m.h}/{m.ab} AB</span>
                       <span className="text-gray-700">·</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-600">Lineup</span>
                       <span className={`px-1.5 py-0.5 rounded font-medium ${
                         m.lineupSource === 'confirmed'
                           ? 'bg-gray-800 text-gray-400'
