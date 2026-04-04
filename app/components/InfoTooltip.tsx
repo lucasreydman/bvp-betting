@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from 'react'
 interface Props {
   text: string
   width?: string
+  align?: 'center' | 'right'  // right = tooltip extends leftward from the button
 }
 
-export default function InfoTooltip({ text, width = 'w-64' }: Props) {
+export default function InfoTooltip({ text, width = 'w-64', align = 'center' }: Props) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLSpanElement>(null)
 
@@ -39,7 +40,7 @@ export default function InfoTooltip({ text, width = 'w-64' }: Props) {
         i
       </button>
       {open && (
-        <span className={`pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 ${width} z-20`}>
+        <span className={`pointer-events-none absolute bottom-full mb-2 ${width} z-20 ${align === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
           <span className="block bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-300 text-[11px] leading-4 shadow-xl">
             {text}
           </span>
