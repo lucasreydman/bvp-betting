@@ -1,6 +1,7 @@
 import type { MatchupResult } from '@/lib/types'
 import { formatTime, expectedAtBats, hitProbability, regressedAvg, suggestDailyDouble } from '@/lib/utils'
 import type { DailyDouble } from '@/lib/utils'
+import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
 import InfoTooltip from './InfoTooltip'
 
 interface Props {
@@ -93,9 +94,9 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
                 <span className="text-white font-medium text-sm flex-1 min-w-0 truncate">{m.batterName}</span>
                 <span
                   className={`inline-flex shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${LINEUP_BADGE_STYLES[m.lineupSource]}`}
-                  title={m.lineupSource === 'confirmed' ? 'Lineup confirmed' : 'Lineup not yet confirmed'}
+                  title={getLineupBadgeTitle(m)}
                 >
-                  {m.lineupSource === 'confirmed' ? 'Confirmed' : 'Estimated'}
+                  {getLineupBadgeText(m)}
                 </span>
                 <span className={`font-mono font-bold text-sm shrink-0 ${CONFIDENCE_COLORS[m.confidence]}`}>
                   {m.avg.toFixed(3)}
@@ -115,9 +116,9 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <span className="text-white font-medium">{m.batterName}</span>
               <span
                 className={`inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${LINEUP_BADGE_STYLES[m.lineupSource]}`}
-                title={m.lineupSource === 'confirmed' ? 'Lineup confirmed' : 'Lineup not yet confirmed'}
+                title={getLineupBadgeTitle(m)}
               >
-                {m.lineupSource === 'confirmed' ? 'Confirmed' : 'Estimated'}
+                {getLineupBadgeText(m)}
               </span>
               <span className="text-gray-400">vs {m.pitcherName}</span>
               <span className={`font-mono font-bold ${CONFIDENCE_COLORS[m.confidence]}`}>

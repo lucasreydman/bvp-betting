@@ -1,6 +1,7 @@
 'use client'
 import type { MatchupResult, SortState } from '@/lib/types'
 import { teamAbbr } from '@/lib/utils'
+import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
 import MatchupRow from './MatchupRow'
 import GameTimeCell from './GameTimeCell'
 
@@ -134,9 +135,6 @@ export default function MatchupTable({
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <span className="font-medium text-white text-sm truncate">{m.batterName}</span>
-                      {m.lineupPosition && (
-                        <span className="text-gray-500 text-xs shrink-0">#{m.lineupPosition}</span>
-                      )}
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {gameKind !== 'upcoming' && (
@@ -169,8 +167,8 @@ export default function MatchupTable({
                         m.lineupSource === 'confirmed'
                           ? 'bg-gray-800 text-gray-400'
                           : 'bg-amber-900/40 text-amber-400'
-                      }`}>
-                        {m.lineupSource === 'confirmed' ? 'Confirmed' : 'Estimated'}
+                      }`} title={getLineupBadgeTitle(m)}>
+                        {getLineupBadgeText(m)}
                       </span>
                     </div>
                     <GameTimeCell gameTime={m.gameTime} variant={gameKind} />

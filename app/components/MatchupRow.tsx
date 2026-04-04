@@ -1,5 +1,6 @@
 import type { MatchupResult } from '@/lib/types'
 import { teamAbbr } from '@/lib/utils'
+import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
 import GameTimeCell from './GameTimeCell'
 
 interface Props {
@@ -35,9 +36,6 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
       <td className="px-3 py-2 font-medium text-white whitespace-normal sm:whitespace-nowrap break-words">
         {m.batterName}
         <span className="ml-1.5 text-gray-600 text-xs font-normal">[{teamAbbr(m.batterTeam)}]</span>
-        {m.lineupPosition && (
-          <span className="ml-1 text-gray-500 text-xs">#{m.lineupPosition}</span>
-        )}
       </td>
       <td className="px-3 py-2 text-gray-400 text-sm min-w-[14rem] max-w-[22rem] break-words">
         <span className="break-words">
@@ -59,8 +57,8 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
           m.lineupSource === 'confirmed'
             ? 'bg-gray-800 text-gray-400'
             : 'bg-amber-900/40 text-amber-400'
-        }`}>
-          {m.lineupSource === 'confirmed' ? 'Confirmed' : 'Estimated'}
+        }`} title={getLineupBadgeTitle(m)}>
+          {getLineupBadgeText(m)}
         </span>
       </td>
       {gameKind !== 'upcoming' && (
