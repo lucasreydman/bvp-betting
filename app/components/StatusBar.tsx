@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { formatTime } from '@/lib/utils'
+import InfoTooltip from './InfoTooltip'
 
 interface Props {
   fetchedAt: string | null
@@ -14,30 +15,52 @@ export default function StatusBar({ fetchedAt, gamesScanned, gamesSkipped, onRef
   const [now, setNow] = useState<string>('')
 
   useEffect(() => {
-    const tick = () => setNow(new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' }))
+    const tick = () => setNow(new Date().toLocaleTimeString('en-US', {
+      hour: 'numeric', minute: '2-digit', second: '2-digit',
+      timeZoneName: 'short',
+    }))
     tick()
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
   }, [])
 
   return (
-    <div className="flex items-center gap-3 sm:gap-6 text-sm text-gray-400 w-full sm:w-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-4 flex-1 min-w-0">
-        <div className="flex items-center gap-3">
-          {now && <span className="whitespace-nowrap font-mono text-xs sm:text-sm">{now}</span>}
+    <div className="flex items-center gap-3 sm:gap-6 text-gray-400 w-full sm:w-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-5 flex-1 min-w-0">
+
+        {/* Current time + Last updated */}
+        <div className="flex items-center gap-4">
+          {now && (
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[10px] uppercase tracking-wider text-gray-600 font-semibold">Now</span>
+              <span className="font-mono text-xs text-gray-400 whitespace-nowrap">{now}</span>
+            </div>
+          )}
           {fetchedAt && (
-            <span className="whitespace-nowrap text-xs sm:text-sm">
-              Updated: {formatTime(fetchedAt)}
-            </span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[10px] uppercase tracking-wider text-gray-600 font-semibold">Updated</span>
+              <span className="font-mono text-xs text-gray-400 whitespace-nowrap">{formatTime(fetchedAt)}</span>
+            </div>
           )}
         </div>
+
+        {/* Games scanned / skipped */}
         {gamesScanned > 0 && (
-          <span className="whitespace-nowrap text-xs hidden sm:inline">
-            {gamesScanned} games scanned
-            {gamesSkipped > 0 ? `, ${gamesSkipped} skipped` : ''}
-          </span>
+          <div className="hidden sm:flex items-center gap-1 text-xs text-gray-600 whitespace-nowrap">
+            <span>{gamesScanned} games scanned</span>
+            {gamesSkipped > 0 && (
+              <>
+                <span>, {gamesSkipped} skipped</span>
+                <InfoTooltip
+                  width="w-72"
+                  text="A game is skipped when no probable pitcher has been announced for one or both teams. Without a confirmed pitcher, career BvP stats can't be calculated, so the matchup is excluded entirely."
+                />
+              </>
+            )}
+          </div>
         )}
       </div>
+
       <button
         type="button"
         onClick={onRefresh}
