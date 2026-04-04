@@ -60,22 +60,31 @@ describe('formatLocalDate', () => {
 })
 
 describe('applyFilters', () => {
-  it('returns matchup that passes all filters', () => {
-    const matchup = makeMatchup({ ab: 20, avg: 0.400, slg: 0.700, ops: 1.178 })
+  it('returns all matchups when no optional filters are active', () => {
+    const matchup = makeMatchup({ ab: 20, avg: 0.400, ops: 1.178 })
     const result = applyFilters([matchup], DEFAULT_FILTERS)
     expect(result).toHaveLength(1)
   })
 
-  it('excludes matchup that fails one filter (AND logic)', () => {
-    const matchup = makeMatchup({ ab: 20, avg: 0.200, slg: 0.700, ops: 1.178 }) // avg too low
-    const result = applyFilters([matchup], DEFAULT_FILTERS)
+  it('excludes matchup below minOPS when OPS filter is active', () => {
+    const matchup = makeMatchup({ ops: 0.650 })
+    const result = applyFilters([matchup], { minOPS: 0.700, minH: null })
     expect(result).toHaveLength(0)
   })
 
-  it('excludes matchup below minAB', () => {
-    const matchup = makeMatchup({ ab: 9, avg: 0.400, slg: 0.700, ops: 1.178 })
-    const result = applyFilters([matchup], DEFAULT_FILTERS)
+  it('excludes matchup below minH when hits filter is active', () => {
+    const matchup = makeMatchup({ h: 5 })
+    const result = applyFilters([matchup], { minOPS: null, minH: 7 })
     expect(result).toHaveLength(0)
+  })
+
+  it('applies OPS and hits filters together (AND logic)', () => {
+    const passing = makeMatchup({ ops: 0.800, h: 8 })
+    const failsOps = makeMatchup({ ops: 0.650, h: 8 })
+    const failsH = makeMatchup({ ops: 0.800, h: 5 })
+    const result = applyFilters([passing, failsOps, failsH], { minOPS: 0.700, minH: 7 })
+    expect(result).toHaveLength(1)
+    expect(result[0].ops).toBe(0.800)
   })
 })
 
@@ -136,9 +145,9 @@ describe('suggestDailyDouble', () => {
     expect(result!.combinedProbability).toBeGreaterThan(0)
   })
 
-  it('marks isSmash when both legs have OPS > 0.950', () => {
-    const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.400, ab: 40, ops: 1.100 })
-    const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.380, ab: 35, ops: 0.980 })
+  it('marks isSmash when both legs have OPS > 0.950 and H >= 7', () => {
+    const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.400, ab: 40, ops: 1.100, h: 16 })
+    const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.380, ab: 35, ops: 0.980, h: 13 })
     const result = suggestDailyDouble([a, b])
 
     expect(result).not.toBeNull()
@@ -146,8 +155,17 @@ describe('suggestDailyDouble', () => {
   })
 
   it('does not mark isSmash when one leg is below 0.950 OPS', () => {
-    const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.400, ab: 40, ops: 1.100 })
-    const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.380, ab: 35, ops: 0.900 })
+    const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.400, ab: 40, ops: 1.100, h: 16 })
+    const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.380, ab: 35, ops: 0.900, h: 13 })
+    const result = suggestDailyDouble([a, b])
+
+    expect(result).not.toBeNull()
+    expect(result!.isSmash).toBe(false)
+  })
+
+  it('does not mark isSmash when one leg has fewer than 7 hits', () => {
+    const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.400, ab: 40, ops: 1.100, h: 16 })
+    const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.333, ab: 15, ops: 0.980, h: 5 })
     const result = suggestDailyDouble([a, b])
 
     expect(result).not.toBeNull()

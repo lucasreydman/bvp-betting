@@ -140,7 +140,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <div className="text-[10px] text-gray-500">In progress. Export available below.</div>
             ) : (
               <div className={`text-[10px] ${dailyDouble.isSmash ? 'text-orange-400/70' : 'text-yellow-400/70'}`}>
-                {dailyDouble.isSmash ? 'Both legs OPS above .950. Strongest possible parlay.' : 'Parlay these two legs for +100 or better'}
+                {dailyDouble.isSmash ? 'Both legs OPS above .950 with 7+ hits. Strongest possible parlay.' : 'Parlay these two legs for +100 or better'}
               </div>
             )}
           </div>
@@ -197,7 +197,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
         <div className="mt-4 rounded-lg border border-gray-800 bg-gray-950 p-3 text-sm">
           <div className="flex items-center gap-1.5 mb-1">
             <span className="text-gray-400 uppercase tracking-wider text-[10px] font-semibold">Daily Double</span>
-            <InfoTooltip width="w-56" text="A Daily Double is a 2-leg parlay built from the top plays with the highest combined hit probability, keeping both legs on different pitchers. If both legs also have career OPS above .950, it upgrades to a Smash Double." />
+            <InfoTooltip width="w-64" text="A Daily Double is a 2-leg parlay built from the top plays with the highest combined hit probability, keeping both legs on different pitchers. If both legs also have career OPS above .950 and at least 7 hits against their pitcher, it upgrades to a Smash Double." />
           </div>
           <p className="text-gray-500">{top5.length < 2 ? 'Not enough qualified plays to form a parlay. Fewer than 2 matchups meet the 15 AB / .300 AVG requirements today.' : 'No double recommendation available for the current top plays.'}</p>
         </div>

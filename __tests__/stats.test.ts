@@ -53,13 +53,13 @@ describe('assignConfidence', () => {
     expect(assignConfidence(50)).toBe('high')
   })
 
-  it('returns medium for 15-29 AB', () => {
-    expect(assignConfidence(15)).toBe('medium')
+  it('returns medium for 20-29 AB', () => {
+    expect(assignConfidence(20)).toBe('medium')
     expect(assignConfidence(29)).toBe('medium')
   })
 
-  it('returns low for 10-14 AB', () => {
-    expect(assignConfidence(10)).toBe('low')
-    expect(assignConfidence(14)).toBe('low')
+  it('returns low for 15-19 AB', () => {
+    expect(assignConfidence(15)).toBe('low')
+    expect(assignConfidence(19)).toBe('low')
   })
 })

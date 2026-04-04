@@ -8,7 +8,7 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 
 **Best bet: take the Daily Double.** Parlay the two recommended legs together for +100 or better. The legs are chosen to give you the highest combined probability of both hitting on that day's slate.
 
-**If it says Smash Double, even better.** A Smash Double is a Daily Double where both legs also have a career OPS above .950 against their pitcher. Same bet, higher conviction.
+**If it says Smash Double, even better.** A Smash Double is a Daily Double where both legs have a career OPS above .950 and at least 7 hits against their pitcher. The hit floor ensures the high OPS reflects real contact, not a small-sample fluke. Same bet, higher conviction.
 
 **Prefer lower risk?** Pick your favorites out of the Top 5 Plays and take them as singles. Less risk per bet than a parlay, with a smaller payout to match.
 
@@ -44,7 +44,7 @@ hit chance   = 1 − (1 − adjusted AVG) ^ (expected AB)
 
 The **Daily Double** is a single 2-leg parlay recommendation built from the Top 5 Plays. Both legs must have at least 15 AB and a .300+ career AVG against their pitcher to qualify. It picks the pair with the highest combined hit probability while keeping both legs on different pitchers.
 
-The **Smash Double** is a Daily Double where both legs also carry a career OPS above .950 against their pitcher. The historical edge is stronger on both sides of the parlay. Every Smash Double win also counts as a Daily Double win.
+The **Smash Double** is a Daily Double where both legs also carry a career OPS above .950 and at least 7 hits against their pitcher. The hit floor ensures the high OPS reflects genuine contact rather than a small-sample fluke. Every Smash Double win also counts as a Daily Double win.
 
 If one or more legs are already in progress, the Daily Double card remains visible so you can track the bet or export it. In-progress legs are marked and dimmed.
 

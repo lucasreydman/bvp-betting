@@ -81,7 +81,7 @@ export interface DailyDouble {
   firstProbability: number
   secondProbability: number
   combinedProbability: number
-  isSmash: boolean  // true when both legs have OPS > 0.950
+  isSmash: boolean  // true when both legs have OPS > 0.950 AND H >= 7
 }
 
 export function suggestDailyDouble(matchups: MatchupResult[]): DailyDouble | null {
@@ -106,7 +106,7 @@ export function suggestDailyDouble(matchups: MatchupResult[]): DailyDouble | nul
           firstProbability: a.probability,
           secondProbability: b.probability,
           combinedProbability,
-          isSmash: a.matchup.ops > 0.950 && b.matchup.ops > 0.950,
+          isSmash: a.matchup.ops > 0.950 && b.matchup.ops > 0.950 && a.matchup.h >= 7 && b.matchup.h >= 7,
         }
       }
     }

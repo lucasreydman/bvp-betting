@@ -28,7 +28,7 @@ export default function Home() {
         </p>
         <p>
           <span className="text-orange-400 font-semibold">If it says Smash Double, even better.</span>
-          <span className="text-slate-300"> A Smash Double is a Daily Double where both legs also have a career OPS above .950 against their pitcher. When both the average and OPS are elite, the historical edge is stronger. Same bet, higher conviction.</span>
+          <span className="text-slate-300"> A Smash Double is a Daily Double where both legs have a career OPS above .950 and at least 7 hits against their pitcher. The hit floor ensures the high OPS reflects real contact, not a small-sample fluke. Same bet, higher conviction.</span>
         </p>
         <p>
           <span className="text-white font-semibold">Prefer lower risk?</span>
