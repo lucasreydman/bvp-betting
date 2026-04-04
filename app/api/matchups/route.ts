@@ -30,6 +30,13 @@ async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+async function buildProjectedPositions(teamId: number, targetDate: string, playerIds: number[]): Promise<Record<number, number>> {
+  const recentPositions = await fetchRecentLineupPositions(teamId, targetDate)
+  return Object.fromEntries(
+    playerIds.map((playerId, index) => [playerId, medianLineupPosition(recentPositions.get(playerId) ?? []) ?? index + 1])
+  )
+}
+
 async function getLineupPlayerIds(
   gamePk: number,
   teamId: number,
@@ -63,7 +70,11 @@ async function getLineupPlayerIds(
   const projectionCacheKey = `projected-lineup:${teamId}:${targetDate}`
 
   if (cached) {
-    const projected = lineupProjectionCache.get(projectionCacheKey)
+    let projected = lineupProjectionCache.get(projectionCacheKey)
+    if (!projected) {
+      projected = await buildProjectedPositions(teamId, targetDate, cached)
+      lineupProjectionCache.set(projectionCacheKey, projected)
+    }
     return { ids: cached, source: 'estimated', projectedPositions: projected }
   }
 
@@ -79,10 +90,7 @@ async function getLineupPlayerIds(
     .slice(0, 9)
     .map(p => p.id)
 
-  const recentPositions = await fetchRecentLineupPositions(teamId, targetDate)
-  const projectedPositions = Object.fromEntries(
-    top9.map((playerId, index) => [playerId, medianLineupPosition(recentPositions.get(playerId) ?? []) ?? index + 1])
-  )
+  const projectedPositions = await buildProjectedPositions(teamId, targetDate, top9)
 
   rosterCache.set(cacheKey, top9)
   lineupProjectionCache.set(projectionCacheKey, projectedPositions)
