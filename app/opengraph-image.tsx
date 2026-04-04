@@ -94,9 +94,12 @@ export default function Image() {
         {/* Sportsbook pills */}
         <div style={{ display: 'flex', gap: 16 }}>
           {[
-            { label: 'FanDuel', color: '#0ea5e9' },
-            { label: 'Bet365', color: '#22c55e' },
-            { label: 'theScore Bet', color: '#f59e0b' },
+            { label: 'FanDuel', color: '#1493FF' },
+            { label: 'Bet365', color: '#126E51' },
+            { label: 'theScore Bet', color: '#FFCC00' },
+            { label: 'DraftKings', color: '#61B50E' },
+            { label: 'BetMGM', color: '#B1801E' },
+            
           ].map(({ label, color }) => (
             <div
               key={label}
