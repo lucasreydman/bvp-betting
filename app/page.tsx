@@ -20,15 +20,15 @@ export default function Home() {
         <div className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">How to use this system for best results</div>
         <p>
           <span className="text-white font-semibold">The page stays current automatically.</span>
-          <span className="text-slate-300"> Data refreshes silently every 5 minutes. No manual refresh needed. Top 5 and the Daily Double show upcoming games only. Once a game starts, those players drop out of the Top 5 and move to the In Progress section automatically, showing whether each batter has gotten a hit yet. When the game ends, they move to the Settled section with a final HIT or NO HIT result. Check back after lineups confirm (usually 3–4 hours before first pitch) for exact hit chance numbers.</span>
+          <span className="text-slate-300"> Data refreshes every 5 minutes. Top 5 and the Daily Double show upcoming games only — once a game starts, players move to In Progress, then Settled with a final result. Check back after lineups post (usually 3–4 hours before first pitch) for exact hit chances.</span>
         </p>
         <p>
           <span className="text-yellow-400 font-semibold">Best bet: take the Daily Double.</span>
-          <span className="text-slate-300"> Parlay the two recommended legs together for +100 or better. The legs are chosen to give you the highest combined probability of both hitting on that day&apos;s slate.</span>
+          <span className="text-slate-300"> Parlay the two recommended legs together for +100 or better. Legs are chosen for the highest combined hit probability on the day&apos;s slate.</span>
         </p>
         <p>
           <span className="text-orange-400 font-semibold">If it says Smash Double, even better.</span>
-          <span className="text-slate-300"> A Smash Double is a Daily Double where both legs also have a career OPS above .950 against their pitcher. OPS measures overall offensive production, so when both the average and the OPS are elite, the historical edge is stronger on both sides of the parlay. Same bet, higher conviction.</span>
+          <span className="text-slate-300"> A Smash Double is a Daily Double where both legs also have a career OPS above .950 against their pitcher. When both the average and OPS are elite, the historical edge is stronger. Same bet, higher conviction.</span>
         </p>
         <p>
           <span className="text-white font-semibold">Prefer lower risk?</span>
@@ -36,13 +36,13 @@ export default function Home() {
         </p>
         <p>
           <span className="text-green-300 font-semibold">Confirmed lineups make the hit chance more accurate.</span>
-          <span className="text-slate-300"> Hit chance is calculated using an expected at-bats number that adjusts based on where the batter sits in the order. Until lineups are official, a generic estimate is used. Plays marked </span>
+          <span className="text-slate-300"> Hit chance uses expected at-bats, which adjusts by lineup position. Until lineups are official, a generic estimate is used — plays marked </span>
           <span className="text-white font-semibold">confirmed</span>
-          <span className="text-slate-300"> are stronger because that number is exact. Lineups usually drop 3 to 4 hours before first pitch.</span>
+          <span className="text-slate-300"> use the exact number. Lineups usually post 3–4 hours before first pitch.</span>
         </p>
         <p>
           <span className="text-sky-400 font-semibold">Consistency is everything for EV.</span>
-          <span className="text-slate-300"> The edge here is statistical. It compounds over time. The more consistently you take these plays, the higher your expected value will be. Skipping days or cherry-picking erodes that edge. Treat it like a system, not a tip.</span>
+          <span className="text-slate-300"> The edge is statistical and compounds over time. Skipping days or cherry-picking erodes it. Treat it like a system, not a tip.</span>
         </p>
       </div>
 
