@@ -78,15 +78,12 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
 
         {/* ── Fixed requirement chips ───────────────────────── */}
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] uppercase tracking-widest text-gray-600 font-semibold mr-0.5 hidden sm:inline">
+          <span className="text-xs uppercase tracking-wider text-gray-600 font-semibold mr-0.5 hidden sm:inline">
             Filters
           </span>
 
           {/* 15 AB chip */}
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-800 border border-gray-700 text-xs font-mono text-gray-300">
-            <svg className="w-2.5 h-2.5 text-gray-600 shrink-0" viewBox="0 0 12 12" fill="currentColor">
-              <path d="M9 5V4a3 3 0 1 0-6 0v1H2v7h8V5H9ZM5 4a1 1 0 1 1 2 0v1H5V4Z"/>
-            </svg>
             15 AB
             <InfoTooltip
               width="w-64"
@@ -96,9 +93,6 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
 
           {/* .300 AVG chip */}
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-800 border border-gray-700 text-xs font-mono text-gray-300">
-            <svg className="w-2.5 h-2.5 text-gray-600 shrink-0" viewBox="0 0 12 12" fill="currentColor">
-              <path d="M9 5V4a3 3 0 1 0-6 0v1H2v7h8V5H9ZM5 4a1 1 0 1 1 2 0v1H5V4Z"/>
-            </svg>
             .300 AVG
             <InfoTooltip
               width="w-64"
@@ -113,7 +107,7 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
         {/* ── OPS filter (optional) ─────────────────────────── */}
         {opsEnabled ? (
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-950/60 border border-blue-800/50">
-            <label htmlFor={minOpsId} className="text-[10px] uppercase tracking-widest text-blue-400 font-semibold whitespace-nowrap">
+            <label htmlFor={minOpsId} className="text-xs uppercase tracking-wider text-blue-400 font-semibold whitespace-nowrap">
               OPS ≥
             </label>
             <input
