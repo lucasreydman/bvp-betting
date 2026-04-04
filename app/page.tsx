@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <main className="max-w-7xl mx-auto px-4 py-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-white tracking-tight">MLB BvP</h1>
+        <h1 className="text-2xl font-bold text-white tracking-tight">MLB BvP Betting</h1>
         <p className="text-gray-400 text-sm mt-1 max-w-full text-balance">
           Career batter vs pitcher stats for the Player Hits (1+) prop on{' '}
           <span className="text-sky-400 font-semibold">FanDuel</span>, and for{' '}

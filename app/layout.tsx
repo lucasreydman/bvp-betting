@@ -11,7 +11,7 @@ const SITE_URL = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'MLB BvP',
+  title: 'MLB BvP Betting',
   description:
     'Career batter vs pitcher stats for the Player to Record a Hit prop. Daily Double parlay picks for FanDuel, Bet365, and theScore. Filter by AVG, AB, and OPS.',
   openGraph: {
