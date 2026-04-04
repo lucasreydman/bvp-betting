@@ -11,6 +11,7 @@ export interface MatchupResult {
   isHome: boolean
   lineupSource: 'confirmed' | 'estimated'
   lineupPosition?: number    // 1-9 if confirmed lineup; undefined for estimated
+  predictedLineupPosition?: number  // 1-9 projected slot for estimated lineups
 
   // Raw counting stats
   ab: number

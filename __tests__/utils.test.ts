@@ -1,4 +1,4 @@
-import { formatTime, formatLocalDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, hitProbability, suggestDailyDouble } from '@/lib/utils'
+import { formatTime, formatLocalDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, hitProbability, suggestDailyDouble, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
 import { DEFAULT_FILTERS, type MatchupResult } from '@/lib/types'
 
 const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => ({
@@ -13,6 +13,7 @@ const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => (
   gameTime: '2026-04-01T18:05:00Z',
   isHome: true,
   lineupSource: 'confirmed',
+  lineupPosition: 2,
   ab: 20,
   h: 8,
   doubles: 2,
@@ -126,6 +127,30 @@ describe('expectedAtBats', () => {
   })
 })
 
+describe('resolveLineupPosition', () => {
+  it('prefers confirmed lineupPosition when present', () => {
+    expect(resolveLineupPosition({ lineupPosition: 2, predictedLineupPosition: 5 })).toBe(2)
+  })
+
+  it('falls back to predicted lineup position for estimated rows', () => {
+    expect(resolveLineupPosition({ lineupPosition: undefined, predictedLineupPosition: 5 })).toBe(5)
+  })
+})
+
+describe('medianLineupPosition', () => {
+  it('returns the median slot for odd-length samples', () => {
+    expect(medianLineupPosition([1, 4, 2, 2, 3])).toBe(2)
+  })
+
+  it('rounds the middle pair for even-length samples', () => {
+    expect(medianLineupPosition([2, 3, 4, 5])).toBe(4)
+  })
+
+  it('returns undefined for empty samples', () => {
+    expect(medianLineupPosition([])).toBeUndefined()
+  })
+})
+
 describe('hitProbability', () => {
   it('computes probability of at least one hit in multiple AB', () => {
     expect(hitProbability(0.4, 4)).toBeCloseTo(0.8704)
@@ -175,6 +200,15 @@ describe('suggestDailyDouble', () => {
   it('returns null when no valid pairs exist', () => {
     const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.300, ab: 40 })
     expect(suggestDailyDouble([a])).toBeNull()
+  })
+
+  it('uses predicted lineup position when confirmed order is unavailable', () => {
+    const a = makeMatchup({ batterId: 1, pitcherId: 1, lineupSource: 'estimated', lineupPosition: undefined, predictedLineupPosition: 2, avg: 0.300, ab: 30 })
+    const b = makeMatchup({ batterId: 2, pitcherId: 2, lineupSource: 'estimated', lineupPosition: undefined, predictedLineupPosition: 8, avg: 0.300, ab: 30 })
+    const result = suggestDailyDouble([a, b])
+
+    expect(result).not.toBeNull()
+    expect(result!.firstProbability).toBeGreaterThan(result!.secondProbability)
   })
 })
 

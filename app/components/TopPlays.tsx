@@ -1,5 +1,5 @@
 import type { MatchupResult } from '@/lib/types'
-import { formatTime, expectedAtBats, hitProbability, regressedAvg, suggestDailyDouble } from '@/lib/utils'
+import { formatTime, expectedAtBats, hitProbability, regressedAvg, resolveLineupPosition, suggestDailyDouble } from '@/lib/utils'
 import type { DailyDouble } from '@/lib/utils'
 import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
 import InfoTooltip from './InfoTooltip'
@@ -25,7 +25,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
   const score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
 
   const enriched = matchups.map(m => {
-    const expectedAB = expectedAtBats(m.lineupPosition)
+    const expectedAB = expectedAtBats(resolveLineupPosition(m))
     const adjustedAvg = regressedAvg(m.avg, m.ab)
     const hitPct = hitProbability(adjustedAvg, expectedAB)
     return { m, expectedAB, adjustedAvg, hitPct }

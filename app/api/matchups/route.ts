@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { fetchSchedule, fetchConfirmedLineup, fetchActiveRoster, fetchCareerPA, fetchBvP, fetchPlayerName, fetchBoxscoreHitting } from '@/lib/mlb-api'
+import { fetchSchedule, fetchConfirmedLineup, fetchActiveRoster, fetchCareerPA, fetchBvP, fetchPlayerName, fetchBoxscoreHitting, fetchRecentLineupPositions } from '@/lib/mlb-api'
 import { getGameStatus, computeHitResult } from '@/lib/game-status'
 import { parseSplit } from '@/lib/stats'
 import { createCache } from '@/lib/cache'
 import { kvGet, kvSet } from '@/lib/kv'
+import { medianLineupPosition } from '@/lib/utils'
 import type { MatchupResult, MatchupsResponse } from '@/lib/types'
 
 // Module-level caches — survive across requests in the same serverless instance
 const bvpCache = createCache<ReturnType<typeof parseSplit>>(3600_000)  // 60 min
 const rosterCache = createCache<number[]>(3600_000)           // 60 min
 const playerNameCache = createCache<string>(86400_000)        // 24h
+const lineupProjectionCache = createCache<Record<number, number>>(21600_000) // 6h
 
 // IMPORTANT: playerNameCache and getPlayerName MUST be at module scope (here),
 // NOT inside the GET handler — inside the handler they'd be re-created per request.
@@ -33,7 +35,8 @@ async function getLineupPlayerIds(
   teamId: number,
   gameStarted: boolean,
   scheduleLineup: number[],
-): Promise<{ ids: number[]; source: 'confirmed' | 'estimated' }> {
+  targetDate: string,
+): Promise<{ ids: number[]; source: 'confirmed' | 'estimated'; projectedPositions?: Record<number, number> }> {
   // Schedule hydration gives us the posted pre-game lineup — use it if complete
   if (scheduleLineup.length >= 8) {
     return { ids: scheduleLineup, source: 'confirmed' }
@@ -57,7 +60,12 @@ async function getLineupPlayerIds(
   // Pre-game estimated fallback: top-9 active roster by career PA
   const cacheKey = `roster:${teamId}`
   const cached = rosterCache.get(cacheKey)
-  if (cached) return { ids: cached, source: 'estimated' }
+  const projectionCacheKey = `projected-lineup:${teamId}:${targetDate}`
+
+  if (cached) {
+    const projected = lineupProjectionCache.get(projectionCacheKey)
+    return { ids: cached, source: 'estimated', projectedPositions: projected }
+  }
 
   const roster = await fetchActiveRoster(teamId)
   const withPA = await Promise.all(
@@ -71,8 +79,14 @@ async function getLineupPlayerIds(
     .slice(0, 9)
     .map(p => p.id)
 
+  const recentPositions = await fetchRecentLineupPositions(teamId, targetDate)
+  const projectedPositions = Object.fromEntries(
+    top9.map((playerId, index) => [playerId, medianLineupPosition(recentPositions.get(playerId) ?? []) ?? index + 1])
+  )
+
   rosterCache.set(cacheKey, top9)
-  return { ids: top9, source: 'estimated' }
+  lineupProjectionCache.set(projectionCacheKey, projectedPositions)
+  return { ids: top9, source: 'estimated', projectedPositions }
 }
 
 export async function GET(req: NextRequest) {
@@ -103,6 +117,7 @@ export async function GET(req: NextRequest) {
       isHome: boolean
       lineupSource: 'confirmed' | 'estimated'
       lineupPosition?: number
+      predictedLineupPosition?: number
     }> = []
 
     const nonUpcomingGames: Array<{
@@ -128,8 +143,8 @@ export async function GET(req: NextRequest) {
         const awayScheduleIds = game.lineups?.awayPlayers?.map(p => p.id) ?? []
 
         const [homeLineup, awayLineup] = await Promise.all([
-          getLineupPlayerIds(game.gamePk, home.team.id, gameStarted, homeScheduleIds),
-          getLineupPlayerIds(game.gamePk, away.team.id, gameStarted, awayScheduleIds),
+          getLineupPlayerIds(game.gamePk, home.team.id, gameStarted, homeScheduleIds, date),
+          getLineupPlayerIds(game.gamePk, away.team.id, gameStarted, awayScheduleIds, date),
         ])
 
         homeLineup.ids.forEach((batterId, i) => {
@@ -145,6 +160,7 @@ export async function GET(req: NextRequest) {
             isHome: true,
             lineupSource: homeLineup.source,
             lineupPosition: homeLineup.source === 'confirmed' ? i + 1 : undefined,
+            predictedLineupPosition: homeLineup.source === 'estimated' ? homeLineup.projectedPositions?.[batterId] : undefined,
           })
         })
 
@@ -161,6 +177,7 @@ export async function GET(req: NextRequest) {
             isHome: false,
             lineupSource: awayLineup.source,
             lineupPosition: awayLineup.source === 'confirmed' ? i + 1 : undefined,
+            predictedLineupPosition: awayLineup.source === 'estimated' ? awayLineup.projectedPositions?.[batterId] : undefined,
           })
         })
       } else {

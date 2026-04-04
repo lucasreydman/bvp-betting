@@ -71,6 +71,18 @@ export function expectedAtBats(lineupPosition?: number): number {
   return 3.85
 }
 
+export function resolveLineupPosition(matchup: Pick<MatchupResult, 'lineupPosition' | 'predictedLineupPosition'>): number | undefined {
+  return matchup.lineupPosition ?? matchup.predictedLineupPosition
+}
+
+export function medianLineupPosition(positions: number[]): number | undefined {
+  if (positions.length === 0) return undefined
+  const sorted = [...positions].sort((a, b) => a - b)
+  const middle = Math.floor(sorted.length / 2)
+  if (sorted.length % 2 === 1) return sorted[middle]
+  return Math.round((sorted[middle - 1] + sorted[middle]) / 2)
+}
+
 export function hitProbability(avg: number, atBats: number): number {
   return 1 - Math.pow(1 - avg, atBats)
 }
@@ -88,7 +100,7 @@ export function suggestDailyDouble(matchups: MatchupResult[]): DailyDouble | nul
   const enriched = matchups
     .map(matchup => ({
       matchup,
-      probability: hitProbability(regressedAvg(matchup.avg, matchup.ab), expectedAtBats(matchup.lineupPosition)),
+      probability: hitProbability(regressedAvg(matchup.avg, matchup.ab), expectedAtBats(resolveLineupPosition(matchup))),
     }))
 
   let best: DailyDouble | null = null
@@ -157,14 +169,14 @@ export function generateCSV(matchups: MatchupResult[]): string {
     'Batter', 'Team', 'Pitcher', 'Opp Team', 'Game Time',
     'AB', 'H', '2B', '3B', 'HR', 'BB', 'K', 'RBI',
     'AVG', 'SLG', 'OBP', 'OPS', 'XBH',
-    'Confidence', 'Lineup Source',
+    'Confidence', 'Lineup Slot', 'Lineup Source',
   ]
   const rows = matchups.map(m => [
     m.batterName, m.batterTeam, m.pitcherName, m.pitcherTeam,
     formatTime(m.gameTime),
     m.ab, m.h, m.doubles, m.triples, m.hr, m.bb, m.k, m.rbi,
     m.avg.toFixed(3), m.slg.toFixed(3), m.obp.toFixed(3), m.ops.toFixed(3), m.xbh,
-    m.confidence, m.lineupSource,
+    m.confidence, resolveLineupPosition(m) ?? '', m.lineupSource,
   ])
   return [headers, ...rows].map(row => row.join(',')).join('\n')
 }

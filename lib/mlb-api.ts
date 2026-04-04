@@ -21,6 +21,10 @@ interface MLBGame {
   }
 }
 
+interface MLBScheduleResponse {
+  dates?: Array<{ games?: MLBGame[] }>
+}
+
 interface MLBRosterPlayer {
   person: { id: number; fullName: string }
   status?: { description: string }
@@ -51,13 +55,53 @@ interface MLBCareerSplit {
 
 const SKIP_STATES = new Set(['Postponed', 'Cancelled', 'Suspended'])
 
+function shiftDateString(date: string, days: number): string {
+  const base = new Date(`${date}T12:00:00Z`)
+  base.setUTCDate(base.getUTCDate() + days)
+  return base.toISOString().slice(0, 10)
+}
+
 export async function fetchSchedule(date: string): Promise<MLBGame[]> {
   const url = `${BASE}/schedule?sportId=1&date=${date}&hydrate=probablePitcher,lineups`
   const res = await fetch(url, { cache: 'no-store' }) // always fresh — KV response cache throttles actual usage
   if (!res.ok) throw new Error(`Schedule fetch failed: ${res.status}`)
-  const data = await res.json()
+  const data: MLBScheduleResponse = await res.json()
   const games: MLBGame[] = data.dates?.[0]?.games ?? []
   return games.filter(g => !SKIP_STATES.has(g.status?.detailedState))
+}
+
+export async function fetchRecentLineupPositions(teamId: number, targetDate: string, lookbackDays = 14, maxGames = 6): Promise<Map<number, number[]>> {
+  const endDate = shiftDateString(targetDate, -1)
+  const startDate = shiftDateString(endDate, -lookbackDays)
+  const url = `${BASE}/schedule?sportId=1&teamId=${teamId}&startDate=${startDate}&endDate=${endDate}&hydrate=lineups`
+  const res = await fetch(url, { next: { revalidate: 21600 } })
+  if (!res.ok) return new Map()
+
+  const data: MLBScheduleResponse = await res.json()
+  const games = (data.dates ?? [])
+    .flatMap(date => date.games ?? [])
+    .filter(game => !SKIP_STATES.has(game.status?.detailedState))
+    .sort((a, b) => new Date(b.gameDate).getTime() - new Date(a.gameDate).getTime())
+
+  const positions = new Map<number, number[]>()
+  let usedGames = 0
+
+  for (const game of games) {
+    if (usedGames >= maxGames) break
+    const side = game.teams.home.team.id === teamId ? 'home' : game.teams.away.team.id === teamId ? 'away' : null
+    if (!side) continue
+    const lineup = side === 'home' ? game.lineups?.homePlayers ?? [] : game.lineups?.awayPlayers ?? []
+    if (lineup.length < 8) continue
+
+    usedGames++
+    lineup.slice(0, 9).forEach((player, index) => {
+      const slots = positions.get(player.id) ?? []
+      slots.push(index + 1)
+      positions.set(player.id, slots)
+    })
+  }
+
+  return positions
 }
 
 export async function fetchConfirmedLineup(gamePk: number, teamId: number): Promise<number[] | null> {
