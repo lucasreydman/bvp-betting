@@ -39,11 +39,12 @@ export default function Footer() {
           </p>
         </div>
         <div>
-          <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Optional OPS filter</h3>
+          <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Optional filters</h3>
           <p className="leading-relaxed">
-            OPS is not the right primary metric for this prop: walks inflate it and slugging
-            overweights extra-base hits. It can still work as a secondary quality check. Setting a minimum OPS filters out batters who hit for average but produce little overall offense. Enable it with the{' '}
-            <span className="text-gray-400">+ OPS filter</span> button above the table.
+            Two optional filters add a secondary confidence layer without changing the core logic.{' '}
+            <span className="text-gray-400">OPS</span> filters out batters who hit for average but produce little overall offense — useful, though walks and slugging matter less for this prop than raw hit rate.{' '}
+            <span className="text-gray-400">Hits</span> raises the minimum contact count, narrowing to batters with more demonstrated success against the pitcher beyond just AVG and AB.
+            Neither is required — both are personal tightening tools.
           </p>
         </div>
       </div>

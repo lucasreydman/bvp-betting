@@ -15,13 +15,19 @@ interface Props {
 }
 
 const DEFAULT_OPS_VALUE = 0.700
+const DEFAULT_H_VALUE = 5
 
 export default function Filters({ filters, onApply, matchups, top5, dailyDouble }: Props) {
   const minOpsId = useId()
+  const minHId = useId()
   const [opsDisplay, setOpsDisplay] = useState(
     filters.minOPS !== null ? filters.minOPS.toFixed(3) : DEFAULT_OPS_VALUE.toFixed(3)
   )
   const [opsEnabled, setOpsEnabled] = useState(filters.minOPS !== null)
+  const [hDisplay, setHDisplay] = useState(
+    filters.minH !== null ? String(filters.minH) : String(DEFAULT_H_VALUE)
+  )
+  const [hEnabled, setHEnabled] = useState(filters.minH !== null)
   const [flash, setFlash] = useState<'apply' | 'reset' | 'export' | null>(null)
   const [showExportMenu, setShowExportMenu] = useState(false)
   const exportRef = useRef<HTMLDivElement>(null)
@@ -29,6 +35,8 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
   useEffect(() => {
     setOpsDisplay(filters.minOPS !== null ? filters.minOPS.toFixed(3) : DEFAULT_OPS_VALUE.toFixed(3))
     setOpsEnabled(filters.minOPS !== null)
+    setHDisplay(filters.minH !== null ? String(filters.minH) : String(DEFAULT_H_VALUE))
+    setHEnabled(filters.minH !== null)
   }, [filters])
 
   useEffect(() => {
@@ -48,13 +56,18 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
   }
 
   const handleApply = () => {
-    onApply({ minOPS: opsEnabled ? Number(opsDisplay) : null })
+    onApply({
+      minOPS: opsEnabled ? Number(opsDisplay) : null,
+      minH: hEnabled ? Number(hDisplay) : null,
+    })
     flashFor('apply')
   }
 
   const handleReset = () => {
     setOpsDisplay(DEFAULT_OPS_VALUE.toFixed(3))
     setOpsEnabled(false)
+    setHDisplay(String(DEFAULT_H_VALUE))
+    setHEnabled(false)
     onApply(DEFAULT_FILTERS)
     flashFor('reset')
   }
@@ -140,6 +153,46 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
           >
             <span className="text-gray-600">+</span>
             OPS filter
+          </button>
+        )}
+
+        {/* ── Hits filter (optional) ────────────────────────── */}
+        {hEnabled ? (
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-950/60 border border-blue-800/50">
+            <label htmlFor={minHId} className="text-xs uppercase tracking-wider text-blue-400 font-semibold whitespace-nowrap">
+              H ≥
+            </label>
+            <input
+              id={minHId}
+              type="number"
+              value={hDisplay}
+              step="1"
+              min="1"
+              onChange={e => setHDisplay(e.target.value)}
+              onBlur={e => setHDisplay(String(Math.max(1, Math.round(Number(e.target.value)))))}
+              className="w-8 bg-transparent text-blue-200 text-xs font-mono focus:outline-none"
+            />
+            <InfoTooltip
+              width="w-72"
+              text="Minimum career hits vs this pitcher. Filters for batters with more demonstrated contact — useful for narrowing to higher-conviction plays. Doesn't change the core logic; just raises the sample quality bar alongside the required .300 AVG."
+            />
+            <button
+              type="button"
+              onClick={() => setHEnabled(false)}
+              className="text-blue-600 hover:text-blue-400 transition-colors ml-0.5 leading-none touch-manipulation"
+              title="Remove hits filter"
+            >
+              ✕
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setHEnabled(true)}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs text-gray-500 hover:text-gray-300 border border-dashed border-gray-700 hover:border-gray-500 transition-colors touch-manipulation"
+          >
+            <span className="text-gray-600">+</span>
+            Hits filter
           </button>
         )}
 

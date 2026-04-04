@@ -38,10 +38,12 @@ export interface MatchupResult {
 
 export interface FilterState {
   minOPS: number | null  // null = not active; minAB (15) and minAVG (0.300) are server-enforced
+  minH: number | null    // null = not active; optional secondary confidence filter
 }
 
 export const DEFAULT_FILTERS: FilterState = {
   minOPS: null,
+  minH: null,
 }
 
 export interface MatchupsResponse {

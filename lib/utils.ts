@@ -134,7 +134,8 @@ export function formatCountdownToStart(isoString: string, nowMs: number): string
 
 export function applyFilters(matchups: MatchupResult[], filters: FilterState): MatchupResult[] {
   return matchups.filter(m =>
-    (filters.minOPS === null || m.ops >= filters.minOPS)
+    (filters.minOPS === null || m.ops >= filters.minOPS) &&
+    (filters.minH === null || m.h >= filters.minH)
   )
 }
 
