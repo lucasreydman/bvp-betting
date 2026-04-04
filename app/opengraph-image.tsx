@@ -1,11 +1,27 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'MLB BvP: Daily Hit Prop Picks'
+export const alt = 'MLB BvP Betting: Daily Hit Prop Picks'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
-export default function Image() {
+export default async function Image() {
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+
+  // Load icon as base64 data URL for use in edge runtime
+  let iconSrc: string | null = null
+  try {
+    const res = await fetch(`${baseUrl}/icon.png`)
+    const buf = await res.arrayBuffer()
+    const bytes = new Uint8Array(buf)
+    const binary = bytes.reduce((acc, b) => acc + String.fromCharCode(b), '')
+    iconSrc = `data:image/png;base64,${btoa(binary)}`
+  } catch {
+    // Render without icon if fetch fails
+  }
+
   return new ImageResponse(
     (
       <div
@@ -28,56 +44,65 @@ export default function Image() {
             top: 0,
             left: 0,
             right: 0,
-            height: '6px',
+            height: '5px',
             background: 'linear-gradient(90deg, #0ea5e9, #22c55e)',
           }}
         />
 
-        {/* Label */}
-        <div
-          style={{
-            fontSize: 20,
-            fontWeight: 600,
-            letterSpacing: '0.2em',
-            textTransform: 'uppercase',
-            color: '#6b7280',
-            marginBottom: 24,
-            display: 'flex',
-          }}
-        >
-          MLB Batter vs Pitcher
+        {/* Icon + title row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: 28 }}>
+          {iconSrc && (
+            <img
+              src={iconSrc}
+              width={96}
+              height={96}
+              alt="MLB BvP Betting"
+              style={{ borderRadius: 999 }}
+            />
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div
+              style={{
+                fontSize: 72,
+                fontWeight: 800,
+                color: '#ffffff',
+                lineHeight: 1,
+                display: 'flex',
+              }}
+            >
+              MLB BvP Betting
+            </div>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 600,
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                color: '#4b5563',
+                display: 'flex',
+              }}
+            >
+              MLB Batter vs Pitcher
+            </div>
+          </div>
         </div>
 
-        {/* Headline */}
+        {/* Description */}
         <div
           style={{
-            fontSize: 80,
-            fontWeight: 800,
-            color: '#ffffff',
-            lineHeight: 1.05,
-            marginBottom: 32,
-            display: 'flex',
-          }}
-        >
-          MLB BvP
-        </div>
-
-        {/* Subheading */}
-        <div
-          style={{
-            fontSize: 30,
+            fontSize: 28,
             color: '#9ca3af',
-            maxWidth: 700,
+            maxWidth: 820,
             lineHeight: 1.5,
-            marginBottom: 56,
+            marginBottom: 52,
             display: 'flex',
           }}
         >
-          {"Career batting average matchups for today's slate. Daily Double parlay picks ranked by sample-weighted AVG."}
+          Career BvP stats for the Player Hits prop — min 15 AB, .300 AVG. Daily Double parlay picks ranked by sample-weighted average.
         </div>
 
-        {/* Stat pills */}
-        <div style={{ display: 'flex', gap: 20 }}>
+        {/* Sportsbook pills */}
+        <div style={{ display: 'flex', gap: 16 }}>
           {[
             { label: 'FanDuel', color: '#0ea5e9' },
             { label: 'Bet365', color: '#22c55e' },
@@ -92,7 +117,7 @@ export default function Image() {
                 borderRadius: 999,
                 border: `2px solid ${color}40`,
                 background: `${color}15`,
-                fontSize: 22,
+                fontSize: 20,
                 fontWeight: 600,
                 color,
               }}
@@ -108,7 +133,7 @@ export default function Image() {
             position: 'absolute',
             bottom: 48,
             right: 80,
-            fontSize: 22,
+            fontSize: 20,
             color: '#374151',
             display: 'flex',
           }}
