@@ -52,6 +52,7 @@ export default async function Image() {
         {/* Icon + title row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: 28 }}>
           {iconSrc && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={iconSrc}
               width={96}
