@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Formula, Sup } from './Formula'
+import { Formula, Sup } from '@/app/components/Formula'
 
 export default function Footer() {
   const year = new Date().getFullYear()
