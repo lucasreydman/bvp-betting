@@ -11,9 +11,9 @@ export default function Footer() {
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Why AVG?</h3>
           <p className="leading-relaxed">
-            This prop wins on any hit, from a single through a homer, so slugging and walks don&apos;t factor in. AVG is the direct measure:{' '}
-            <span className="text-gray-400 font-mono">P(1+ hit) = 1 − (1 − AVG)ⁿ </span> where n is
-            expected at-bats based on the batter&apos;s confirmed lineup slot or, before lineups post, a projected slot from recent lineup history. A .300 BvP AVG still works out to a <strong>79–82%</strong> hit probability, above typical book lines of <strong>60–63%</strong>.
+            This prop wins on any hit, so slugging and walks don&apos;t factor in. AVG is the direct measure:{' '}
+            <span className="text-gray-400 font-mono">P(1+ hit) = 1 − (1 − AVG)ⁿ</span> where n is
+            expected at-bats based on the batter&apos;s confirmed lineup slot or, before lineups post, a projected slot from recent lineup history. A .300 BvP AVG still works out to a <span className="text-gray-400 font-mono">79–82%</span> hit probability, above typical book lines of <span className="text-gray-400 font-mono">60–63%</span>.
           </p>
         </div>
         <div>
