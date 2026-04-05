@@ -20,8 +20,8 @@ function formatDisplay(dateStr: string): string {
 
 export default function DatePicker({ date, onChange }: Props) {
   const today = formatLocalDate()
-  const minDate = addDays(today, -1)
-  const maxDate = addDays(today, 1)
+  const minDate = today
+  const maxDate = addDays(today, 2)
 
   return (
     <div className="flex items-center gap-3">
