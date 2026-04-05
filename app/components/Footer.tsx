@@ -12,16 +12,16 @@ export default function Footer() {
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Why AVG?</h3>
           <p className="leading-relaxed">
             This prop wins on any hit, so slugging and walks don&apos;t factor in. AVG is the direct measure:{' '}
-            <span className="text-gray-400 font-mono">P(1+ hit) = 1 − (1 − AVG)ⁿ</span> where n is
-            expected at-bats based on the batter&apos;s confirmed lineup slot or, before lineups post, a projected slot from recent lineup history. A .300 BvP AVG still works out to a <span className="text-gray-400 font-mono">79–82%</span> hit probability, above typical book lines of <span className="text-gray-400 font-mono">60–63%</span>.
+            <span className="text-gray-400 font-mono whitespace-nowrap">P(1+ hit) = 1 − (1 − AVG)ⁿ</span>{' '}
+            Here, n is expected at-bats from the confirmed lineup slot or a projected slot based on recent lineup history. A .300 BvP AVG implies about <span className="text-gray-400 font-mono whitespace-nowrap">79–82%</span> to get a hit versus typical book lines around <span className="text-gray-400 font-mono whitespace-nowrap">60–63%</span>.
           </p>
         </div>
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Minimum requirements</h3>
           <p className="leading-relaxed">
-            Only matchups with at least 15 career AB and a .300+ BvP AVG are shown. Below 15 AB
-            the margin of error (±.145) is wide enough that a single at-bat can swing the average
-            significantly. The .300 floor ensures every listed matchup reflects a historically
+            Only matchups with at least 15 career AB and a <span className="text-gray-400 font-mono whitespace-nowrap">.300+ BvP AVG</span> are shown. Below 15 AB
+            the margin of error (<span className="text-gray-400 font-mono whitespace-nowrap">±.145</span>) is wide enough that a single at-bat can swing the average
+            significantly. The <span className="text-gray-400 font-mono whitespace-nowrap">.300</span> floor ensures every listed matchup reflects a historically
             meaningful edge over the pitcher.
           </p>
         </div>
