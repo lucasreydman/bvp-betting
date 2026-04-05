@@ -4,6 +4,7 @@ import type { DailyDouble } from '@/lib/utils'
 import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
 import { fmtOdds } from '@/lib/odds'
 import InfoTooltip from './InfoTooltip'
+import MathFormula from './MathFormula'
 
 interface Props {
   matchups: MatchupResult[]
@@ -59,15 +60,27 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             <span className="text-sky-400"> career batting average against this pitcher, weighted by how many at-bats back it up. More at-bats = more trust in the number.</span>
             <InfoTooltip width="w-64" align="left" text="For singles bets, go by primary score. It directly rewards both a strong average and a large sample. The higher the score, the more reliable the historical edge. Hit chance % is better for parlay legs, where raw probability matters more than sample confidence." />
           </p>
-          <p className="text-slate-400 pl-3">score = AVG × confidence</p>
-          <p className="text-slate-400 pl-3">confidence = min(AB / 30, 1)</p>
+          <MathFormula
+            expression="\\mathrm{score} = \\mathrm{AVG} \\times \\mathrm{confidence}"
+            className="pl-3 text-slate-300 [&_.katex]:text-[0.95rem]"
+          />
+          <MathFormula
+            expression="\\mathrm{confidence} = \\min(\\mathrm{AB}/30,\\ 1)"
+            className="pl-3 text-slate-300 [&_.katex]:text-[0.95rem]"
+          />
           <p>
             <span className="text-green-300 font-semibold">Hit chance %:</span>
             <span className="text-green-300"> estimated chance of ≥1 hit using a regressed AVG and expected ABs.</span>
             <InfoTooltip width="w-72" text="Hit chance uses a regressed AVG that pulls toward .320 (the conditional mean of pre-filtered matchups) based on sample size. Smaller samples get pulled more. A higher raw AVG matters more here than ABs, which is the opposite of the ranking score (AVG × confidence). This is why a lower-ranked play can have a higher hit % and get picked for the parlay." />
           </p>
-          <p className="text-slate-400 pl-3">adjusted AVG = (AB / (AB + 50)) × AVG + (50 / (AB + 50)) × 0.320</p>
-          <p className="text-slate-400 pl-3">hit chance = 1 − (1 − adjusted AVG)^(expected AB)</p>
+          <MathFormula
+            expression="\\mathrm{adjustedAvg} = \\frac{\\mathrm{AB}}{\\mathrm{AB}+50} \\times \\mathrm{AVG} + \\frac{50}{\\mathrm{AB}+50} \\times 0.320"
+            className="pl-3 text-slate-300 [&_.katex]:text-[0.95rem]"
+          />
+          <MathFormula
+            expression="P(\\ge 1\\ \\text{hit}) = 1 - (1 - \\mathrm{adjustedAvg})^{\\mathrm{expectedAB}}"
+            className="pl-3 text-slate-300 [&_.katex]:text-[0.95rem]"
+          />
         </div>
       </div>
     </div>
