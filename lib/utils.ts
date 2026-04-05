@@ -158,6 +158,10 @@ export function sortMatchups(matchups: MatchupResult[], sort: SortState): Matchu
       const cmp = aVal.localeCompare(bVal)
       return sort.direction === 'desc' ? -cmp : cmp
     }
+    // null/undefined values sort to the bottom regardless of direction
+    if (aVal == null && bVal == null) return 0
+    if (aVal == null) return 1
+    if (bVal == null) return -1
     const diff = (aVal as number) - (bVal as number)
     return sort.direction === 'desc' ? -diff : diff
   })
