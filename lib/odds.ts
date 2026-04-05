@@ -27,10 +27,6 @@ export function impliedToAmerican(prob: number): number {
  * The result is a vigged consensus — not a fair-odds price. The systematic
  * bias is ~3-6% depending on book margins, which is expected for a display
  * odds column showing market consensus.
- *
- * Special case: when the average implied probability is exactly 0.5 (e.g. +100
- * and -100 cancel out), we return 0 to signal true even money rather than the
- * +100 canonical form, since the two sides are genuinely balanced.
  */
 export function consensusFromLines(lines: number[]): number | null {
   if (lines.length === 0) return null
