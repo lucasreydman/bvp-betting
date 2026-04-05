@@ -79,7 +79,19 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             <span className="text-green-300"> estimated chance of ≥1 hit using a regressed AVG and expected ABs.</span>
             <InfoTooltip width="w-72" text="Hit chance uses a regressed AVG that pulls toward .320 (the conditional mean of pre-filtered matchups) based on sample size. Smaller samples get pulled more. A higher raw AVG matters more here than ABs, which is the opposite of the ranking score (AVG × confidence). This is why a lower-ranked play can have a higher hit % and get picked for the parlay." />
           </p>
-          <Formula className="pl-3 text-slate-300">
+          <div className="pl-3 text-slate-300 sm:hidden" style={{ fontFamily: '"Cambria Math", "STIX Two Text", "Times New Roman", serif' }}>
+            <div className="text-[0.88rem] leading-5">adjusted AVG =</div>
+            <Formula className="mt-1 text-slate-300">
+              <Fraction top={<span>AB</span>} bottom={<span>AB + 50</span>} />
+              <span>×</span>
+              <span>AVG</span>
+              <span>+</span>
+              <Fraction top={<span>50</span>} bottom={<span>AB + 50</span>} />
+              <span>×</span>
+              <span>0.320</span>
+            </Formula>
+          </div>
+          <Formula className="pl-3 text-slate-300 hidden sm:flex">
             <span>adjusted AVG</span>
             <span>=</span>
             <Fraction top={<span>AB</span>} bottom={<span>AB + 50</span>} />
