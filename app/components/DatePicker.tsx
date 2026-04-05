@@ -24,22 +24,24 @@ export default function DatePicker({ date, onChange }: Props) {
   const maxDate = addDays(today, 2)
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex w-full items-center justify-between gap-3 rounded-xl border border-gray-800 bg-gray-900/70 px-3 py-2 sm:w-auto sm:justify-start sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0">
       {date > minDate && (
         <button
           type="button"
           onClick={() => onChange(addDays(date, -1))}
-          className="text-gray-500 hover:text-white transition-colors text-lg leading-none"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-800 bg-gray-950 text-gray-400 transition-colors hover:text-white sm:h-auto sm:w-auto sm:border-0 sm:bg-transparent sm:text-lg"
         >
           ‹
         </button>
       )}
-      <span className="text-white font-medium text-sm">{formatDisplay(date)}</span>
+      <span className="min-w-0 flex-1 text-center text-sm font-medium text-white sm:flex-initial sm:text-left">
+        {formatDisplay(date)}
+      </span>
       {date < maxDate && (
         <button
           type="button"
           onClick={() => onChange(addDays(date, 1))}
-          className="text-gray-500 hover:text-white transition-colors text-lg leading-none"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-800 bg-gray-950 text-gray-400 transition-colors hover:text-white sm:h-auto sm:w-auto sm:border-0 sm:bg-transparent sm:text-lg"
         >
           ›
         </button>

@@ -97,7 +97,7 @@ export default function MatchupTable({
   return (
     <div className="bg-gray-900 rounded-lg overflow-hidden">
       {/* Table header */}
-      <div className="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-gray-800 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
           {title}
         </h2>
@@ -112,15 +112,15 @@ export default function MatchupTable({
           <div className="sm:hidden">
             {/* Sort chips */}
             {gameKind !== 'settled' && (
-              <div className="px-4 py-2 border-b border-gray-800 flex items-center gap-2">
-                <span className="text-xs text-gray-600">Sort:</span>
-                <div className="flex gap-1.5">
+              <div className="px-4 py-3 border-b border-gray-800 space-y-2">
+                <span className="block text-[11px] uppercase tracking-wider text-gray-600 font-semibold">Sort</span>
+                <div className="grid grid-cols-3 gap-1.5">
                   {MOBILE_SORT_COLS.map(col => (
                     <button
                       key={col.key}
                       type="button"
                       onClick={() => onSort(col.key)}
-                      className={`text-xs px-2.5 py-1 rounded-full border transition-colors touch-manipulation ${
+                      className={`text-xs px-2.5 py-2 rounded-lg border transition-colors touch-manipulation ${
                         sort.column === col.key
                           ? 'bg-blue-600/20 border-blue-500/50 text-blue-400'
                           : 'border-gray-700 text-gray-500 active:text-gray-300'

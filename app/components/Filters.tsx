@@ -80,10 +80,10 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
 
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 mb-4">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
 
         {/* ── Fixed requirement chips ───────────────────────── */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5 justify-center sm:justify-start">
           <span className="text-xs uppercase tracking-wider text-gray-600 font-semibold mr-0.5 hidden sm:inline">
             Filters
           </span>
@@ -102,86 +102,88 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
         {/* ── Divider ───────────────────────────────────────── */}
         <div className="w-px h-5 bg-gray-800 mx-0.5 hidden sm:block" />
 
-        {/* ── OPS filter (optional) ─────────────────────────── */}
-        {opsEnabled ? (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-950/60 border border-blue-800/50">
-            <label htmlFor={minOpsId} className="text-xs uppercase tracking-wider text-blue-400 font-semibold whitespace-nowrap">
-              OPS ≥
-            </label>
-            <input
-              id={minOpsId}
-              type="number"
-              value={opsDisplay}
-              step="0.001"
-              onChange={e => setOpsDisplay(e.target.value)}
-              onBlur={e => setOpsDisplay(Number(e.target.value).toFixed(3))}
-              className="w-14 bg-transparent text-blue-200 text-xs font-mono focus:outline-none"
-            />
+        <div className="grid grid-cols-2 gap-2 sm:contents">
+          {/* ── OPS filter (optional) ─────────────────────────── */}
+          {opsEnabled ? (
+            <div className="inline-flex min-w-0 items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-md bg-blue-950/60 border border-blue-800/50">
+              <label htmlFor={minOpsId} className="text-xs uppercase tracking-wider text-blue-400 font-semibold whitespace-nowrap">
+                OPS ≥
+              </label>
+              <input
+                id={minOpsId}
+                type="number"
+                value={opsDisplay}
+                step="0.001"
+                onChange={e => setOpsDisplay(e.target.value)}
+                onBlur={e => setOpsDisplay(Number(e.target.value).toFixed(3))}
+                className="w-14 bg-transparent text-blue-200 text-xs font-mono focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setOpsEnabled(false)}
+                className="text-blue-600 hover:text-blue-400 transition-colors ml-0.5 leading-none touch-manipulation"
+                title="Remove OPS filter"
+              >
+                ✕
+              </button>
+            </div>
+          ) : (
             <button
               type="button"
-              onClick={() => setOpsEnabled(false)}
-              className="text-blue-600 hover:text-blue-400 transition-colors ml-0.5 leading-none touch-manipulation"
-              title="Remove OPS filter"
+              onClick={() => setOpsEnabled(true)}
+              className="inline-flex min-w-0 items-center justify-center gap-1 px-2.5 py-1.5 rounded-md text-xs text-gray-500 hover:text-gray-300 border border-dashed border-gray-700 hover:border-gray-500 transition-colors touch-manipulation"
             >
-              ✕
+              <span className="text-gray-600">+</span>
+              OPS filter
             </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setOpsEnabled(true)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs text-gray-500 hover:text-gray-300 border border-dashed border-gray-700 hover:border-gray-500 transition-colors touch-manipulation"
-          >
-            <span className="text-gray-600">+</span>
-            OPS filter
-          </button>
-        )}
+          )}
 
-        {/* ── Hits filter (optional) ────────────────────────── */}
-        {hEnabled ? (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-950/60 border border-blue-800/50">
-            <label htmlFor={minHId} className="text-xs uppercase tracking-wider text-blue-400 font-semibold whitespace-nowrap">
-              H ≥
-            </label>
-            <input
-              id={minHId}
-              type="number"
-              value={hDisplay}
-              step="1"
-              min="1"
-              onChange={e => setHDisplay(e.target.value)}
-              onBlur={e => setHDisplay(String(Math.max(1, Math.round(Number(e.target.value)))))}
-              className="w-8 bg-transparent text-blue-200 text-xs font-mono focus:outline-none"
-            />
+          {/* ── Hits filter (optional) ────────────────────────── */}
+          {hEnabled ? (
+            <div className="inline-flex min-w-0 items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-md bg-blue-950/60 border border-blue-800/50">
+              <label htmlFor={minHId} className="text-xs uppercase tracking-wider text-blue-400 font-semibold whitespace-nowrap">
+                H ≥
+              </label>
+              <input
+                id={minHId}
+                type="number"
+                value={hDisplay}
+                step="1"
+                min="1"
+                onChange={e => setHDisplay(e.target.value)}
+                onBlur={e => setHDisplay(String(Math.max(1, Math.round(Number(e.target.value))))) }
+                className="w-8 bg-transparent text-blue-200 text-xs font-mono focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setHEnabled(false)}
+                className="text-blue-600 hover:text-blue-400 transition-colors ml-0.5 leading-none touch-manipulation"
+                title="Remove hits filter"
+              >
+                ✕
+              </button>
+            </div>
+          ) : (
             <button
               type="button"
-              onClick={() => setHEnabled(false)}
-              className="text-blue-600 hover:text-blue-400 transition-colors ml-0.5 leading-none touch-manipulation"
-              title="Remove hits filter"
+              onClick={() => setHEnabled(true)}
+              className="inline-flex min-w-0 items-center justify-center gap-1 px-2.5 py-1.5 rounded-md text-xs text-gray-500 hover:text-gray-300 border border-dashed border-gray-700 hover:border-gray-500 transition-colors touch-manipulation"
             >
-              ✕
+              <span className="text-gray-600">+</span>
+              Hits filter
             </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setHEnabled(true)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs text-gray-500 hover:text-gray-300 border border-dashed border-gray-700 hover:border-gray-500 transition-colors touch-manipulation"
-          >
-            <span className="text-gray-600">+</span>
-            Hits filter
-          </button>
-        )}
+          )}
+        </div>
 
         {/* ── Spacer ────────────────────────────────────────── */}
-        <div className="flex-1" />
+        <div className="hidden flex-1 sm:block" />
 
         {/* ── Action buttons ────────────────────────────────── */}
-        <div className="flex items-center gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-start">
           <button
             type="button"
             onClick={handleApply}
-            className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all touch-manipulation ${
+            className={`w-full px-4 py-2 text-sm font-medium rounded-lg transition-all touch-manipulation ${
               flash === 'apply'
                 ? 'bg-green-600 text-white'
                 : 'bg-blue-600 hover:bg-blue-500 text-white'
@@ -193,7 +195,7 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
           <button
             type="button"
             onClick={handleReset}
-            className={`px-4 py-1.5 text-sm font-medium rounded-lg border transition-all touch-manipulation ${
+            className={`w-full px-4 py-2 text-sm font-medium rounded-lg border transition-all touch-manipulation ${
               flash === 'reset'
                 ? 'border-green-700 text-green-400'
                 : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
