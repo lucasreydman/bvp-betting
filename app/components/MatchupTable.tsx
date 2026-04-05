@@ -13,6 +13,7 @@ interface Props {
   totalMatchups: number
   title?: string
   onResetFilters?: () => void
+  hasActiveOptionalFilters?: boolean
   /** Drives Game column: countdown vs live badge */
   gameKind?: 'upcoming' | 'inProgress' | 'settled'
 }
@@ -63,6 +64,7 @@ export default function MatchupTable({
   totalMatchups,
   title = 'Upcoming',
   onResetFilters,
+  hasActiveOptionalFilters = false,
   gameKind = 'upcoming',
 }: Props) {
   const sortIcon = (key: keyof MatchupResult) => {
@@ -70,10 +72,17 @@ export default function MatchupTable({
     return <span className="text-blue-400 ml-1">{sort.direction === 'desc' ? '↓' : '↑'}</span>
   }
 
+  const showFilterEmptyState = hasActiveOptionalFilters && totalMatchups > 0
+  const emptyMessage = showFilterEmptyState
+    ? 'No rows match these optional filters. Try lowering a minimum.'
+    : gameKind === 'upcoming'
+      ? 'No qualifying upcoming plays remain for this date.'
+      : `No ${title.toLowerCase()} matchups are available.`
+
   const emptyState = (
     <div className="px-4 py-8 text-center text-gray-500 text-sm space-y-3">
-      <p>No rows match these filters. Try lowering a minimum.</p>
-      {onResetFilters && (
+      <p>{emptyMessage}</p>
+      {showFilterEmptyState && onResetFilters && (
         <button
           type="button"
           onClick={onResetFilters}

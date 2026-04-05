@@ -86,6 +86,7 @@ export default function ClientShell() {
 
   const totalUpcoming   = allUpcoming.length
   const totalInProgress = allInProgress.length
+  const hasActiveOptionalFilters = filters.minOPS !== null || filters.minH !== null
 
   const top5Score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
   const filtersKey = `${filters.minOPS ?? 'none'}-${filters.minH ?? 'none'}`
@@ -136,6 +137,7 @@ export default function ClientShell() {
             sort={sort}
             onSort={handleSort}
             totalMatchups={totalUpcoming}
+            hasActiveOptionalFilters={hasActiveOptionalFilters}
             onResetFilters={() => setFilters(DEFAULT_FILTERS)}
             gameKind="upcoming"
           />
