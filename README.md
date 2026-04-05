@@ -14,13 +14,13 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 
 **Consistency is everything for EV.** The edge here is statistical. It compounds over time. The more consistently you take these plays, the higher your expected value will be. Treat it like a system, not a tip.
 
-**Confirmed lineups make the hit chance more accurate.** Hit chance is calculated using an expected at-bats number that adjusts based on where the batter sits in the order. Until lineups are official, a generic estimate is used. Plays marked **confirmed** are stronger because that number is exact. Lineups usually drop 3–4 hours before first pitch.
+**Confirmed lineups make the hit chance more accurate.** Hit chance is calculated using an expected at-bats number that adjusts based on where the batter sits in the order. Until lineups are official, the app projects a batting slot from recent lineup history when possible. Plays marked **confirmed** are stronger because that number is exact. Lineups usually drop 3–4 hours before first pitch.
 
 ## How it works
 
 1. Loads the schedule and probable pitchers for the date. Postponed, cancelled, and suspended games are automatically excluded.
 2. Builds each lineup: official order from the schedule or boxscore when available, otherwise the top 9 active players by career plate appearances.
-3. Fetches career BvP for each batter vs the opposing starter (minimum 10 AB to show a row).
+3. Fetches career BvP for each batter vs the opposing starter, then excludes rows below 15 AB or .300 AVG.
 4. Computes AVG, OPS, SLG, OBP, and XBH from the split.
 5. Splits results into **Upcoming**, **In progress**, and **Settled** tables based on game status from the MLB API. The qualifying player list for each game is frozen at game start, so no new players can enter or leave mid-game.
 6. In-progress rows show whether each batter has gotten a hit yet (HIT / pending). Settled rows show the final result (HIT / NO HIT).
@@ -36,13 +36,13 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 **Hit chance %:** Estimated probability of recording at least one hit, using a regressed AVG and expected at-bats based on lineup position.
 
 ```
-adjusted AVG = (AB / (AB + 50)) × AVG + (50 / (AB + 50)) × 0.260
+adjusted AVG = (AB / (AB + 50)) × AVG + (50 / (AB + 50)) × 0.320
 hit chance   = 1 − (1 − adjusted AVG) ^ (expected AB)
 ```
 
 ## Daily Double and Smash Double
 
-The **Daily Double** is a single 2-leg parlay recommendation built from the Top 5 Plays. Both legs must have at least 15 AB and a .300+ career AVG against their pitcher to qualify. It picks the pair with the highest combined hit probability.
+The **Daily Double** is a single 2-leg parlay recommendation built from the Top 5 Plays. Both legs must have at least 15 AB and a .300+ career AVG against their pitcher to qualify. It picks the pair with the highest combined hit probability from that Top 5 group.
 
 The **Smash Double** is a Daily Double where both legs also carry a career OPS above .950 and at least 7 hits against their pitcher. The hit floor ensures the high OPS reflects genuine contact rather than a small-sample fluke. Every Smash Double win also counts as a Daily Double win.
 
@@ -50,7 +50,7 @@ If one or more legs are already in progress, the Daily Double card remains visib
 
 ## Date navigation
 
-Today and tomorrow are available. The forward arrow peeks at tomorrow's probable matchups; the back arrow returns to today.
+Today and the next two days are available. The arrows move one day at a time within that range.
 
 ## Filters
 
@@ -60,7 +60,7 @@ Today and tomorrow are available. The forward arrow peeks at tomorrow's probable
 | Min AVG | .300 | Batting average |
 | Min OPS | Off | Optional OPS filter (toggle on/off) |
 
-All active filters apply at once (AND logic). Filters apply to the Upcoming table only. In progress and Settled tables show all qualifying rows regardless of filter settings.
+All active filters apply at once (AND logic). Filters apply to the Upcoming, In progress, and Settled tables.
 
 ## Export CSV
 
@@ -68,7 +68,7 @@ The Export CSV button (desktop only) offers three options:
 
 - **Daily Double / Smash Double**: 2-leg parlay recommendation
 - **Top 5 Plays**: top 5 upcoming plays by primary score
-- **Full List**: all rows that pass the current filters
+- **Full List**: all upcoming and in-progress rows that pass the current filters
 
 ## Confidence
 
