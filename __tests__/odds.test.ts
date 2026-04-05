@@ -4,6 +4,7 @@ import {
   consensusFromLines,
   normalizePlayerName,
   fmtOdds,
+  buildOddsMap,
 } from '@/lib/odds'
 
 describe('americanToImplied', () => {
@@ -54,7 +55,15 @@ describe('consensusFromLines', () => {
   it('averages two symmetric lines around even money', () => {
     const result = consensusFromLines([100, -100])
     expect(result).not.toBeNull()
-    expect(Math.abs(result!)).toBeLessThan(5)
+    expect(Math.round(result!)).toBe(100)  // even money = +100
+  })
+
+  it('averages asymmetric multi-book lines', () => {
+    // -115 implied ≈ 0.535, -110 ≈ 0.524, -120 ≈ 0.545 → avg ≈ 0.535 → consensus ≈ -115
+    const result = consensusFromLines([-115, -110, -120])
+    expect(result).not.toBeNull()
+    expect(result!).toBeLessThan(-100)  // should remain negative (favorite)
+    expect(result!).toBeGreaterThan(-125)  // but not extreme
   })
 
   it('averages multiple lines via implied probability', () => {
@@ -74,6 +83,10 @@ describe('normalizePlayerName', () => {
   it('normalizes accented characters', () => {
     expect(normalizePlayerName('Yoán Moncada')).toBe('yoan moncada')
   })
+
+  it('collapses multiple spaces and trims', () => {
+    expect(normalizePlayerName('  Juan  Soto  ')).toBe('juan soto')
+  })
 })
 
 describe('fmtOdds', () => {
@@ -85,5 +98,30 @@ describe('fmtOdds', () => {
   it('returns negative odds as-is', () => {
     expect(fmtOdds(-110)).toBe('-110')
     expect(fmtOdds(-200)).toBe('-200')
+  })
+
+  it('handles zero (even money)', () => {
+    expect(fmtOdds(0)).toBe('+0')
+  })
+})
+
+describe('buildOddsMap', () => {
+  it('builds a map keyed by normalized name', () => {
+    const rows = [
+      { batterNameNormalized: 'shohei ohtani', consensusHitOddsAmerican: -130, bookCount: 4 },
+      { batterNameNormalized: 'mike trout', consensusHitOddsAmerican: 110, bookCount: 3 },
+    ]
+    const map = buildOddsMap(rows)
+    expect(map.get('shohei ohtani')?.consensusHitOddsAmerican).toBe(-130)
+    expect(map.get('mike trout')?.consensusHitOddsAmerican).toBe(110)
+  })
+
+  it('first-entry-wins on duplicate names', () => {
+    const rows = [
+      { batterNameNormalized: 'player a', consensusHitOddsAmerican: -130, bookCount: 6 },
+      { batterNameNormalized: 'player a', consensusHitOddsAmerican: -120, bookCount: 6 },
+    ]
+    const map = buildOddsMap(rows)
+    expect(map.get('player a')?.consensusHitOddsAmerican).toBe(-130)
   })
 })

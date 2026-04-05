@@ -17,8 +17,7 @@ export function americanToImplied(american: number): number {
 }
 
 export function impliedToAmerican(prob: number): number {
-  if (prob < 0.5) return ((1 - prob) / prob) * 100    // positive odds (+100 at 0.5)
-  if (prob === 0.5) return 100                         // even money: canonical positive form
+  if (prob <= 0.5) return ((1 - prob) / prob) * 100   // positive odds (including even money)
   return -(prob / (1 - prob)) * 100                   // negative odds
 }
 
@@ -36,8 +35,6 @@ export function impliedToAmerican(prob: number): number {
 export function consensusFromLines(lines: number[]): number | null {
   if (lines.length === 0) return null
   const avgImplied = lines.reduce((sum, l) => sum + americanToImplied(l), 0) / lines.length
-  // When the average is exactly 0.5 (symmetric lines around even money), return 0.
-  if (avgImplied === 0.5 && lines.length > 1) return 0
   return impliedToAmerican(avgImplied)
 }
 
@@ -54,7 +51,7 @@ export function normalizePlayerName(name: string): string {
 
 /** Format American odds for display: +150, -110, +100. */
 export function fmtOdds(american: number): string {
-  return american > 0 ? `+${american}` : String(american)
+  return american >= 0 ? `+${american}` : String(american)
 }
 
 // ── API types ────────────────────────────────────────────────────────────────
@@ -129,8 +126,9 @@ export async function fetchDayOdds(date: string): Promise<OddsRow[]> {
           if (market.key !== 'batter_hits') continue
           for (const outcome of market.outcomes) {
             const normalized = normalizePlayerName(outcome.name)
-            if (!playerLines.has(normalized)) playerLines.set(normalized, [])
-            playerLines.get(normalized)!.push(outcome.price)
+            const bucket = playerLines.get(normalized) ?? []
+            playerLines.set(normalized, bucket)
+            bucket.push(outcome.price)
           }
         }
       }
