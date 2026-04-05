@@ -42,7 +42,7 @@ hit chance   = 1 − (1 − adjusted AVG) ^ (expected AB)
 
 ## Daily Double and Smash Double
 
-The **Daily Double** is a single 2-leg parlay recommendation built from the Top 5 Plays. Both legs must have at least 15 AB and a .300+ career AVG against their pitcher to qualify. It picks the pair with the highest combined hit probability while keeping both legs on different pitchers.
+The **Daily Double** is a single 2-leg parlay recommendation built from the Top 5 Plays. Both legs must have at least 15 AB and a .300+ career AVG against their pitcher to qualify. It picks the pair with the highest combined hit probability.
 
 The **Smash Double** is a Daily Double where both legs also carry a career OPS above .950 and at least 7 hits against their pitcher. The hit floor ensures the high OPS reflects genuine contact rather than a small-sample fluke. Every Smash Double win also counts as a Daily Double win.
 

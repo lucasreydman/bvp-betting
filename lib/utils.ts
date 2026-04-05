@@ -109,7 +109,6 @@ export function suggestDailyDouble(matchups: MatchupResult[]): DailyDouble | nul
     for (let j = i + 1; j < enriched.length; j++) {
       const a = enriched[i]
       const b = enriched[j]
-      if (a.matchup.pitcherId === b.matchup.pitcherId) continue
       const combinedProbability = a.probability * b.probability
       if (!best || combinedProbability > best.combinedProbability) {
         best = {

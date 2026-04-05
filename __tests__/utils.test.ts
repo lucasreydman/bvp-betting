@@ -158,7 +158,7 @@ describe('hitProbability', () => {
 })
 
 describe('suggestDailyDouble', () => {
-  it('returns the single best pair with different pitchers', () => {
+  it('returns the single best pair by combined probability', () => {
     const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.300, ab: 40 })
     const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.320, ab: 30 })
     const c = makeMatchup({ batterId: 3, pitcherId: 3, avg: 0.350, ab: 20 })
@@ -166,7 +166,6 @@ describe('suggestDailyDouble', () => {
 
     expect(result).not.toBeNull()
     expect(result!.first.batterId).not.toBe(result!.second.batterId)
-    expect(result!.first.pitcherId).not.toBe(result!.second.pitcherId)
     expect(result!.combinedProbability).toBeGreaterThan(0)
   })
 
