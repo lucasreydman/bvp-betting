@@ -35,6 +35,10 @@ export interface MatchupResult {
   confidence: 'high' | 'medium' | 'low'  // 25+ AB = high, 20-24 AB = medium, 15-19 AB = low
   gameStatus: 'upcoming' | 'inProgress' | 'settled'
   hitResult?: 'win' | 'loss' | 'pending'   // only present on inProgress and settled rows
+
+  // Odds enrichment (upcoming rows only; null = no line found for this player)
+  consensusHitOddsAmerican?: number | null
+  bookCount?: number
 }
 
 export interface FilterState {
