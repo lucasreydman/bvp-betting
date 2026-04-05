@@ -70,7 +70,9 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
           <Formula className="pl-3 text-slate-300 text-[0.95rem]">
             <span>confidence</span>
             <span>=</span>
-            <span>min(AB / 30, 1)</span>
+            <span>min(</span>
+            <Fraction top={<span>AB</span>} bottom={<span>30</span>} />
+            <span>, 1)</span>
           </Formula>
           <p>
             <span className="text-green-300 font-semibold">Hit chance %:</span>

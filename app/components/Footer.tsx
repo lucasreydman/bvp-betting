@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Formula, Sup } from '@/app/components/Formula'
+import { Formula, Fraction, Sup } from '@/app/components/Formula'
 
 export default function Footer() {
   const year = new Date().getFullYear()
@@ -13,13 +13,13 @@ export default function Footer() {
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Why AVG?</h3>
           <p className="leading-relaxed">
             This prop wins on any hit, so slugging and walks don&apos;t factor in. AVG is the direct measure:{' '}
-            <Formula inline className="text-gray-400 text-[0.95rem]">
+            <Formula inline className="text-gray-400 text-[0.9rem]">
               <span>P(≥1 hit)</span>
               <span>=</span>
               <span>1 − (1 − AVG)</span>
               <Sup>n</Sup>
             </Formula>{' '}
-            Here, n is expected at-bats from the confirmed lineup slot or a projected slot based on recent lineup history. A .300 BvP AVG implies about{' '}
+            In this formula, n is expected at-bats from the confirmed lineup slot or a projected slot based on recent lineup history. A .300 BvP AVG implies about{' '}
             <span className="text-gray-400 font-mono whitespace-nowrap">79–82%</span>{' '}
             to get a hit versus typical book lines around{' '}
             <span className="text-gray-400 font-mono whitespace-nowrap">60–63%</span>.
@@ -40,10 +40,12 @@ export default function Footer() {
             <span className="text-yellow-500">yellow</span> = 20–24 AB,{' '}
             <span className="text-red-500">red</span> = 15–19 AB.
             Top 5 Plays ranks by{' '}
-            <Formula inline className="text-gray-400 text-[0.95rem]">
+            <Formula inline className="text-gray-400 text-[0.9rem]">
               <span>AVG</span>
               <span>×</span>
-              <span>min(AB / 30, 1)</span>
+              <span>min(</span>
+              <Fraction top={<span>AB</span>} bottom={<span>30</span>} />
+              <span>, 1)</span>
             </Formula>, so a .350 in 30 AB
             scores higher than a .500 in 15 AB. Larger samples carry less variance and are generally more reliable at the same AVG.
           </p>
