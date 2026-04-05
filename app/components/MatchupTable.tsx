@@ -171,8 +171,8 @@ export default function MatchupTable({
                     </div>
                   </div>
 
-                  {/* Row 3: H/AB + lineup status + odds */}
-                  <div className="mt-2 flex items-center gap-2 text-xs text-gray-500 flex-wrap">
+                  {/* Row 3: H/AB + odds on left, lineup badge on right */}
+                  <div className="mt-2 flex items-center justify-between gap-3 text-xs text-gray-500">
                     <div className="flex items-center gap-2 text-gray-500 min-w-0 flex-wrap">
                       <span className="font-mono">{m.h}/{m.ab} AB</span>
                       {gameKind === 'upcoming' && m.consensusHitOddsAmerican != null && (
@@ -186,7 +186,8 @@ export default function MatchupTable({
                           </span>
                         </>
                       )}
-                      <span className="text-gray-700">·</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
                       <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-600">Lineup</span>
                       <span className={`px-1.5 py-0.5 rounded font-medium ${
                         m.lineupSource === 'confirmed'
