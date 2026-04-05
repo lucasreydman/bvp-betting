@@ -13,7 +13,7 @@ export default function Footer() {
           <p className="leading-relaxed">
             This prop wins on any hit, from a single through a homer, so slugging and walks don&apos;t factor in. AVG is the direct measure:{' '}
             <span className="text-gray-400 font-mono">P(1+ hit) = 1 − (1 − AVG)ⁿ</span> where n is
-            expected at-bats based on the batter&apos;s confirmed lineup slot or, before lineups post, a projected slot from recent lineup history. A .300 BvP AVG still works out to roughly a 79–82% hit probability, well above typical book lines of 60–63%.
+            expected at-bats based on the batter&apos;s confirmed lineup slot or, before lineups post, a projected slot from recent lineup history. A .300 BvP AVG still works out to roughly a 79–82% hit probability, above typical book lines of 60–63%.
           </p>
         </div>
         <div>
