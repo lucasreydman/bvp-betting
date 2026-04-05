@@ -6,12 +6,12 @@ export default function Footer() {
   return (
     <footer className="mt-12 border-t border-gray-800 pt-8 pb-10 text-xs text-gray-500 space-y-6">
 
-      {/* Methodology — 4 columns */}
+      {/* Methodology - 4 columns */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Why AVG?</h3>
           <p className="leading-relaxed">
-            This prop wins on any hit — single through homer — so slugging and walks don&apos;t factor in. AVG is the direct measure:{' '}
+            This prop wins on any hit, from a single through a homer, so slugging and walks don&apos;t factor in. AVG is the direct measure:{' '}
             <span className="text-gray-400 font-mono">P(1+ hit) = 1 − (1 − AVG)ⁿ</span> where n is
             expected at-bats (4.1 unconfirmed; 3.85–4.45 by lineup spot once confirmed). A .300 BvP AVG means roughly a 79–82% hit probability, well above typical book lines of 60–63%.
           </p>
@@ -28,8 +28,8 @@ export default function Footer() {
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Confidence &amp; Top 5</h3>
           <p className="leading-relaxed">
-            Confidence reflects sample size: <span className="text-green-500">green</span> = 30+ AB,{' '}
-            <span className="text-yellow-500">yellow</span> = 20–29 AB,{' '}
+            Confidence reflects sample size: <span className="text-green-500">green</span> = 25+ AB,{' '}
+            <span className="text-yellow-500">yellow</span> = 20–24 AB,{' '}
             <span className="text-red-500">red</span> = 15–19 AB.
             Top 5 Plays ranks by{' '}
             <span className="text-gray-400 font-mono">AVG × min(AB / 30, 1)</span>, so a .350 in 30 AB
@@ -39,7 +39,7 @@ export default function Footer() {
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Optional filters</h3>
           <p className="leading-relaxed">
-            Both are optional and don&apos;t change the core logic — they narrow the list for personal conviction.{' '}
+            Both are optional and don&apos;t change the core logic. They narrow the list for personal conviction.{' '}
             <span className="text-gray-400">OPS</span> filters out batters who hit for average but produce little overall offense; walks and slugging matter less here than raw hit rate.{' '}
             <span className="text-gray-400">Hits</span> targets batters with more demonstrated contact against the pitcher, beyond just AVG and AB.
           </p>

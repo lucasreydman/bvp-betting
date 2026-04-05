@@ -54,7 +54,7 @@ export default function StatusBar({ fetchedAt, gamesScanned, gamesSkipped, onRef
                 <InfoTooltip
                   width="w-72"
                   align="right"
-                  text="Skipped means no probable pitcher was announced for one or both teams — BvP stats can't be calculated without one. Postponed, cancelled, and suspended games are removed before counting and don't appear here at all."
+                  text="Skipped means no probable pitcher was announced for one or both teams, so BvP stats can't be calculated. Postponed, cancelled, and suspended games are removed before counting and don't appear here at all."
                 />
               </>
             )}

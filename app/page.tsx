@@ -20,7 +20,7 @@ export default function Home() {
         <div className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">How to use this system for best results</div>
         <p>
           <span className="text-white font-semibold">The page stays current automatically.</span>
-          <span className="text-slate-300"> Data refreshes every 5 minutes. Top 5 and the Recommended Double show the current upcoming slate only — once a game starts, players move to In Progress, then Settled with a final result. Check back after lineups post (usually 3–4 hours before first pitch) for exact hit chances.</span>
+          <span className="text-slate-300"> Data refreshes every 5 minutes. Top 5 and the Recommended Double show the current upcoming slate only. Once a game starts, players move to In Progress, then Settled with a final result. Check back after lineups post (usually 3–4 hours before first pitch) for exact hit chances.</span>
         </p>
         <p>
           <span className="text-yellow-400 font-semibold">Best bet: take the Recommended Double.</span>
@@ -36,7 +36,7 @@ export default function Home() {
         </p>
         <p>
           <span className="text-green-300 font-semibold">Confirmed lineups make the hit chance more accurate.</span>
-          <span className="text-slate-300"> Hit chance uses expected at-bats, which adjusts by lineup position. Until lineups are official, a projected lineup order is used when available — plays marked </span>
+          <span className="text-slate-300"> Hit chance uses expected at-bats, which adjusts by lineup position. Until lineups are official, a projected lineup order is used when available. Plays marked </span>
           <span className="text-white font-semibold">confirmed</span>
           <span className="text-slate-300"> use the exact number. Lineups usually post 3–4 hours before first pitch.</span>
         </p>

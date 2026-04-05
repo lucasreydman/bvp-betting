@@ -47,9 +47,9 @@ export function calcStats(raw: RawStats): CalculatedStats {
 }
 
 export function assignConfidence(ab: number): 'high' | 'medium' | 'low' {
-  if (ab >= 30) return 'high'
+  if (ab >= 25) return 'high'
   if (ab >= 20) return 'medium'
-  return 'low'  // 15–19 AB
+  return 'low'  // 15-19 AB
 }
 
 export function parseSplit(stat: SplitStat) {
