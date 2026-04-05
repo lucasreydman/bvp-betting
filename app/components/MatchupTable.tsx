@@ -197,12 +197,7 @@ export default function MatchupTable({
                 {COLUMNS.map(col => (
                   <col key={col.key} className={col.cls} />
                 ))}
-                {gameKind === 'upcoming' && (
-                  <col className="hidden sm:table-column min-w-[5rem]" />
-                )}
-                {gameKind !== 'upcoming' && (
-                  <col className="hidden sm:table-column min-w-[5rem]" />
-                )}
+                <col className="hidden sm:table-column min-w-[5rem]" />
               </colgroup>
               <thead>
                 <tr className="bg-gray-800/60">
