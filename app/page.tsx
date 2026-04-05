@@ -18,7 +18,7 @@ export default function Home() {
           <span className="text-slate-300"> Data refreshes every 5 minutes. Top 5 and the Recommended Double show the current upcoming slate only. Once a game starts, players move to In Progress, then Settled with a final result. Check back after lineups post (usually 3–4 hours before first pitch) for exact hit chances.</span>
         </p>
         <p>
-          <span className="text-sky-400 font-semibold">Best bet: take the Recommended Double.</span>
+          <span className="text-yellow-400 font-semibold">Best bet: take the Recommended Double.</span>
           <span className="text-slate-300"> Parlay the two recommended legs together for a boosted payout. Before games start, it&apos;s the top 2-leg recommendation on the board. After games begin, it reflects the best current 2-leg recommendation from the remaining upcoming slate.</span>
         </p>
         <p>
@@ -30,7 +30,7 @@ export default function Home() {
           <span className="text-slate-300"> Pick your favorites from the Top 5 and take them as singles. Less risk per bet than a parlay, with a smaller payout to match.</span>
         </p>
         <p>
-          <span className="text-sky-400 font-semibold">Confirmed lineups make the hit chance more accurate.</span>
+          <span className="text-green-300 font-semibold">Confirmed lineups make the hit chance more accurate.</span>
           <span className="text-slate-300"> Hit chance uses expected at-bats, which adjusts by lineup position. Until lineups are official, the app projects a batting slot from recent lineup history when it can. Plays marked </span>
           <span className="text-white font-semibold">confirmed</span>
           <span className="text-slate-300"> use the exact number. Lineups usually post 3–4 hours before first pitch.</span>
