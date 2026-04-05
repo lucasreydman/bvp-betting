@@ -2,6 +2,7 @@ import type { MatchupResult } from '@/lib/types'
 import { formatTime, expectedAtBats, hitProbability, regressedAvg, resolveLineupPosition, suggestDailyDouble } from '@/lib/utils'
 import type { DailyDouble } from '@/lib/utils'
 import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
+import { fmtOdds } from '@/lib/odds'
 import InfoTooltip from './InfoTooltip'
 
 interface Props {
@@ -107,6 +108,14 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
                 <span className="text-gray-500 text-xs shrink-0 font-mono">{m.ab} AB</span>
                 <span className="text-gray-400 text-xs shrink-0">Est. {expectedAB.toFixed(1)} AB</span>
                 <span className="text-green-300 text-xs shrink-0 font-semibold">{(hitPct * 100).toFixed(2)}%</span>
+                {m.consensusHitOddsAmerican != null && (
+                  <span
+                    className="text-gray-500 text-xs shrink-0 font-mono"
+                    title={m.bookCount ? `${m.bookCount} books` : undefined}
+                  >
+                    {fmtOdds(m.consensusHitOddsAmerican)}
+                  </span>
+                )}
                 <span className="text-gray-600 text-xs shrink-0">{formatTime(m.gameTime)}</span>
               </div>
             </div>
@@ -128,6 +137,17 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <span className="text-gray-700 select-none">·</span>
               <span className="text-gray-400 font-mono">Est. {expectedAB.toFixed(1)} AB</span>
               <span className="text-green-300 font-semibold">{(hitPct * 100).toFixed(2)}%</span>
+              {m.consensusHitOddsAmerican != null && (
+                <>
+                  <span className="text-gray-700 select-none">·</span>
+                  <span
+                    className="text-gray-400 font-mono text-sm"
+                    title={m.bookCount ? `${m.bookCount} books` : undefined}
+                  >
+                    {fmtOdds(m.consensusHitOddsAmerican)}
+                  </span>
+                </>
+              )}
               <span className="text-gray-600 text-xs ml-auto">{formatTime(m.gameTime)}</span>
             </div>
           </li>
@@ -139,7 +159,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-2">
             <div className={`flex items-center gap-1 whitespace-nowrap uppercase tracking-wider text-[10px] font-semibold ${dailyDouble.isSmash ? 'text-orange-400' : 'text-yellow-400'}`}>
               {dailyDouble.isSmash ? 'Smash Double' : 'Recommended Double'}
-              <InfoTooltip width="w-56" align="left" text="These legs are chosen from the current upcoming slate by highest combined hit probability, not by list rank. Ranking uses AVG × confidence, while hit chance uses regressed AVG plus expected at-bats. Before games start, this is the top 2-leg recommendation on the board. After games begin, it updates with the remaining upcoming slate." />
+              <InfoTooltip width="w-56" align="left" text="These legs are chosen from the filtered Top 5 upcoming plays by highest combined hit probability, not by list rank. Ranking uses AVG × confidence, while hit chance uses regressed AVG plus expected at-bats. Before games start, this is the top 2-leg recommendation within that group. After games begin, it updates with the remaining upcoming slate." />
             </div>
             {anyLegStarted ? (
               <div className="text-[10px] text-gray-500">Current recommendation updates as the upcoming slate changes.</div>
@@ -184,10 +204,10 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             <span className="text-green-300 font-semibold">Combined: {(dailyDouble.combinedProbability * 100).toFixed(2)}%</span>
             <span className="text-gray-500 text-xs">
               {anyLegStarted
-                ? `This card reflects the current recommendation from the remaining upcoming slate.`
+                ? `This card reflects the current recommendation from the filtered Top 5 remaining in the upcoming slate.`
                 : dailyDouble.isSmash
-                  ? `Top current 2-leg recommendation by combined hit probability.`
-                  : `Current top recommendation from the upcoming slate: highest combined hit probability.`}
+                  ? `Top current 2-leg recommendation within the filtered Top 5 by combined hit probability.`
+                  : `Current top recommendation from the filtered Top 5 upcoming plays by combined hit probability.`}
             </span>
           </div>
           {!anyLegStarted && unconfirmedLegs > 0 && (
@@ -205,7 +225,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
         <div className="mt-4 rounded-lg border border-gray-800 bg-gray-950 p-3 text-sm">
           <div className="flex items-center gap-1.5 mb-1">
             <span className="text-gray-400 uppercase tracking-wider text-[10px] font-semibold">Recommended Double</span>
-            <InfoTooltip width="w-64" text="A Recommended Double is the current 2-leg parlay built from the upcoming slate with the highest combined hit probability. If both legs also have career OPS above .950 and at least 7 hits against their pitcher, it upgrades to a Smash Double." />
+            <InfoTooltip width="w-64" text="A Recommended Double is the current 2-leg parlay built from the filtered Top 5 upcoming plays with the highest combined hit probability. If both legs also have career OPS above .950 and at least 7 hits against their pitcher, it upgrades to a Smash Double." />
           </div>
           <p className="text-gray-500">{top5.length < 2 ? 'Not enough qualified plays to form a recommended double. Fewer than 2 matchups meet the 15 AB / .300 AVG requirements today.' : 'No recommended double is available from the current upcoming slate.'}</p>
         </div>
