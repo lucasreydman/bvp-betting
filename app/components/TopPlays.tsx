@@ -136,12 +136,10 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
 
       {dailyDouble ? (
         <div className={`mt-4 rounded-lg border p-3 text-sm ${dailyDouble.isSmash ? 'border-orange-500/50 bg-orange-950/20' : 'border-gray-800 bg-gray-950'}`}>
-          <div className="flex items-baseline gap-2 mb-1">
-            <div className={`inline-flex items-center gap-1 uppercase tracking-wider text-[10px] font-semibold ${dailyDouble.isSmash ? 'text-orange-400' : 'text-yellow-400'}`}>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-2">
+            <div className={`flex items-center gap-1 whitespace-nowrap uppercase tracking-wider text-[10px] font-semibold ${dailyDouble.isSmash ? 'text-orange-400' : 'text-yellow-400'}`}>
               {dailyDouble.isSmash ? 'Smash Double' : 'Recommended Double'}
-              <span className="normal-case tracking-normal">
-                <InfoTooltip width="w-80" text="These legs are chosen from the current upcoming slate by highest combined hit probability, not by list rank. Ranking uses AVG × confidence, while hit chance uses regressed AVG plus expected at-bats. Before games start, this is the top 2-leg recommendation on the board. After games begin, it updates with the remaining upcoming slate." />
-              </span>
+              <InfoTooltip width="w-72" align="left" text="These legs are chosen from the current upcoming slate by highest combined hit probability, not by list rank. Ranking uses AVG × confidence, while hit chance uses regressed AVG plus expected at-bats. Before games start, this is the top 2-leg recommendation on the board. After games begin, it updates with the remaining upcoming slate." />
             </div>
             {anyLegStarted ? (
               <div className="text-[10px] text-gray-500">Current recommendation updates as the upcoming slate changes.</div>
