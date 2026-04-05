@@ -145,7 +145,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <div className="text-[10px] text-gray-500">Current recommendation updates as the upcoming slate changes.</div>
             ) : (
               <div className={`text-[10px] ${dailyDouble.isSmash ? 'text-orange-400/70' : 'text-yellow-400/70'}`}>
-                {dailyDouble.isSmash ? 'Both legs clear the Smash Double threshold.' : 'Current recommended 2-leg parlay.'}
+                {dailyDouble.isSmash ? 'Both legs have OPS > .950 and 7+ hits vs this pitcher.' : 'Current recommended 2-leg parlay.'}
               </div>
             )}
           </div>
@@ -164,13 +164,16 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
                     <span className="text-white font-medium text-sm flex-1 min-w-0 truncate">{leg.batterName}</span>
                     <span className={`font-mono font-bold text-sm shrink-0 ${CONFIDENCE_COLORS[leg.confidence]}`}>{leg.avg.toFixed(3)} AVG</span>
                   </div>
-                  {/* Row 2: pitcher + OPS + AB + hit% */}
+                  {/* Row 2: pitcher name */}
+                  <div className="pl-6 mt-0.5">
+                    <span className="text-gray-500 text-xs">vs {leg.pitcherName}</span>
+                    {legStarted && <span className="ml-2 text-[9px] font-bold text-amber-400 border border-amber-400/40 rounded px-1 py-0.5 uppercase tracking-wide leading-none">In Progress</span>}
+                  </div>
+                  {/* Row 3: OPS + AB + hit% */}
                   <div className="flex items-center gap-2 pl-6 mt-0.5">
-                    <span className="text-gray-500 text-xs flex-1 min-w-0 truncate">vs {leg.pitcherName}</span>
                     <span className={`font-mono text-xs shrink-0 ${dailyDouble.isSmash ? 'text-orange-300' : 'text-gray-400'}`}>{leg.ops.toFixed(3)} OPS</span>
                     <span className="text-gray-500 font-mono text-xs shrink-0">{leg.ab} AB</span>
                     <span className="text-green-300 font-semibold text-xs shrink-0">{(prob * 100).toFixed(2)}% hit chance</span>
-                    {legStarted && <span className="text-[9px] font-bold text-amber-400 border border-amber-400/40 rounded px-1 py-0.5 uppercase tracking-wide leading-none shrink-0">In Progress</span>}
                   </div>
                 </div>
               )
