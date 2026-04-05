@@ -40,7 +40,7 @@ export default function InfoTooltip({ text, width = 'w-64', align = 'center' }: 
         i
       </button>
       {open && (
-        <span className={`pointer-events-none absolute bottom-full mb-2 ${width} z-20 ${align === 'right' ? 'right-0' : align === 'left' ? 'left-0' : 'left-1/2 -translate-x-1/2'}`}>
+        <span className={`pointer-events-none absolute bottom-full mb-2 ${width} z-20 ${align === 'right' ? 'right-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2' : 'left-0 sm:left-1/2 sm:-translate-x-1/2'}`}>
           <span className="block bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-300 text-[11px] leading-4 shadow-xl whitespace-normal break-words normal-case tracking-normal font-normal">
             {text}
           </span>

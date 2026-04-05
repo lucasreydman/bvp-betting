@@ -12,7 +12,7 @@ export default function Home() {
       </header>
 
       <div className="mb-6 rounded-2xl border border-slate-700 bg-slate-950 p-4 text-xs text-slate-300 space-y-3 leading-5">
-        <div className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">How to use this system for best results</div>
+        <div className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">How to use this system</div>
         <p>
           <span className="text-white font-semibold">The page stays current automatically.</span>
           <span className="text-slate-300"> Data refreshes every 5 minutes. Top 5 and the Recommended Double show the current upcoming slate only. Once a game starts, players move to In Progress, then Settled with a final result. Check back after lineups post (usually 3–4 hours before first pitch) for exact hit chances.</span>
