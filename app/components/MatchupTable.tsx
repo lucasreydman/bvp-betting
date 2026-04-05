@@ -1,6 +1,7 @@
 'use client'
 import type { MatchupResult, SortState } from '@/lib/types'
 import { teamAbbr } from '@/lib/utils'
+import { fmtOdds } from '@/lib/odds'
 import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
 import MatchupRow from './MatchupRow'
 import GameTimeCell from './GameTimeCell'
@@ -161,6 +162,17 @@ export default function MatchupTable({
                   <div className="mt-1.5 flex items-center justify-between gap-2 text-xs">
                     <div className="flex items-center gap-2 text-gray-500">
                       <span className="font-mono">{m.h}/{m.ab} AB</span>
+                      {gameKind === 'upcoming' && m.consensusHitOddsAmerican != null && (
+                        <>
+                          <span className="text-gray-700">·</span>
+                          <span
+                            className="font-mono text-gray-300"
+                            title={m.bookCount ? `${m.bookCount} books` : undefined}
+                          >
+                            {fmtOdds(m.consensusHitOddsAmerican)}
+                          </span>
+                        </>
+                      )}
                       <span className="text-gray-700">·</span>
                       <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-600">Lineup</span>
                       <span className={`px-1.5 py-0.5 rounded font-medium ${
@@ -185,6 +197,9 @@ export default function MatchupTable({
                 {COLUMNS.map(col => (
                   <col key={col.key} className={col.cls} />
                 ))}
+                {gameKind === 'upcoming' && (
+                  <col className="hidden sm:table-column min-w-[5rem]" />
+                )}
                 {gameKind !== 'upcoming' && (
                   <col className="hidden sm:table-column min-w-[5rem]" />
                 )}
@@ -200,6 +215,14 @@ export default function MatchupTable({
                       {col.label}{gameKind !== 'settled' && sortIcon(col.key)}
                     </th>
                   ))}
+                  {gameKind === 'upcoming' && (
+                    <th
+                      className="px-3 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell min-w-[5rem] cursor-pointer hover:text-white select-none"
+                      onClick={() => onSort('consensusHitOddsAmerican')}
+                    >
+                      Odds{sortIcon('consensusHitOddsAmerican')}
+                    </th>
+                  )}
                   {gameKind !== 'upcoming' && (
                     <th className="px-3 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
                       Result
