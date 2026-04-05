@@ -133,20 +133,21 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <div className="flex items-center gap-2">
                 <span className="text-sky-400 w-4 shrink-0 font-mono text-xs">{i + 1}.</span>
                 <span className="text-white font-medium text-sm flex-1 min-w-0 truncate">{m.batterName}</span>
+                <span className="text-gray-400 text-[11px] shrink-0 font-mono">Est. {expectedAB.toFixed(1)} AB</span>
+                <span className={`font-mono font-bold text-sm shrink-0 ${CONFIDENCE_COLORS[m.confidence]}`}>
+                  {m.avg.toFixed(3)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 pl-6 mt-0.5 min-w-0">
+                <span className="text-gray-400 text-xs flex-1 min-w-0 truncate">vs {m.pitcherName}</span>
                 <span
                   className={`inline-flex shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${LINEUP_BADGE_STYLES[m.lineupSource]}`}
                   title={getLineupBadgeTitle(m)}
                 >
                   {getLineupBadgeText(m)}
                 </span>
-                <span className={`font-mono font-bold text-sm shrink-0 ${CONFIDENCE_COLORS[m.confidence]}`}>
-                  {m.avg.toFixed(3)}
-                </span>
               </div>
-              <div className="flex items-center gap-2 pl-6 mt-0.5">
-                <span className="text-gray-400 text-xs flex-1 min-w-0 truncate">vs {m.pitcherName}</span>
-                <span className="text-gray-500 text-xs shrink-0 font-mono">{m.ab} AB</span>
-                <span className="text-gray-400 text-xs shrink-0">Est. {expectedAB.toFixed(1)} AB</span>
+              <div className="flex items-center gap-2 pl-6 mt-1">
                 <span className="text-green-300 text-xs shrink-0 font-semibold">{(hitPct * 100).toFixed(2)}%</span>
                 {m.consensusHitOddsAmerican != null && (
                   <span
@@ -251,7 +252,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
                     <div className="flex items-center justify-between gap-3 pl-6 mt-0.5">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className={`font-mono text-xs shrink-0 ${dailyDouble.isSmash ? 'text-orange-300' : 'text-gray-400'}`}>{leg.ops.toFixed(3)} OPS</span>
-                        <span className="text-gray-500 font-mono text-xs shrink-0">{leg.ab} AB</span>
+                        <span className="text-gray-500 font-mono text-xs shrink-0">{leg.h}/{leg.ab}</span>
                       </div>
                       <span className="text-green-300 font-semibold text-xs shrink-0 text-right">{(prob * 100).toFixed(2)}% hit chance</span>
                     </div>
