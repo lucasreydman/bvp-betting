@@ -124,7 +124,7 @@ KV_REST_API_URL=https://...
 KV_REST_API_TOKEN=...
 ```
 
-Without these, the app falls back to an in-memory store for the duration of the server process.
+Without these, the app falls back to a process-local in-memory store. It now respects TTLs, but cached data is still isolated to the current dev server process.
 
 ```bash
 npm test

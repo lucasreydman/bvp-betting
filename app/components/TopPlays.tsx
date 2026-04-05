@@ -147,7 +147,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <div className="text-[10px] text-gray-500">Current recommendation updates as the upcoming slate changes.</div>
             ) : (
               <div className={`text-[10px] ${dailyDouble.isSmash ? 'text-orange-400/70' : 'text-yellow-400/70'}`}>
-                {dailyDouble.isSmash ? 'Both legs OPS above .950 with 7+ hits. Strongest possible current parlay.' : 'Current recommended 2-leg parlay.'}
+                {dailyDouble.isSmash ? 'Both legs clear the Smash Double threshold.' : 'Current recommended 2-leg parlay.'}
               </div>
             )}
           </div>
@@ -185,7 +185,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               {anyLegStarted
                 ? `This card reflects the current recommendation from the remaining upcoming slate.`
                 : dailyDouble.isSmash
-                  ? `Current top recommendation: both legs have career OPS above .950 against their pitchers, with at least 7 hits each.`
+                  ? `Top current 2-leg recommendation by combined hit probability.`
                   : `Current top recommendation from the upcoming slate: highest combined hit probability.`}
             </span>
           </div>
@@ -194,8 +194,8 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <span className="shrink-0 mt-px">⚠</span>
               <span>
                 {unconfirmedLegs === 2
-                  ? 'Lineups not yet confirmed. Hit chance will update once batting order is set, but both matchups remain strong plays.'
-                  : 'One lineup is not yet confirmed. Hit chance for that leg may shift once batting order is set, but the matchup remains a strong play.'}
+                  ? 'Lineups not confirmed yet. Hit chance will update once batting order is set.'
+                  : 'One lineup is not confirmed yet. Hit chance for that leg may shift once batting order is set.'}
               </span>
             </div>
           )}
