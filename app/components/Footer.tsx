@@ -12,14 +12,14 @@ export default function Footer() {
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Why AVG?</h3>
           <p className="leading-relaxed">
-            This prop wins on any hit, so slugging and walks don&apos;t factor in. AVG is the direct measure:{' '}
+            This prop wins on any hit, so slugging and walks don&apos;t factor in. AVG gives the clearest baseline for hit probability. One simple approximation is{' '}
             <Formula inline className="text-gray-400 text-[0.9rem]">
               <span>P(≥1 hit)</span>
               <span>=</span>
               <span>1 − (1 − AVG)</span>
               <Sup>n</Sup>
-            </Formula>{' '}
-            In this formula, n is expected at-bats from the confirmed lineup slot or a projected slot based on recent lineup history. A .300 BvP AVG implies about{' '}
+            </Formula>.
+            {' '}Here, n is expected at-bats from the confirmed lineup slot or a projected slot based on recent lineup history. A .300 BvP AVG implies about{' '}
             <span className="text-gray-400 font-mono whitespace-nowrap">79–82%</span>{' '}
             to get a hit versus typical book lines around{' '}
             <span className="text-gray-400 font-mono whitespace-nowrap">60–63%</span>.
