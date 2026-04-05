@@ -141,12 +141,13 @@ export default function MatchupTable({
                   key={`${m.batterId}-${m.pitcherId}-${m.gameTime}`}
                   className={`px-4 py-3 border-l-4 ${CARD_LEFT_BORDER[m.confidence]}`}
                 >
-                  {/* Row 1: Batter name + AVG + hit badge (in-progress/settled only) */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="font-medium text-white text-sm truncate">{m.batterName}</span>
+                  {/* Row 1: Batter identity + AVG/result */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-white text-sm truncate">{m.batterName}</div>
+                      <div className="mt-0.5 text-gray-500 text-xs font-mono">{teamAbbr(m.batterTeam)}</div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 pt-0.5">
                       {gameKind !== 'upcoming' && (
                         <div className="flex items-center gap-1">
                           <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-600">Result</span>
@@ -159,17 +160,20 @@ export default function MatchupTable({
                     </div>
                   </div>
 
-                  {/* Row 2: Team vs Pitcher */}
-                  <div className="mt-0.5 flex items-center gap-1.5 text-xs min-w-0">
-                    <span className="shrink-0 text-gray-400 font-mono">{teamAbbr(m.batterTeam)}</span>
-                    <span className="text-gray-600 shrink-0">vs</span>
-                    <span className="text-gray-400 truncate flex-1 min-w-0">{m.pitcherName}</span>
-                    <span className="text-gray-600 shrink-0 font-mono">[{teamAbbr(m.pitcherTeam)}]</span>
+                  {/* Row 2: Pitcher identity + game time */}
+                  <div className="mt-1.5 flex items-start justify-between gap-3 text-xs min-w-0">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-gray-400 truncate">{m.pitcherName}</div>
+                      <div className="mt-0.5 text-gray-600 font-mono">{teamAbbr(m.pitcherTeam)}</div>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <GameTimeCell gameTime={m.gameTime} variant={gameKind} />
+                    </div>
                   </div>
 
-                  {/* Row 3: H/AB + lineup status + game time */}
-                  <div className="mt-1.5 flex items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-2 text-gray-500">
+                  {/* Row 3: H/AB + lineup status + odds */}
+                  <div className="mt-2 flex items-center gap-2 text-xs text-gray-500 flex-wrap">
+                    <div className="flex items-center gap-2 text-gray-500 min-w-0 flex-wrap">
                       <span className="font-mono">{m.h}/{m.ab} AB</span>
                       {gameKind === 'upcoming' && m.consensusHitOddsAmerican != null && (
                         <>
@@ -192,7 +196,6 @@ export default function MatchupTable({
                         {getLineupBadgeText(m)}
                       </span>
                     </div>
-                    <GameTimeCell gameTime={m.gameTime} variant={gameKind} />
                   </div>
                 </div>
               ))}

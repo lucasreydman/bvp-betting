@@ -11,7 +11,7 @@ interface FormulaProps {
 export function Formula({ children, inline = false, className }: FormulaProps) {
   const baseClass = inline
     ? 'inline-flex items-center flex-wrap gap-1 align-middle whitespace-nowrap'
-    : 'flex items-center flex-wrap gap-1 whitespace-nowrap overflow-x-auto'
+    : 'flex items-center gap-1 whitespace-nowrap overflow-x-auto max-w-full text-[0.88rem] sm:text-[0.95rem]'
 
   return (
     <span
@@ -31,7 +31,7 @@ interface FractionProps {
 
 export function Fraction({ top, bottom, className }: FractionProps) {
   return (
-    <span className={`inline-flex flex-col items-center justify-center align-middle leading-none ${className ?? ''}`.trim()}>
+    <span className={`inline-flex flex-col items-center justify-center align-middle leading-none shrink-0 ${className ?? ''}`.trim()}>
       <span className="px-1 border-b border-current">{top}</span>
       <span className="px-1 pt-0.5">{bottom}</span>
     </span>

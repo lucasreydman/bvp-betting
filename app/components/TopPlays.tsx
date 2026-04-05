@@ -60,14 +60,14 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             <span className="text-sky-400"> career batting average against this pitcher, weighted by how many at-bats back it up. More at-bats = more trust in the number.</span>
             <InfoTooltip width="w-64" align="left" text="For singles bets, go by primary score. It directly rewards both a strong average and a large sample. The higher the score, the more reliable the historical edge. Hit chance % is better for parlay legs, where raw probability matters more than sample confidence." />
           </p>
-          <Formula className="pl-3 text-slate-300 text-[0.95rem]">
+          <Formula className="pl-3 text-slate-300">
             <span>score</span>
             <span>=</span>
             <span>AVG</span>
             <span>×</span>
             <span>confidence</span>
           </Formula>
-          <Formula className="pl-3 text-slate-300 text-[0.95rem]">
+          <Formula className="pl-3 text-slate-300">
             <span>confidence</span>
             <span>=</span>
             <span>min(</span>
@@ -79,7 +79,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             <span className="text-green-300"> estimated chance of ≥1 hit using a regressed AVG and expected ABs.</span>
             <InfoTooltip width="w-72" text="Hit chance uses a regressed AVG that pulls toward .320 (the conditional mean of pre-filtered matchups) based on sample size. Smaller samples get pulled more. A higher raw AVG matters more here than ABs, which is the opposite of the ranking score (AVG × confidence). This is why a lower-ranked play can have a higher hit % and get picked for the parlay." />
           </p>
-          <Formula className="pl-3 text-slate-300 text-[0.95rem]">
+          <Formula className="pl-3 text-slate-300">
             <span>adjusted AVG</span>
             <span>=</span>
             <Fraction top={<span>AB</span>} bottom={<span>AB + 50</span>} />
@@ -90,7 +90,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             <span>×</span>
             <span>0.320</span>
           </Formula>
-          <Formula className="pl-3 text-slate-300 text-[0.95rem]">
+          <Formula className="pl-3 text-slate-300">
             <span>P(≥1 hit)</span>
             <span>=</span>
             <span>1 − (1 − adjusted AVG)</span>
@@ -236,10 +236,12 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
                       <span className="text-gray-500 text-xs">vs {leg.pitcherName}</span>
                       {legStarted && <span className="ml-2 text-[9px] font-bold text-amber-400 border border-amber-400/40 rounded px-1 py-0.5 uppercase tracking-wide leading-none">In Progress</span>}
                     </div>
-                    <div className="flex items-center gap-2 pl-6 mt-0.5">
-                      <span className={`font-mono text-xs shrink-0 ${dailyDouble.isSmash ? 'text-orange-300' : 'text-gray-400'}`}>{leg.ops.toFixed(3)} OPS</span>
-                      <span className="text-gray-500 font-mono text-xs shrink-0">{leg.ab} AB</span>
-                      <span className="text-green-300 font-semibold text-xs shrink-0">{(prob * 100).toFixed(2)}% hit chance</span>
+                    <div className="flex items-center justify-between gap-3 pl-6 mt-0.5">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`font-mono text-xs shrink-0 ${dailyDouble.isSmash ? 'text-orange-300' : 'text-gray-400'}`}>{leg.ops.toFixed(3)} OPS</span>
+                        <span className="text-gray-500 font-mono text-xs shrink-0">{leg.ab} AB</span>
+                      </div>
+                      <span className="text-green-300 font-semibold text-xs shrink-0 text-right">{(prob * 100).toFixed(2)}% hit chance</span>
                     </div>
                   </div>
                 </div>
