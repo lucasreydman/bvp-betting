@@ -7,12 +7,7 @@ export default function Home() {
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-white tracking-tight">MLB BvP Betting</h1>
         <p className="text-gray-400 text-sm mt-1 max-w-full text-balance">
-          Career batter vs pitcher stats for the Player Hits (1+) prop on{' '}
-          <span className="text-sky-400 font-semibold">FanDuel</span>, and for{' '}
-          Total Bases (1+) or Hits (1+) on{' '}
-          <span className="text-emerald-400 font-semibold">Bet365</span>{' '}
-          and{' '}
-          <span className="text-amber-400 font-semibold">theScore Bet</span>. They all mean the same thing at the same odds. Any single, double, triple, or homer wins. This tool surfaces today’s best historical matchups ranked by career BvP batting average, weighted by sample size for reliability.
+          Career batter vs pitcher stats for the <span className="text-white font-semibold">Player to Record a Hit</span> prop — any single, double, triple, or homer wins. Matchups are ranked by career BvP batting average weighted by sample size, with consensus odds from major US books attached to each play.
         </p>
       </header>
 
@@ -24,7 +19,7 @@ export default function Home() {
         </p>
         <p>
           <span className="text-yellow-400 font-semibold">Best bet: take the Recommended Double.</span>
-          <span className="text-slate-300"> Parlay the two recommended legs together for +100 or better. Before games start, it&apos;s the top 2-leg recommendation on the board. After games begin, it reflects the best current 2-leg recommendation from the remaining upcoming slate.</span>
+          <span className="text-slate-300"> Parlay the two recommended legs together for a boosted payout. Before games start, it&apos;s the top 2-leg recommendation on the board. After games begin, it reflects the best current 2-leg recommendation from the remaining upcoming slate.</span>
         </p>
         <p>
           <span className="text-orange-400 font-semibold">If it says Smash Double, even better.</span>
@@ -41,8 +36,8 @@ export default function Home() {
           <span className="text-slate-300"> use the exact number. Lineups usually post 3–4 hours before first pitch.</span>
         </p>
         <p>
-          <span className="text-sky-400 font-semibold">Consistency is everything for EV.</span>
-          <span className="text-slate-300"> The edge is statistical and compounds over time. Skipping days or cherry-picking erodes it. Treat it like a system, not a tip.</span>
+          <span className="text-sky-400 font-semibold">The edge is statistical, not guaranteed.</span>
+          <span className="text-slate-300"> BvP averages reflect career history, not a prediction. Use this as one input among many, and only bet what you&apos;re comfortable losing.</span>
         </p>
       </div>
 

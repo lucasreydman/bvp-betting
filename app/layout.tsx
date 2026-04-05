@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: 'MLB BvP Betting',
   description:
-    'Career batter vs pitcher stats for the Player to Record a Hit prop. Recommended Double parlay picks for all major sportsbooks. Filter by AVG, AB, and OPS.',
+    'Career batter vs pitcher stats for the Player to Record a Hit prop, with consensus odds from major US books. Ranked by BvP batting average weighted by sample size. Recommended Double parlay picks daily.',
   openGraph: {
     title: 'MLB BvP Betting: Daily Hit Prop Picks',
     description:
