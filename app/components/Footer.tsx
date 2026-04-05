@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import MathFormula from './MathFormula'
+import { Formula, Sup } from './Formula'
 
 export default function Footer() {
   const year = new Date().getFullYear()
@@ -13,20 +13,22 @@ export default function Footer() {
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Why AVG?</h3>
           <p className="leading-relaxed">
             This prop wins on any hit, so slugging and walks don&apos;t factor in. AVG is the direct measure:{' '}
-            <MathFormula
-              expression="P(\\ge 1\\ \\text{hit}) = 1 - (1 - \\mathrm{AVG})^n"
-              inline
-              className="text-gray-400 whitespace-nowrap"
-            />{' '}
-            Here, n is expected at-bats from the confirmed lineup slot or a projected slot based on recent lineup history. A .300 BvP AVG implies about 
-            <span className="text-gray-400 font-mono whitespace-nowrap">79–82%</span> to get a hit versus typical book lines around 
+            <Formula inline className="text-gray-400 text-[0.95rem]">
+              <span>P(≥1 hit)</span>
+              <span>=</span>
+              <span>1 − (1 − AVG)</span>
+              <Sup>n</Sup>
+            </Formula>{' '}
+            Here, n is expected at-bats from the confirmed lineup slot or a projected slot based on recent lineup history. A .300 BvP AVG implies about{' '}
+            <span className="text-gray-400 font-mono whitespace-nowrap">79–82%</span>{' '}
+            to get a hit versus typical book lines around{' '}
             <span className="text-gray-400 font-mono whitespace-nowrap">60–63%</span>.
           </p>
         </div>
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Minimum requirements</h3>
           <p className="leading-relaxed">
-            Only matchups with at least <span className="text-gray-400 font-mono whitespace-nowrap">15</span> career AB and a <span className="text-gray-400 font-mono whitespace-nowrap">.300</span> + BvP AVG are shown. Below 15 AB
+            Only matchups with at least <span className="text-gray-400 font-mono whitespace-nowrap">15</span> career AB and a <span className="text-gray-400 font-mono whitespace-nowrap">.300+</span> BvP AVG are shown. Below 15 AB
             the margin of error <span className="text-gray-400 font-mono whitespace-nowrap">(±.145)</span> is wide enough that a single at-bat can swing the average
             significantly. The .300 floor ensures every listed matchup reflects a historically meaningful edge over the pitcher.
           </p>
@@ -38,7 +40,11 @@ export default function Footer() {
             <span className="text-yellow-500">yellow</span> = 20–24 AB,{' '}
             <span className="text-red-500">red</span> = 15–19 AB.
             Top 5 Plays ranks by{' '}
-            <span className="text-gray-400 font-mono">AVG × min(AB / 30, 1)</span>, so a .350 in 30 AB
+            <Formula inline className="text-gray-400 text-[0.95rem]">
+              <span>AVG</span>
+              <span>×</span>
+              <span>min(AB / 30, 1)</span>
+            </Formula>, so a .350 in 30 AB
             scores higher than a .500 in 15 AB. Larger samples carry less variance and are generally more reliable at the same AVG.
           </p>
         </div>

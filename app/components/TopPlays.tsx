@@ -4,7 +4,7 @@ import type { DailyDouble } from '@/lib/utils'
 import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
 import { fmtOdds } from '@/lib/odds'
 import InfoTooltip from './InfoTooltip'
-import MathFormula from './MathFormula'
+import { Formula, Fraction, Sup } from './Formula'
 
 interface Props {
   matchups: MatchupResult[]
@@ -60,27 +60,40 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             <span className="text-sky-400"> career batting average against this pitcher, weighted by how many at-bats back it up. More at-bats = more trust in the number.</span>
             <InfoTooltip width="w-64" align="left" text="For singles bets, go by primary score. It directly rewards both a strong average and a large sample. The higher the score, the more reliable the historical edge. Hit chance % is better for parlay legs, where raw probability matters more than sample confidence." />
           </p>
-          <MathFormula
-            expression="\\mathrm{score} = \\mathrm{AVG} \\times \\mathrm{confidence}"
-            className="pl-3 text-slate-300 [&_.katex]:text-[0.95rem]"
-          />
-          <MathFormula
-            expression="\\mathrm{confidence} = \\min(\\mathrm{AB}/30,\\ 1)"
-            className="pl-3 text-slate-300 [&_.katex]:text-[0.95rem]"
-          />
+          <Formula className="pl-3 text-slate-300 text-[0.95rem]">
+            <span>score</span>
+            <span>=</span>
+            <span>AVG</span>
+            <span>×</span>
+            <span>confidence</span>
+          </Formula>
+          <Formula className="pl-3 text-slate-300 text-[0.95rem]">
+            <span>confidence</span>
+            <span>=</span>
+            <span>min(AB / 30, 1)</span>
+          </Formula>
           <p>
             <span className="text-green-300 font-semibold">Hit chance %:</span>
             <span className="text-green-300"> estimated chance of ≥1 hit using a regressed AVG and expected ABs.</span>
             <InfoTooltip width="w-72" text="Hit chance uses a regressed AVG that pulls toward .320 (the conditional mean of pre-filtered matchups) based on sample size. Smaller samples get pulled more. A higher raw AVG matters more here than ABs, which is the opposite of the ranking score (AVG × confidence). This is why a lower-ranked play can have a higher hit % and get picked for the parlay." />
           </p>
-          <MathFormula
-            expression="\\mathrm{adjustedAvg} = \\frac{\\mathrm{AB}}{\\mathrm{AB}+50} \\times \\mathrm{AVG} + \\frac{50}{\\mathrm{AB}+50} \\times 0.320"
-            className="pl-3 text-slate-300 [&_.katex]:text-[0.95rem]"
-          />
-          <MathFormula
-            expression="P(\\ge 1\\ \\text{hit}) = 1 - (1 - \\mathrm{adjustedAvg})^{\\mathrm{expectedAB}}"
-            className="pl-3 text-slate-300 [&_.katex]:text-[0.95rem]"
-          />
+          <Formula className="pl-3 text-slate-300 text-[0.95rem]">
+            <span>adjusted AVG</span>
+            <span>=</span>
+            <Fraction top={<span>AB</span>} bottom={<span>AB + 50</span>} />
+            <span>×</span>
+            <span>AVG</span>
+            <span>+</span>
+            <Fraction top={<span>50</span>} bottom={<span>AB + 50</span>} />
+            <span>×</span>
+            <span>0.320</span>
+          </Formula>
+          <Formula className="pl-3 text-slate-300 text-[0.95rem]">
+            <span>P(≥1 hit)</span>
+            <span>=</span>
+            <span>1 − (1 − adjusted AVG)</span>
+            <Sup>expected AB</Sup>
+          </Formula>
         </div>
       </div>
     </div>
