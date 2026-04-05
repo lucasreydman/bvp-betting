@@ -139,7 +139,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-2">
             <div className={`flex items-center gap-1 whitespace-nowrap uppercase tracking-wider text-[10px] font-semibold ${dailyDouble.isSmash ? 'text-orange-400' : 'text-yellow-400'}`}>
               {dailyDouble.isSmash ? 'Smash Double' : 'Recommended Double'}
-              <InfoTooltip width="w-72" align="left" text="These legs are chosen from the current upcoming slate by highest combined hit probability, not by list rank. Ranking uses AVG × confidence, while hit chance uses regressed AVG plus expected at-bats. Before games start, this is the top 2-leg recommendation on the board. After games begin, it updates with the remaining upcoming slate." />
+              <InfoTooltip width="w-56" align="left" text="These legs are chosen from the current upcoming slate by highest combined hit probability, not by list rank. Ranking uses AVG × confidence, while hit chance uses regressed AVG plus expected at-bats. Before games start, this is the top 2-leg recommendation on the board. After games begin, it updates with the remaining upcoming slate." />
             </div>
             {anyLegStarted ? (
               <div className="text-[10px] text-gray-500">Current recommendation updates as the upcoming slate changes.</div>
