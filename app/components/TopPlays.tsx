@@ -192,14 +192,14 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
 
           <FormulaBlock title="Expected At-Bats" accent="text-amber-300">
             <div className="text-[0.88rem] leading-5 text-slate-100">
-              <div>slot = confirmed batting slot</div>
-              <div>or estimated batting slot</div>
+              <div>slot = confirmed slot</div>
+              <div>or estimated slot</div>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-[0.88rem] leading-5 text-slate-300">
-              <div className="rounded-xl border border-amber-500/15 bg-slate-900/60 px-2.5 py-2">E[AB] = 4.45, slot ≤ 3</div>
-              <div className="rounded-xl border border-amber-500/15 bg-slate-900/60 px-2.5 py-2">E[AB] = 4.25, slot = 4</div>
-              <div className="rounded-xl border border-amber-500/15 bg-slate-900/60 px-2.5 py-2">E[AB] = 4.05, 5 ≤ slot ≤ 6</div>
-              <div className="rounded-xl border border-amber-500/15 bg-slate-900/60 px-2.5 py-2">E[AB] = 3.85, slot ≥ 7</div>
+            <div className="grid grid-cols-2 gap-x-5 gap-y-1 text-[0.84rem] leading-5 text-slate-300">
+              <div>E[AB] = 4.45, slot ≤ 3</div>
+              <div>E[AB] = 4.25, slot = 4</div>
+              <div>E[AB] = 4.05, 5 ≤ slot ≤ 6</div>
+              <div>E[AB] = 3.85, slot ≥ 7</div>
             </div>
           </FormulaBlock>
 
@@ -238,9 +238,10 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
           </FormulaBlock>
 
           <FormulaBlock title="Smash Double" accent="text-orange-300">
-            <div className="space-y-1 text-[0.9rem] leading-6 text-slate-100">
+            <div className="space-y-0.5 text-[0.9rem] leading-6 text-slate-100">
               <div>smash = (OPS₁ &gt; .950 ∧ H₁ ≥ 7)</div>
-              <div className="pl-14">∧ (OPS₂ &gt; .950 ∧ H₂ ≥ 7)</div>
+              <div className="pl-16 text-slate-300">and</div>
+              <div className="pl-14">(OPS₂ &gt; .950 ∧ H₂ ≥ 7)</div>
             </div>
           </FormulaBlock>
         </div>
