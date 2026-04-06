@@ -46,9 +46,8 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
 
   const enriched = matchups.map(m => {
     const expectedAB = expectedAtBats(resolveLineupPosition(m))
-    const adjustedAvg = regressedAvg(m.avg, m.ab)
-    const hitPct = hitProbability(adjustedAvg, expectedAB)
-    return { m, expectedAB, adjustedAvg, hitPct }
+    const hitPct = hitProbability(regressedAvg(m.avg, m.ab), expectedAB)
+    return { m, expectedAB, hitPct }
   })
 
   const top5 = [...enriched]
@@ -60,10 +59,6 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
 
   const isStarted = (leg: MatchupResult) => new Date(leg.gameTime).getTime() <= now
   const anyLegStarted = dailyDouble ? isStarted(dailyDouble.first) || isStarted(dailyDouble.second) : false
-
-  const unconfirmedLegs = dailyDouble
-    ? [dailyDouble.first, dailyDouble.second].filter(leg => leg.lineupSource === 'estimated').length
-    : 0
 
   const header = (
     <div className="mb-4">
@@ -94,7 +89,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
           </Formula>
           <p>
             <span className="text-green-300 font-semibold">Hit chance %:</span>
-            <span className="text-green-300"> estimated chance of ≥1 hit using a regressed AVG and expected ABs.</span>
+            <span className="text-green-300"> estimated chance of ≥1 hit using a regressed AVG and expected at-bats.</span>
             <InfoTooltip width="w-72" text="Hit chance uses a regressed AVG that pulls toward .320 (the conditional mean of pre-filtered matchups) based on sample size. Smaller samples get pulled more. A higher raw AVG matters more here than ABs, which is the opposite of the ranking score (AVG × confidence). This is why a lower-ranked play can have a higher hit % and get picked for the parlay." />
           </p>
           <div className="pl-3 text-slate-300 sm:hidden" style={{ fontFamily: '"Cambria Math", "STIX Two Text", "Times New Roman", serif' }}>
@@ -124,7 +119,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             <span>P(≥1 hit)</span>
             <span>=</span>
             <span>1 − (1 − adjusted AVG)</span>
-            <Sup>expected AB</Sup>
+            <Sup>expected at-bats</Sup>
           </Formula>
         </div>
       </div>
@@ -134,11 +129,11 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
       >
         <div className="mb-4 flex items-end justify-between gap-4 border-b border-slate-800/80 pb-4">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.28em] text-slate-400">Top 5 math sheet</div>
-            <div className="mt-1 text-lg text-white">All scoring and selection formulas used in this card</div>
+            <div className="text-[11px] uppercase tracking-[0.28em] text-slate-400">Top 5 formulas</div>
+            <div className="mt-1 text-lg text-white">Scoring and selection logic used in this card</div>
           </div>
           <div className="max-w-xs text-right text-[11px] leading-5 text-slate-400">
-            Rank uses score. Double selection uses hit probability. Confirmed lineups replace projected batting slots when available.
+            AVG = career BvP batting average. AB = career at-bats vs this pitcher. P = probability of at least one hit. E[AB] = expected at-bats from the player&apos;s batting slot.
           </div>
         </div>
 
@@ -189,11 +184,11 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             </Formula>
           </FormulaBlock>
 
-          <FormulaBlock title="Expected AB" accent="text-amber-300">
+          <FormulaBlock title="Expected At-Bats" accent="text-amber-300">
             <Formula className="text-slate-100">
               <span>slot</span>
               <span>=</span>
-              <span>confirmed slot ?? projected slot</span>
+              <span>confirmed batting slot, otherwise estimated batting slot</span>
             </Formula>
             <div className="space-y-1.5 text-[0.88rem] leading-5 text-slate-300">
               <div>E[AB] = 4.45, slot ≤ 3</div>
@@ -231,15 +226,20 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <span>(P₁ × P₂)</span>
               <span>, legs from Top 5</span>
             </Formula>
+            <Formula className="text-slate-400 text-[0.8rem]">
+              <span>P₁, P₂</span>
+              <span>=</span>
+              <span>the two legs&apos; hit probabilities</span>
+            </Formula>
           </FormulaBlock>
 
           <FormulaBlock title="Smash Double" accent="text-orange-300">
             <Formula className="text-slate-100">
               <span>smash</span>
               <span>=</span>
-              <span>(OPS₁ &gt; .950 ∧ H₁ ≥ 7)</span>
+              <span>((OPS₁ &gt; .950 ∧ H₁ ≥ 7)</span>
               <span>∧</span>
-              <span>(OPS₂ &gt; .950 ∧ H₂ ≥ 7)</span>
+              <span>(OPS₂ &gt; .950 ∧ H₂ ≥ 7))</span>
             </Formula>
           </FormulaBlock>
         </div>
