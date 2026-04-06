@@ -59,6 +59,9 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
 
   const isStarted = (leg: MatchupResult) => new Date(leg.gameTime).getTime() <= now
   const anyLegStarted = dailyDouble ? isStarted(dailyDouble.first) || isStarted(dailyDouble.second) : false
+  const unconfirmedLegs = dailyDouble
+    ? [dailyDouble.first, dailyDouble.second].filter(leg => leg.lineupSource === 'estimated').length
+    : 0
 
   const header = (
     <div className="mb-4">
