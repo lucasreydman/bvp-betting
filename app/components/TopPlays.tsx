@@ -34,9 +34,9 @@ function FormulaBlock({
   children: ReactNode
 }) {
   return (
-    <div className="rounded-2xl border border-slate-800/90 bg-slate-950/70 p-3">
-      <div className={`mb-2 text-[10px] font-semibold uppercase tracking-[0.24em] ${accent}`}>{title}</div>
-      <div className="space-y-2 text-slate-200">{children}</div>
+    <div className="flex h-full flex-col rounded-2xl border border-slate-800/90 bg-slate-950/70 p-3.5">
+      <div className={`mb-2.5 text-[10px] font-semibold uppercase tracking-[0.24em] ${accent}`}>{title}</div>
+      <div className="flex flex-1 flex-col gap-2.5 text-slate-200 leading-[1.45]">{children}</div>
     </div>
   )
 }
@@ -143,23 +143,23 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
           </div>
         </div>
 
-        <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
+        <div className="grid auto-rows-fr gap-3 lg:grid-cols-2 xl:grid-cols-3">
           <FormulaBlock title="Ranking" accent="text-sky-300">
-            <Formula className="text-slate-100">
+            <Formula className="text-slate-100 leading-6">
               <span>score</span>
               <span>=</span>
               <span>AVG</span>
               <span>×</span>
               <span>confidence</span>
             </Formula>
-            <Formula className="text-slate-300">
+            <Formula className="text-slate-300 leading-6">
               <span>confidence</span>
               <span>=</span>
               <span>min(</span>
               <Fraction top={<span>AB</span>} bottom={<span>30</span>} />
               <span>, 1)</span>
             </Formula>
-            <Formula className="text-slate-400 text-[0.8rem]">
+            <Formula className="text-slate-400 text-[0.8rem] leading-5">
               <span>sort</span>
               <span>=</span>
               <span>score ↓, AVG ↓, AB ↓</span>
@@ -167,7 +167,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
           </FormulaBlock>
 
           <FormulaBlock title="Regression" accent="text-emerald-300">
-            <Formula className="text-slate-100">
+            <Formula className="text-slate-100 leading-6">
               <span>adjusted AVG</span>
               <span>=</span>
               <Fraction top={<span>AB</span>} bottom={<span>AB + 50</span>} />
@@ -178,12 +178,12 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <span>×</span>
               <span>0.320</span>
             </Formula>
-            <Formula className="text-slate-400 text-[0.8rem]">
+            <Formula className="text-slate-400 text-[0.8rem] leading-5">
               <span>w</span>
               <span>=</span>
               <Fraction top={<span>AB</span>} bottom={<span>AB + 50</span>} />
             </Formula>
-            <Formula className="text-slate-400 text-[0.8rem]">
+            <Formula className="text-slate-400 text-[0.8rem] leading-5">
               <span>adjusted AVG</span>
               <span>=</span>
               <span>w × AVG + (1 − w) × 0.320</span>
@@ -195,7 +195,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
               <div>slot = confirmed slot</div>
               <div>or estimated slot</div>
             </div>
-            <div className="grid grid-cols-2 gap-x-5 gap-y-1 text-[0.84rem] leading-5 text-slate-300">
+            <div className="grid grid-cols-2 gap-x-5 gap-y-1 text-[0.84rem] leading-5 text-slate-300 content-start">
               <div>E[AB] = 4.45, slot ≤ 3</div>
               <div>E[AB] = 4.25, slot = 4</div>
               <div>E[AB] = 4.05, 5 ≤ slot ≤ 6</div>
@@ -204,13 +204,13 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
           </FormulaBlock>
 
           <FormulaBlock title="Hit Chance" accent="text-lime-300">
-            <Formula className="text-slate-100">
+            <Formula className="text-slate-100 leading-6">
               <span>P(≥1 hit)</span>
               <span>=</span>
               <span>1 − (1 − adjusted AVG)</span>
               <Sup>E[AB]</Sup>
             </Formula>
-            <Formula className="text-slate-400 text-[0.8rem]">
+            <Formula className="text-slate-400 text-[0.8rem] leading-5">
               <span>Top 5 hit %</span>
               <span>=</span>
               <span>100 × P(≥1 hit)</span>
@@ -218,19 +218,19 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
           </FormulaBlock>
 
           <FormulaBlock title="Recommended Double" accent="text-yellow-300">
-            <Formula className="text-slate-100">
+            <Formula className="text-slate-100 leading-6">
               <span>P(double)</span>
               <span>=</span>
               <span>P₁ × P₂</span>
             </Formula>
-            <Formula className="text-slate-300">
+            <Formula className="text-slate-300 leading-6">
               <span>best double</span>
               <span>=</span>
               <span>arg max</span>
               <span>(P₁ × P₂)</span>
               <span>, legs from Top 5</span>
             </Formula>
-            <Formula className="text-slate-400 text-[0.8rem]">
+            <Formula className="text-slate-400 text-[0.8rem] leading-5">
               <span>P₁, P₂</span>
               <span>=</span>
               <span>the two legs&apos; hit probabilities</span>
