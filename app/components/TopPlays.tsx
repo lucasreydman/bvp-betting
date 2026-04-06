@@ -130,13 +130,16 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
         className="hidden sm:block overflow-hidden rounded-[1.75rem] border border-slate-700/90 bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.12),_transparent_32%),radial-gradient(circle_at_top_right,_rgba(34,197,94,0.10),_transparent_28%),linear-gradient(180deg,_rgba(2,6,23,0.98),_rgba(2,6,23,0.92))] p-5 text-slate-200"
         style={{ fontFamily: MATH_FONT_STACK }}
       >
-        <div className="mb-4 flex items-end justify-between gap-4 border-b border-slate-800/80 pb-4">
+        <div className="mb-4 flex items-start justify-between gap-4 border-b border-slate-800/80 pb-4">
           <div>
             <div className="text-[11px] uppercase tracking-[0.28em] text-slate-400">Top 5 formulas</div>
             <div className="mt-1 text-lg text-white">Scoring and selection logic used in this card</div>
           </div>
-          <div className="max-w-xs text-right text-[11px] leading-5 text-slate-400">
-            AVG = career BvP batting average. AB = career at-bats vs this pitcher. P = probability of at least one hit. E[AB] = expected at-bats from the player&apos;s batting slot.
+          <div className="max-w-sm shrink-0 text-right text-[11px] leading-5 text-slate-400">
+            <div>AVG = career BvP batting average</div>
+            <div>AB = career at-bats vs this pitcher</div>
+            <div>P = probability of at least one hit</div>
+            <div>E[AB] = expected at-bats from batting slot</div>
           </div>
         </div>
 
@@ -188,17 +191,15 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
           </FormulaBlock>
 
           <FormulaBlock title="Expected At-Bats" accent="text-amber-300">
-            <Formula className="text-slate-100">
-              <span>slot</span>
-              <span>=</span>
-              <span>confirmed batting slot, otherwise estimated batting slot</span>
-            </Formula>
-            <div className="space-y-1.5 text-[0.88rem] leading-5 text-slate-300">
-              <div>E[AB] = 4.45, slot ≤ 3</div>
-              <div>E[AB] = 4.25, slot = 4</div>
-              <div>E[AB] = 4.05, 5 ≤ slot ≤ 6</div>
-              <div>E[AB] = 3.85, slot ≥ 7</div>
-              <div>E[AB] = 4.10, slot unknown</div>
+            <div className="text-[0.88rem] leading-5 text-slate-100">
+              <div>slot = confirmed batting slot</div>
+              <div>or estimated batting slot</div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-[0.88rem] leading-5 text-slate-300">
+              <div className="rounded-xl border border-amber-500/15 bg-slate-900/60 px-2.5 py-2">E[AB] = 4.45, slot ≤ 3</div>
+              <div className="rounded-xl border border-amber-500/15 bg-slate-900/60 px-2.5 py-2">E[AB] = 4.25, slot = 4</div>
+              <div className="rounded-xl border border-amber-500/15 bg-slate-900/60 px-2.5 py-2">E[AB] = 4.05, 5 ≤ slot ≤ 6</div>
+              <div className="rounded-xl border border-amber-500/15 bg-slate-900/60 px-2.5 py-2">E[AB] = 3.85, slot ≥ 7</div>
             </div>
           </FormulaBlock>
 
@@ -237,13 +238,10 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
           </FormulaBlock>
 
           <FormulaBlock title="Smash Double" accent="text-orange-300">
-            <Formula className="text-slate-100">
-              <span>smash</span>
-              <span>=</span>
-              <span>((OPS₁ &gt; .950 ∧ H₁ ≥ 7)</span>
-              <span>∧</span>
-              <span>(OPS₂ &gt; .950 ∧ H₂ ≥ 7))</span>
-            </Formula>
+            <div className="space-y-1 text-[0.9rem] leading-6 text-slate-100">
+              <div>smash = (OPS₁ &gt; .950 ∧ H₁ ≥ 7)</div>
+              <div className="pl-14">∧ (OPS₂ &gt; .950 ∧ H₂ ≥ 7)</div>
+            </div>
           </FormulaBlock>
         </div>
       </div>
