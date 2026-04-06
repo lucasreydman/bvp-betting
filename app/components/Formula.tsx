@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-const MATH_FONT_STACK = '"Cambria Math", "STIX Two Text", "Times New Roman", serif'
+export const MATH_FONT_STACK = '"Cambria Math", "STIX Two Text", "Times New Roman", serif'
 
 interface FormulaProps {
   children: ReactNode

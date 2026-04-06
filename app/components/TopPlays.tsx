@@ -1,10 +1,11 @@
+import type { ReactNode } from 'react'
 import type { MatchupResult } from '@/lib/types'
 import { formatTime, expectedAtBats, hitProbability, regressedAvg, resolveLineupPosition, suggestDailyDouble } from '@/lib/utils'
 import type { DailyDouble } from '@/lib/utils'
 import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
 import { fmtOdds } from '@/lib/odds'
 import InfoTooltip from './InfoTooltip'
-import { Formula, Fraction, Sup } from './Formula'
+import { Formula, Fraction, MATH_FONT_STACK, Sup } from './Formula'
 
 interface Props {
   matchups: MatchupResult[]
@@ -22,6 +23,23 @@ const LINEUP_BADGE_STYLES = {
   confirmed: 'bg-gray-800 text-gray-300',
   estimated: 'bg-amber-900/40 text-amber-400',
 } as const
+
+function FormulaBlock({
+  title,
+  accent,
+  children,
+}: {
+  title: string
+  accent: string
+  children: ReactNode
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-800/90 bg-slate-950/70 p-3">
+      <div className={`mb-2 text-[10px] font-semibold uppercase tracking-[0.24em] ${accent}`}>{title}</div>
+      <div className="space-y-2 text-slate-200">{children}</div>
+    </div>
+  )
+}
 
 export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) {
   const score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
@@ -52,7 +70,7 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
       <div className="flex items-center gap-2 mb-3">
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Top 5 Plays</h2>
       </div>
-      <div className="rounded-2xl border border-slate-700 bg-slate-950 p-4 text-xs text-slate-300">
+      <div className="rounded-2xl border border-slate-700 bg-slate-950 p-4 text-xs text-slate-300 sm:hidden">
         <div className="mb-3 text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">How Top Plays are ranked</div>
         <div className="space-y-3 leading-5">
           <p>
@@ -108,6 +126,122 @@ export default function TopPlays({ matchups, overrideDailyDouble, now }: Props) 
             <span>1 − (1 − adjusted AVG)</span>
             <Sup>expected AB</Sup>
           </Formula>
+        </div>
+      </div>
+      <div
+        className="hidden sm:block overflow-hidden rounded-[1.75rem] border border-slate-700/90 bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.12),_transparent_32%),radial-gradient(circle_at_top_right,_rgba(34,197,94,0.10),_transparent_28%),linear-gradient(180deg,_rgba(2,6,23,0.98),_rgba(2,6,23,0.92))] p-5 text-slate-200"
+        style={{ fontFamily: MATH_FONT_STACK }}
+      >
+        <div className="mb-4 flex items-end justify-between gap-4 border-b border-slate-800/80 pb-4">
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.28em] text-slate-400">Top 5 math sheet</div>
+            <div className="mt-1 text-lg text-white">All scoring and selection formulas used in this card</div>
+          </div>
+          <div className="max-w-xs text-right text-[11px] leading-5 text-slate-400">
+            Rank uses score. Double selection uses hit probability. Confirmed lineups replace projected batting slots when available.
+          </div>
+        </div>
+
+        <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
+          <FormulaBlock title="Ranking" accent="text-sky-300">
+            <Formula className="text-slate-100">
+              <span>score</span>
+              <span>=</span>
+              <span>AVG</span>
+              <span>×</span>
+              <span>confidence</span>
+            </Formula>
+            <Formula className="text-slate-300">
+              <span>confidence</span>
+              <span>=</span>
+              <span>min(</span>
+              <Fraction top={<span>AB</span>} bottom={<span>30</span>} />
+              <span>, 1)</span>
+            </Formula>
+            <Formula className="text-slate-400 text-[0.8rem]">
+              <span>sort</span>
+              <span>=</span>
+              <span>score ↓, AVG ↓, AB ↓</span>
+            </Formula>
+          </FormulaBlock>
+
+          <FormulaBlock title="Regression" accent="text-emerald-300">
+            <Formula className="text-slate-100">
+              <span>adjusted AVG</span>
+              <span>=</span>
+              <Fraction top={<span>AB</span>} bottom={<span>AB + 50</span>} />
+              <span>×</span>
+              <span>AVG</span>
+              <span>+</span>
+              <Fraction top={<span>50</span>} bottom={<span>AB + 50</span>} />
+              <span>×</span>
+              <span>0.320</span>
+            </Formula>
+            <Formula className="text-slate-400 text-[0.8rem]">
+              <span>w</span>
+              <span>=</span>
+              <Fraction top={<span>AB</span>} bottom={<span>AB + 50</span>} />
+            </Formula>
+            <Formula className="text-slate-400 text-[0.8rem]">
+              <span>adjusted AVG</span>
+              <span>=</span>
+              <span>w × AVG + (1 − w) × 0.320</span>
+            </Formula>
+          </FormulaBlock>
+
+          <FormulaBlock title="Expected AB" accent="text-amber-300">
+            <Formula className="text-slate-100">
+              <span>slot</span>
+              <span>=</span>
+              <span>confirmed slot ?? projected slot</span>
+            </Formula>
+            <div className="space-y-1.5 text-[0.88rem] leading-5 text-slate-300">
+              <div>E[AB] = 4.45, slot ≤ 3</div>
+              <div>E[AB] = 4.25, slot = 4</div>
+              <div>E[AB] = 4.05, 5 ≤ slot ≤ 6</div>
+              <div>E[AB] = 3.85, slot ≥ 7</div>
+              <div>E[AB] = 4.10, slot unknown</div>
+            </div>
+          </FormulaBlock>
+
+          <FormulaBlock title="Hit Chance" accent="text-lime-300">
+            <Formula className="text-slate-100">
+              <span>P(≥1 hit)</span>
+              <span>=</span>
+              <span>1 − (1 − adjusted AVG)</span>
+              <Sup>E[AB]</Sup>
+            </Formula>
+            <Formula className="text-slate-400 text-[0.8rem]">
+              <span>Top 5 hit %</span>
+              <span>=</span>
+              <span>100 × P(≥1 hit)</span>
+            </Formula>
+          </FormulaBlock>
+
+          <FormulaBlock title="Recommended Double" accent="text-yellow-300">
+            <Formula className="text-slate-100">
+              <span>P(double)</span>
+              <span>=</span>
+              <span>P₁ × P₂</span>
+            </Formula>
+            <Formula className="text-slate-300">
+              <span>best double</span>
+              <span>=</span>
+              <span>arg max</span>
+              <span>(P₁ × P₂)</span>
+              <span>, legs from Top 5</span>
+            </Formula>
+          </FormulaBlock>
+
+          <FormulaBlock title="Smash Double" accent="text-orange-300">
+            <Formula className="text-slate-100">
+              <span>smash</span>
+              <span>=</span>
+              <span>(OPS₁ &gt; .950 ∧ H₁ ≥ 7)</span>
+              <span>∧</span>
+              <span>(OPS₂ &gt; .950 ∧ H₂ ≥ 7)</span>
+            </Formula>
+          </FormulaBlock>
         </div>
       </div>
     </div>
