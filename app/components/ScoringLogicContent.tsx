@@ -43,7 +43,7 @@ export default function ScoringLogicContent() {
     <div className="pb-1">
       <div className="mb-3">
         <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Key Symbols</div>
-        <p className="mt-1 text-sm leading-6 text-slate-400">These are the inputs that appear throughout the formulas below. Only confirmed plays can enter the candidate board, and the official Top 4 locks at the slate&apos;s first scheduled pitch.</p>
+        <p className="mt-1 text-sm leading-6 text-slate-400">These are the inputs that appear throughout the formulas below.</p>
       </div>
 
       <div className="mb-4 grid grid-cols-2 items-start gap-2.5 lg:items-stretch lg:grid-cols-4">
@@ -168,25 +168,6 @@ export default function ScoringLogicContent() {
             <span>best single pair only</span>
           </Formula>
           <p className="text-[0.8rem] leading-5 text-slate-400">When four locked plays qualify by first pitch, the board compares the possible pairings and promotes the strongest lead double.</p>
-        </FormulaBlock>
-
-        <FormulaBlock title="Lock Timing" accent="text-cyan-300">
-          <Formula className="text-slate-50 leading-6">
-            <span>lock time</span>
-            <span>=</span>
-            <span>earliest slate game time</span>
-          </Formula>
-          <Formula className="text-slate-200 leading-6">
-            <span>official Top 4</span>
-            <span>=</span>
-            <span>best confirmed candidates at lock time</span>
-          </Formula>
-          <Formula className="text-slate-400 text-[0.82rem] leading-5">
-            <span>after lock</span>
-            <span>=</span>
-            <span>no new players can enter</span>
-          </Formula>
-          <p className="text-[0.8rem] leading-5 text-slate-400">This avoids late lineup confirmations reshuffling tracked plays after betting windows have already started.</p>
         </FormulaBlock>
 
         <FormulaBlock title="Smash Priority" accent="text-orange-300">

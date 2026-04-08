@@ -20,7 +20,7 @@ interface Props {
 }
 
 const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> = [
-  { key: 'batterName', label: 'Batter', cls: 'min-w-[9rem]' },
+  { key: 'batterName', label: 'Batter', cls: 'min-w-[13rem]' },
   { key: 'pitcherName', label: 'Pitcher', cls: 'min-w-[14rem]' },
   { key: 'avg', label: 'AVG', cls: 'min-w-[4.5rem]' },
   { key: 'h', label: 'H', cls: 'min-w-[3rem]' },

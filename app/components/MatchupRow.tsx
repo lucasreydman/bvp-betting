@@ -35,12 +35,12 @@ function ResultBadge({ hitResult }: { hitResult: MatchupResult['hitResult'] }) {
 export default function MatchupRow({ matchup: m, gameKind }: Props) {
   return (
     <tr className={`border-t ${CONFIDENCE_ROW_COLORS[m.confidence]} hover:bg-gray-800/50 transition-colors`}>
-      <td className="px-3 py-2 font-medium text-white whitespace-normal sm:whitespace-nowrap break-words">
-        <div className="flex items-center gap-2 min-w-0">
+      <td className="px-3 py-2 font-medium text-white whitespace-nowrap">
+        <div className="flex items-center gap-2 min-w-0 overflow-hidden">
           <span className="truncate">{m.batterName}</span>
+          <span className="shrink-0 text-gray-600 text-xs font-normal">[{teamAbbr(m.batterTeam)}]</span>
           <RecommendationTagBadge tags={m.recommendationTags} />
         </div>
-        <span className="ml-1.5 text-gray-600 text-xs font-normal">[{teamAbbr(m.batterTeam)}]</span>
       </td>
       <td className="px-3 py-2 text-gray-400 text-sm min-w-[14rem] max-w-[22rem] break-words">
         <span className="break-words">
