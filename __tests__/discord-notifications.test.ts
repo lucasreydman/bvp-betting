@@ -220,14 +220,15 @@ describe('Discord snapshot cutoff', () => {
     expect(extended.addedTopPlays).toHaveLength(3)
   })
 
-  it('prepends @everyone and allows the mention in webhook payloads', () => {
+  it('removes broadcast mentions and disables webhook mentions', () => {
     expect(buildDiscordWebhookPayload('Top 4 locked.')).toEqual({
-      content: '@everyone\nTop 4 locked.',
+      content: 'Top 4 locked.',
       allowed_mentions: {
-        parse: ['everyone'],
+        parse: [],
       },
     })
 
-    expect(buildDiscordWebhookPayload('@everyone\nAlready tagged.').content).toBe('@everyone\nAlready tagged.')
+    expect(buildDiscordWebhookPayload('@everyone\nAlready tagged.').content).toBe('Already tagged.')
+    expect(buildDiscordWebhookPayload('@here\nHeads up.').content).toBe('Heads up.')
   })
 })

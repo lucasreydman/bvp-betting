@@ -35,14 +35,14 @@ function formatLeg(matchup: MatchupResult): string {
 }
 
 export function buildDiscordWebhookPayload(content: string): DiscordWebhookPayload {
-  const normalizedContent = content.trimStart().startsWith('@everyone')
-    ? content
-    : `@everyone\n${content}`
+  const normalizedContent = content
+    .replace(/^@(everyone|here)\s*\n?/i, '')
+    .trim()
 
   return {
     content: normalizedContent,
     allowed_mentions: {
-      parse: ['everyone'],
+      parse: [],
     },
   }
 }

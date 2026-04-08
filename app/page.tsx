@@ -4,7 +4,7 @@ import Footer from './components/Footer'
 import { getSiteUrl } from '@/lib/site'
 
 export const metadata: Metadata = {
-  title: 'Batter vs Pitcher Stats and MLB Hit Props',
+  title: 'Batter vs Pitcher | MLB Hit Props',
   description:
     'Daily batter versus pitcher stats, BVP betting angles, and MLB hit props ranked by career matchup data. Find MLB BVP stats, official Top 4 plays, and recommended doubles in one board.',
   alternates: {

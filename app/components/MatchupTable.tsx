@@ -19,17 +19,17 @@ interface Props {
 }
 
 const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> = [
-  { key: 'batterName', label: 'Batter', cls: 'w-[15.5rem]' },
-  { key: 'pitcherName', label: 'Pitcher', cls: 'w-[11.75rem]' },
+  { key: 'batterName', label: 'Batter', cls: 'w-[15.25rem]' },
+  { key: 'pitcherName', label: 'Pitcher', cls: 'w-[11.25rem]' },
   { key: 'avg', label: 'AVG', cls: 'w-[3.75rem]' },
   { key: 'h', label: 'H', cls: 'w-[2.75rem]' },
   { key: 'ab', label: 'AB', cls: 'w-[2.75rem]' },
   { key: 'ops', label: 'OPS', cls: 'hidden sm:table-cell w-[4.25rem]' },
-  { key: 'gameTime', label: 'Game', cls: 'w-[12rem]' },
-  { key: 'lineupSource', label: 'Lineup', cls: 'hidden sm:table-cell w-[10rem]' },
+  { key: 'gameTime', label: 'Game', cls: 'w-[12.5rem]' },
+  { key: 'lineupSource', label: 'Lineup', cls: 'hidden sm:table-cell w-[10.5rem]' },
 ]
 
-const RESULT_COLUMN_CLASS = 'hidden sm:table-column w-[6.5rem]'
+const RESULT_COLUMN_CLASS = 'hidden sm:table-column w-[6.75rem]'
 
 const MOBILE_SORT_COLS: Array<{ key: keyof MatchupResult; label: string }> = [
   { key: 'avg', label: 'AVG' },
@@ -70,8 +70,8 @@ export default function MatchupTable({
   gameKind = 'upcoming',
 }: Props) {
   const headerPaddingClass = (key: keyof MatchupResult) => {
-    if (key === 'gameTime') return 'pl-3 pr-4'
-    if (key === 'lineupSource') return 'pl-6 pr-3'
+    if (key === 'gameTime') return 'px-4'
+    if (key === 'lineupSource') return 'px-4'
     return 'px-3'
   }
 
@@ -225,14 +225,14 @@ export default function MatchupTable({
                   ))}
                   {gameKind === 'upcoming' && (
                     <th
-                      className="pl-6 pr-3 py-2 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell text-transparent select-none"
+                      className="pl-4 pr-5 py-2 text-right text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell text-transparent select-none"
                       aria-hidden="true"
                     >
                       Result
                     </th>
                   )}
                   {gameKind !== 'upcoming' && (
-                    <th className="pl-6 pr-3 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
+                    <th className="pl-4 pr-5 py-2 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
                       Result
                     </th>
                   )}
