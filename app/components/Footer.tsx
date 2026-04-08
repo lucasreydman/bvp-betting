@@ -40,7 +40,7 @@ export default function Footer() {
         <div className="h-full">
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Lineups &amp; filters</h3>
           <p className="leading-relaxed">
-            Confirmed lineups improve the hit chance because expected at-bats depend on batting order. Until lineups are official, the app uses a projected slot when it can. The optional <span className="text-gray-400">OPS</span> and <span className="text-gray-400">Hits</span> filters do not change the core ranking, but they help you tighten the list to the kind of profile you want to bet. That makes them useful for preference, not for replacing the board's main logic.
+            Confirmed lineups improve the hit chance because expected at-bats depend on batting order. Until lineups are official, the app uses a projected slot when it can. The optional <span className="text-gray-400">OPS</span> and <span className="text-gray-400">Hits</span> filters do not change the core ranking, but they help you tighten the list to the kind of profile you want to bet. That makes them useful for preference, not for replacing the board&apos;s main logic.
           </p>
         </div>
       </div>

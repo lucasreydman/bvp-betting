@@ -25,11 +25,11 @@ export default function RecommendationTagBadge({ tags, variant = 'default' }: Pr
   const isCompact = variant === 'compact'
 
   return (
-    <span className={`inline-flex items-center gap-1 ${isCompact ? 'max-w-full overflow-hidden whitespace-nowrap' : 'flex-wrap'}`}>
+    <span className={`inline-flex min-w-0 items-center gap-1 ${isCompact ? 'max-w-full overflow-hidden whitespace-nowrap' : 'flex-wrap'}`}>
       {tags.map(tag => (
         <span
           key={tag}
-          className={`inline-flex shrink-0 items-center rounded font-semibold uppercase ${isCompact ? 'px-1 py-0.5 text-[9px] tracking-[0.14em]' : 'px-1.5 py-0.5 text-[10px] tracking-[0.18em]'} ${TAG_STYLES[tag]}`}
+          className={`inline-flex shrink-0 items-center rounded font-semibold uppercase ${isCompact ? 'px-1 py-0.5 text-[8px] tracking-[0.12em]' : 'px-1.5 py-0.5 text-[10px] tracking-[0.18em]'} ${TAG_STYLES[tag]}`}
           title={TAG_TITLES[tag]}
         >
           {tag}

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import type { MatchupResult } from '@/lib/types'
 import { formatTime, expectedAtBats, hitProbability, regressedAvg, resolveLineupPosition, suggestRecommendedDoubles, TOP_PLAYS_LIMIT } from '@/lib/utils'
 import type { RecommendedDouble } from '@/lib/utils'
@@ -10,6 +10,7 @@ import InfoTooltip from './InfoTooltip'
 import ScoringLogicContent from './ScoringLogicContent'
 
 const DESKTOP_LOGIC_STORAGE_KEY = 'bvp-top-plays-desktop-logic-open'
+const DESKTOP_LOGIC_STORAGE_EVENT = 'bvp-top-plays-desktop-logic-change'
 
 interface Props {
   matchups: MatchupResult[]
@@ -28,25 +29,39 @@ const LINEUP_BADGE_STYLES = {
   estimated: 'bg-amber-900/40 text-amber-400',
 } as const
 
+function subscribeToDesktopLogicPreference(onStoreChange: () => void) {
+  if (typeof window === 'undefined') return () => {}
+
+  window.addEventListener('storage', onStoreChange)
+  window.addEventListener(DESKTOP_LOGIC_STORAGE_EVENT, onStoreChange)
+
+  return () => {
+    window.removeEventListener('storage', onStoreChange)
+    window.removeEventListener(DESKTOP_LOGIC_STORAGE_EVENT, onStoreChange)
+  }
+}
+
+function getDesktopLogicPreference() {
+  if (typeof window === 'undefined') return true
+
+  const storedPreference = window.localStorage.getItem(DESKTOP_LOGIC_STORAGE_KEY)
+  return storedPreference === null ? true : storedPreference === 'true'
+}
+
+function updateDesktopLogicPreference(nextValue: boolean) {
+  window.localStorage.setItem(DESKTOP_LOGIC_STORAGE_KEY, String(nextValue))
+  window.dispatchEvent(new Event(DESKTOP_LOGIC_STORAGE_EVENT))
+}
+
 export default function TopPlays({ matchups, overrideRecommendedDoubles, now, slateLockedAt = null }: Props) {
-  const [isDesktopLogicOpen, setIsDesktopLogicOpen] = useState(true)
-  const hasLoadedLogicPreference = useRef(false)
+  const isDesktopLogicOpen = useSyncExternalStore(
+    subscribeToDesktopLogicPreference,
+    getDesktopLogicPreference,
+    () => true,
+  )
   const score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
   const isSlateLocked = slateLockedAt !== null
   const canBackfillLockedSlots = isSlateLocked && matchups.length < TOP_PLAYS_LIMIT
-
-  useEffect(() => {
-    const storedPreference = window.localStorage.getItem(DESKTOP_LOGIC_STORAGE_KEY)
-    if (storedPreference !== null) {
-      setIsDesktopLogicOpen(storedPreference === 'true')
-    }
-    hasLoadedLogicPreference.current = true
-  }, [])
-
-  useEffect(() => {
-    if (!hasLoadedLogicPreference.current) return
-    window.localStorage.setItem(DESKTOP_LOGIC_STORAGE_KEY, String(isDesktopLogicOpen))
-  }, [isDesktopLogicOpen])
 
   const enriched = matchups.map(m => {
     const expectedAB = expectedAtBats(resolveLineupPosition(m))
@@ -125,7 +140,7 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
           <div className="flex justify-end">
             <button
               type="button"
-              onClick={() => setIsDesktopLogicOpen(open => !open)}
+              onClick={() => updateDesktopLogicPreference(!isDesktopLogicOpen)}
               aria-label={isDesktopLogicOpen ? 'Collapse scoring and selection logic' : 'Expand scoring and selection logic'}
               className="group inline-flex items-center gap-2 rounded-full border border-slate-600/70 bg-slate-950/75 px-3 py-2 text-slate-300 shadow-[0_10px_30px_rgba(2,6,23,0.28)] backdrop-blur-sm transition-all duration-300 hover:border-sky-400/50 hover:bg-slate-900/95 hover:text-white"
             >
