@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Formula, Fraction, Sup } from './Formula'
+import { Formula, Fraction, MATH_FONT_STACK, Sup } from './Formula'
 
 function SymbolCard({
   label,
@@ -13,8 +13,8 @@ function SymbolCard({
   accent: string
 }) {
   return (
-    <div className="rounded-[1.15rem] border border-slate-700/70 bg-slate-950/80 px-3.5 py-3 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
-      <div className={`text-[0.95rem] font-semibold ${accent}`}>{label}</div>
+    <div className="rounded-[1.15rem] border border-slate-700/70 bg-slate-950/80 px-3.5 py-3 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)] lg:h-full">
+      <div className={`text-[0.95rem] font-semibold ${accent}`} style={{ fontFamily: MATH_FONT_STACK }}>{label}</div>
       <div className="mt-1 text-[0.82rem] font-semibold leading-5 text-slate-100">{title}</div>
       <p className="mt-1.5 text-[0.77rem] leading-5 text-slate-400">{description}</p>
     </div>
@@ -31,7 +31,7 @@ function FormulaBlock({
   children: ReactNode
 }) {
   return (
-    <div className="flex flex-col rounded-[1.25rem] border border-slate-700/60 bg-[linear-gradient(180deg,rgba(2,6,23,0.9),rgba(3,10,28,0.72))] p-4 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)] sm:rounded-[1.35rem]">
+    <div className="flex flex-col rounded-[1.25rem] border border-slate-700/60 bg-[linear-gradient(180deg,rgba(2,6,23,0.9),rgba(3,10,28,0.72))] p-4 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)] sm:rounded-[1.35rem] lg:h-full">
       <div className={`mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] sm:tracking-[0.28em] ${accent}`}>{title}</div>
       <div className="flex flex-1 flex-col gap-2.5 text-[0.92rem] leading-[1.6] text-slate-100 sm:text-[0.96rem] sm:leading-[1.55]">{children}</div>
     </div>
@@ -46,7 +46,7 @@ export default function ScoringLogicContent() {
         <p className="mt-1 text-sm leading-6 text-slate-400">These are the inputs that appear throughout the formulas below.</p>
       </div>
 
-      <div className="mb-4 grid grid-cols-2 items-start gap-2.5 lg:grid-cols-4">
+      <div className="mb-4 grid grid-cols-2 items-start gap-2.5 lg:items-stretch lg:grid-cols-4">
         <SymbolCard
           label="AVG"
           title="Career BvP batting"
@@ -73,7 +73,7 @@ export default function ScoringLogicContent() {
         />
       </div>
 
-      <div className="grid items-start gap-3 lg:grid-cols-2 xl:grid-cols-3">
+      <div className="grid items-start gap-3 lg:grid-cols-2 lg:items-stretch xl:grid-cols-3">
         <FormulaBlock title="Ranking" accent="text-sky-300">
           <Formula className="text-slate-50 leading-6">
             <span>score</span>
@@ -123,15 +123,15 @@ export default function ScoringLogicContent() {
         </FormulaBlock>
 
         <FormulaBlock title="Expected At-Bats" accent="text-amber-300">
-          <div className="text-[0.92rem] leading-6 text-slate-50 sm:text-[0.95rem]">
+          <div className="text-[0.92rem] leading-6 text-slate-50 sm:text-[0.95rem]" style={{ fontFamily: MATH_FONT_STACK }}>
             <div>slot = confirmed slot</div>
             <div>or estimated slot</div>
           </div>
-          <div className="grid content-start grid-cols-1 gap-x-5 gap-y-1.5 text-[0.88rem] leading-5 text-slate-200 sm:grid-cols-2">
-            <div>E[AB] = 4.45, slot ≤ 3</div>
-            <div>E[AB] = 4.25, slot = 4</div>
-            <div>E[AB] = 4.05, 5 ≤ slot ≤ 6</div>
-            <div>E[AB] = 3.85, slot ≥ 7</div>
+          <div className="grid content-start grid-cols-1 gap-x-4 gap-y-1.5 text-[0.84rem] leading-5 text-slate-200 sm:grid-cols-2 xl:text-[0.88rem]" style={{ fontFamily: MATH_FONT_STACK }}>
+            <div className="whitespace-nowrap">E[AB] = 4.45, slot ≤ 3</div>
+            <div className="whitespace-nowrap">E[AB] = 4.25, slot = 4</div>
+            <div className="whitespace-nowrap">E[AB] = 4.05, slot 5-6</div>
+            <div className="whitespace-nowrap">E[AB] = 3.85, slot ≥ 7</div>
           </div>
           <p className="text-[0.8rem] leading-5 text-slate-400">Batters near the top of the order are projected for more trips to the plate, which lifts hit probability.</p>
         </FormulaBlock>
@@ -171,7 +171,7 @@ export default function ScoringLogicContent() {
         </FormulaBlock>
 
         <FormulaBlock title="Smash Priority" accent="text-orange-300">
-          <div className="space-y-0.5 text-[0.92rem] leading-6 text-slate-50 sm:text-[0.95rem]">
+          <div className="space-y-0.5 text-[0.92rem] leading-6 text-slate-50 sm:text-[0.95rem]" style={{ fontFamily: MATH_FONT_STACK }}>
             <div>smash = (OPS₁ &gt; .950 ∧ H₁ ≥ 7)</div>
             <div className="pl-6 text-slate-300 sm:pl-16">and</div>
             <div className="pl-4 sm:pl-14">(OPS₂ &gt; .950 ∧ H₂ ≥ 7)</div>
