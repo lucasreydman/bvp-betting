@@ -302,6 +302,7 @@ export async function GET(req: NextRequest) {
     }
 
     let slateTopPlaysSnapshot = await kvGet<SlateTopPlaysSnapshot>(slateTopPlaysKey)
+    const currentCandidateTopPlays = selectTopPlays(upcomingResults)
     const currentConfirmedTopPlays = selectTopPlays(confirmedSlatePool)
 
     if (!slateTopPlaysSnapshot && slateLockReached) {
@@ -316,7 +317,7 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const trackedTopPlays = slateTopPlaysSnapshot?.topPlays ?? currentConfirmedTopPlays
+    const trackedTopPlays = slateTopPlaysSnapshot?.topPlays ?? currentCandidateTopPlays
     const trackedKeys = new Set(trackedTopPlays.map(matchup => matchupKey(matchup)))
     const recommendationTags = buildRecommendationTags(trackedTopPlays, suggestRecommendedDoubles(trackedTopPlays))
 

@@ -16,11 +16,11 @@ export default function Home() {
         <div className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">How to use this system</div>
         <p>
           <span className="text-white font-semibold">The page stays current automatically.</span>
-          <span className="text-slate-300"> Data refreshes every 5 minutes, and faster while any lineup is still estimated. Before first pitch, the board shows only the current confirmed Top 4 candidates. At the slate&apos;s first scheduled pitch, the official Top 4 locks. Once those games start, players move to In Progress, then Settled with a final result. Check back after lineups post (usually 3–4 hours before first pitch) for exact hit chances.</span>
+          <span className="text-slate-300"> Data refreshes every 5 minutes, and faster while any lineup is still estimated. Before first pitch, the board shows the current Top 4 candidates, including estimated-lineup plays when official lineups are not posted yet. At the slate&apos;s first scheduled pitch, the official Top 4 locks from the confirmed plays available at that cutoff. Once those games start, players move to In Progress, then Settled with a final result. Check back after lineups post (usually 3–4 hours before first pitch) for exact hit chances.</span>
         </p>
         <p>
           <span className="text-yellow-400 font-semibold">Best bet: take the recommended double.</span>
-          <span className="text-slate-300"> When all four locked plays populate, the board can give you two 2-leg parlays, but the first non-smash card is the Daily Double and is the main recommendation. If only two or three locked plays qualify, it falls back to the strongest single double. Before first pitch, these are provisional pairings from the current confirmed candidates. After the lock, they stay fixed to the official Top 4.</span>
+          <span className="text-slate-300"> When all four locked plays populate, the board can give you two 2-leg parlays, but the first non-smash card is the Daily Double and is the main recommendation. If only two or three locked plays qualify, it falls back to the strongest single double. Before first pitch, these are provisional pairings from the current candidate board. After the lock, they stay fixed to the official Top 4.</span>
         </p>
         <p>
           <span className="text-orange-400 font-semibold">If it says Smash Double, even better.</span>

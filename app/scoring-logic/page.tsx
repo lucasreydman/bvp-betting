@@ -8,7 +8,7 @@ export default function ScoringLogicPage() {
         <div className="min-w-0">
           <div className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-500">Scoring Guide</div>
           <h1 className="mt-1 text-[1.7rem] font-semibold tracking-tight text-white sm:text-xl">Scoring and Selection Logic</h1>
-          <p className="mt-2 max-w-2xl text-[0.98rem] leading-7 text-slate-400 sm:mt-1 sm:text-sm sm:leading-6">How confirmed Top 4 candidates are ranked, when the official board locks at first pitch, and how Daily Double, Secondary Double, and Smash Double selections are calculated.</p>
+          <p className="mt-2 max-w-2xl text-[0.98rem] leading-7 text-slate-400 sm:mt-1 sm:text-sm sm:leading-6">How Top 4 candidates are ranked before lineups are fully confirmed, when the official board locks at first pitch, and how Daily Double, Secondary Double, and Smash Double selections are calculated.</p>
         </div>
         <Link
           href="/"

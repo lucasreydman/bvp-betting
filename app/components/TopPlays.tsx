@@ -58,12 +58,12 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
     if (hasTwoDoubles) {
       return isSlateLocked
         ? 'Recommended doubles are locked from the official Top 4 frozen at the slate\'s first scheduled pitch. If a Smash Double exists, it takes the lead slot and the remaining two legs become the Secondary Double. If no smash pair exists, the app chooses the strongest overall split of the locked Top 4 and shows the best pair first as the Daily Double.'
-        : 'Before first pitch, the board shows the current confirmed Top 4 candidates only. At the slate\'s first scheduled pitch, the official Top 4 locks and recommended doubles stop changing.'
+        : 'Before first pitch, the board shows the current Top 4 candidates, including estimated-lineup plays when lineups are not posted yet. At the slate\'s first scheduled pitch, the official Top 4 locks and recommended doubles stop changing.'
     }
 
     return isSlateLocked
       ? 'Recommended doubles are locked from the official Top 4 frozen at the slate\'s first scheduled pitch. When fewer than four tracked plays qualify by lock time, the app shows the strongest available 2-leg parlay only.'
-      : 'Before first pitch, the board shows the current confirmed Top 4 candidates only. At the slate\'s first scheduled pitch, the official Top 4 locks and only those plays continue to be tracked.'
+      : 'Before first pitch, the board shows the current Top 4 candidates, including estimated-lineup plays when lineups are not posted yet. At the slate\'s first scheduled pitch, the official Top 4 locks and only those plays continue to be tracked.'
   }
 
   const getDoubleSubcopy = (double: RecommendedDouble, index: number) => {
@@ -83,7 +83,7 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
           <p className="mt-1 text-xs leading-5 text-gray-500">
             {isSlateLocked
               ? 'The official Top 4 locked at the slate\'s first scheduled pitch. Only those plays keep tags and move through the board.'
-              : 'Before first pitch, the board shows the current confirmed Top 4 candidates only. At first pitch, the official Top 4 locks and nothing new can enter.'}
+              : 'Before first pitch, the board shows the current Top 4 candidates. Estimated-lineup plays can appear until official lineups post. At first pitch, the official Top 4 locks and nothing new can enter.'}
           </p>
         </div>
       </div>
@@ -138,7 +138,7 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
         <p className="text-sm text-gray-500">
           {isSlateLocked
             ? 'No tracked Top 4 plays are still upcoming for this date.'
-            : 'No confirmed Top 4 candidates are currently upcoming for this date.'}
+            : 'No Top 4 candidates are currently upcoming for this date.'}
         </p>
       </div>
     )

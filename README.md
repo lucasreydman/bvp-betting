@@ -6,7 +6,7 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 
 ## How to use it for best results
 
-**Best bet: take the recommended double.** Before first pitch, the board shows only the current confirmed Top 4 candidates. At the slate's first scheduled pitch, the official Top 4 locks. If all four locked plays qualify, the board can show two 2-leg parlays, but the first non-smash card is the Daily Double and is the main recommendation. If only two or three locked plays qualify, it falls back to the single strongest double on the slate.
+**Best bet: take the recommended double.** Before first pitch, the board shows the current Top 4 candidates, including estimated-lineup plays when official lineups are not posted yet. At the slate's first scheduled pitch, the official Top 4 locks from the confirmed plays available at that cutoff. If all four locked plays qualify, the board can show two 2-leg parlays, but the first non-smash card is the Daily Double and is the main recommendation. If only two or three locked plays qualify, it falls back to the single strongest double on the slate.
 
 **If it says Smash Double, even better.** A Smash Double is the lead card whenever both legs have a career OPS above .950 and at least 7 hits against their pitcher. When one exists, it takes priority over the Daily Double and the remaining two Top 4 plays become the Secondary Double.
 
@@ -24,7 +24,7 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 2. Builds each lineup: official order from the schedule or boxscore when available, otherwise the top 9 active players by career plate appearances.
 3. Fetches career BvP for each batter vs the opposing starter, then excludes rows below 15 AB or .300 AVG.
 4. Computes AVG, OPS, SLG, OBP, and XBH from the split.
-5. Before the slate's first scheduled pitch, the API returns only the current confirmed Top 4 candidates. At first pitch, it freezes a slate-wide official Top 4 snapshot. Only those tracked plays continue into **Upcoming**, **In progress**, and **Settled**.
+5. Before the slate's first scheduled pitch, the API returns the current Top 4 candidate board, which can include estimated-lineup plays. At first pitch, it freezes a slate-wide official Top 4 snapshot from the confirmed qualifying plays available at that cutoff. Only those tracked plays continue into **Upcoming**, **In progress**, and **Settled**.
 6. In-progress rows show whether each batter has gotten a hit yet (HIT / pending). Settled rows show the final result (HIT / NO HIT).
 7. Data refreshes silently in the background every 5 minutes, and faster while any upcoming lineup is still estimated, with no manual refresh needed.
 7. Sorts tables client-side (default: **AVG desc**).
@@ -84,7 +84,7 @@ All active filters apply at once (AND logic). Filters apply to the Upcoming, In 
 The Export CSV button (desktop only) offers three options:
 
 - **Daily / Secondary / Smash Double**: one or two 2-leg parlay recommendations
-- **Top 4 Plays**: the official tracked Top 4 or, before lock, the current confirmed Top 4 candidates
+- **Top 4 Plays**: the official tracked Top 4 or, before lock, the current Top 4 candidate board
 - **Full List**: all upcoming and in-progress rows that pass the current filters
 
 ## Confidence
@@ -98,7 +98,7 @@ Sample size (career AB vs this pitcher):
 ## Data quality
 
 - The API sometimes returns team-level aggregates instead of true individual BvP. Any raw stat line shared by **three or more** batters on the same team against the same pitcher is dropped.
-- Before the slate lock, only confirmed qualifying plays can appear in the Top 4 board. Estimated rows never enter the tracked set.
+- Before the slate lock, the Top 4 board can include estimated-lineup rows so future dates still surface provisional candidates.
 - At the slate's first scheduled pitch, the API freezes a slate-wide `slate-top4:{date}` snapshot from the confirmed qualifying plays available at that cutoff. No later lineup confirmations can replace those tracked players.
 - Upcoming games still write per-game qualifying snapshots to KV. Once those tracked players start, only players from those pre-game snapshots appear in the In progress and Settled tables, so no new players can enter mid-game.
 - If no pre-game snapshot exists for a game (e.g. the server first saw it already in progress), that game is omitted from In progress and Settled rather than showing unverified data.

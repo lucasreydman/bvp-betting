@@ -48,7 +48,7 @@ lib/
 2. Route checks `matchups-response:{date}` and returns immediately if found. Before first pitch this cache is short-lived so confirmed lineups can update the candidate board; after lock it returns to the normal 5-minute TTL.
 3. On cache miss: separates games by `getGameStatus(detailedState)` → upcoming vs in-progress/settled. For upcoming: loads lineups then BvP in batches of 20 with 200 ms delays. For in-progress/settled: reads frozen per-game KV snapshots.
 4. Server excludes rows with fewer than 15 AB or below .300 AVG, then dedupes rows where **3+** batters on the same team vs the same pitcher share identical raw stats. After dedup, writes per-game KV snapshots (`game-qualifying:{gamePk}`, 36h TTL) for confirmed upcoming games.
-5. Before the slate's first scheduled pitch, the API returns only the current confirmed Top 4 candidates. At first pitch, it freezes `slate-top4:{date}` from the confirmed qualifying plays available at that cutoff.
+5. Before the slate's first scheduled pitch, the API returns the current Top 4 candidate board, which can include estimated-lineup plays. At first pitch, it freezes `slate-top4:{date}` from the confirmed qualifying plays available at that cutoff.
 6. For in-progress/settled games, server reads the pre-game per-game snapshot, filters to the locked Top 4 keys, and attaches live hit counts from `fetchBoxscoreHitting`. `computeHitResult` stamps each row `win/loss/pending`.
 7. Client receives only the tracked set with server-set `gameStatus` (`upcoming | inProgress | settled`) plus `slateLockedAt`. `ClientShell` splits rows by `gameStatus`; filters apply within that tracked set.
 8. `TopPlays` and the first table use upcoming tracked rows only; second table is **In progress**; third table is **Settled**.
@@ -60,7 +60,7 @@ lib/
 
 - **Filters:** minAB (15) and minAVG (.300) are server-enforced hard minimums — not user-editable. Only minOPS is user-configurable (optional). OPS filter applies to all three tables (upcoming, inProgress, settled).
 - **Game status split:** Server-driven via `gameStatus` field on each `MatchupResult`. `getGameStatus(detailedState)` maps MLB API states → `upcoming | inProgress | settled`. Client reads `gameStatus` directly — no time-based split.
-- **TopPlays:** Before lock, shows only confirmed Top 4 candidates. After lock, shows only official tracked Top 4 plays that are still upcoming.
+- **TopPlays:** Before lock, shows the current Top 4 candidate board, which may include estimated-lineup plays. After lock, shows only official tracked Top 4 plays that are still upcoming.
 - **Default sort:** AVG desc by default (table). Top 4 card uses AVG × min(AB/30, 1) with tiebreakers raw AVG then AB.
 - **Confidence:** AB vs this pitcher: high ≥21 (green), medium 18–20 (yellow), low 15–17 (red). Server enforces 15 AB minimum so all three tiers are reachable.
 - **Slate Top 4 lock:** The official tracked set freezes at the slate's first scheduled pitch, not when the fourth confirmed play appears. Use only confirmed qualifying plays available by that cutoff.
