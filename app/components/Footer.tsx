@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Formula, Fraction, Sup } from '@/app/components/Formula'
+import { Formula, Sup } from '@/app/components/Formula'
 
 export default function Footer() {
   const year = new Date().getFullYear()
@@ -13,19 +13,19 @@ export default function Footer() {
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Why AVG?</h3>
           <p className="leading-relaxed">
             This prop cashes on any hit, so batting average is the clearest starting point. A simple approximation is{' '}
-            <Formula inline className="text-gray-400 text-[0.9rem]">
+            <Formula inline className="text-gray-400 text-[0.82rem]">
               <span>P(≥1 hit)</span>
               <span>=</span>
               <span>1 − (1 − AVG)</span>
               <Sup>n</Sup>
             </Formula>.
-            {' '}Here, n is expected at-bats based on lineup slot. A strong BvP AVG does not guarantee anything, but it gives a direct baseline for comparing who has the best chance to record one hit tonight.
+            {' '}Here, n is expected at-bats based on lineup slot. A strong BvP AVG does not guarantee anything, but it gives a clean baseline for comparing which hitters have the best chance to record one hit. It is the fastest way to scan the board without mixing in stats that do not cash the prop.
           </p>
         </div>
         <div className="h-full">
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Minimum requirements</h3>
           <p className="leading-relaxed">
-            Only matchups with at least <span className="text-gray-400 font-mono whitespace-nowrap">15</span> career AB and a <span className="text-gray-400 font-mono whitespace-nowrap">.300+</span> BvP AVG make the board. That keeps tiny samples and coin-flip histories out of the pool. The goal is not to show every batter versus pitcher stat, but to narrow the slate to matchup histories with enough evidence to matter.
+            Only matchups with at least <span className="text-gray-400 font-mono whitespace-nowrap">15</span> career AB and a <span className="text-gray-400 font-mono whitespace-nowrap">.300+</span> BvP AVG make the board. That keeps tiny samples and coin-flip histories out of the pool. The goal is not to show every batter versus pitcher stat, but to narrow the slate to matchup histories with enough evidence to matter. If a batter is missing, the sample usually is not strong enough to trust.
           </p>
         </div>
         <div className="h-full">
@@ -34,20 +34,13 @@ export default function Footer() {
             Confidence reflects sample size in career at-bats versus that pitcher: <span className="text-red-500">red</span> = 15–17 AB,{' '}
             <span className="text-yellow-500">yellow</span> = 18–20 AB,{' '}
             <span className="text-green-500">green</span> = 21+ AB.
-            Top 4 Plays ranks by{' '}
-            <Formula inline className="text-gray-400 text-[0.9rem]">
-              <span>AVG</span>
-              <span>×</span>
-              <span>min(</span>
-              <Fraction top={<span>AB</span>} bottom={<span>30</span>} />
-              <span>, 1)</span>
-            </Formula>, so bigger samples carry more trust. Before first pitch the board shows the best current candidates. After first pitch, started plays stay tracked separately while the upcoming board still prefers the best remaining options.
+            Top 4 Plays ranks by <span className="font-mono text-[0.82rem] text-gray-400">AVG × min(AB/30, 1)</span>, so bigger samples carry more trust. Before first pitch the board shows the best current candidates. After first pitch, started plays stay tracked separately while the upcoming board still prefers the best remaining options.
           </p>
         </div>
         <div className="h-full">
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Lineups &amp; filters</h3>
           <p className="leading-relaxed">
-            Confirmed lineups improve the hit chance because expected at-bats depend on batting order. Until lineups are official, the app uses a projected slot when it can. The optional <span className="text-gray-400">OPS</span> and <span className="text-gray-400">Hits</span> filters do not change the core ranking, but they help you tighten the list to the kind of profile you want to bet.
+            Confirmed lineups improve the hit chance because expected at-bats depend on batting order. Until lineups are official, the app uses a projected slot when it can. The optional <span className="text-gray-400">OPS</span> and <span className="text-gray-400">Hits</span> filters do not change the core ranking, but they help you tighten the list to the kind of profile you want to bet. That makes them useful for preference, not for replacing the board's main logic.
           </p>
         </div>
       </div>
