@@ -10,7 +10,8 @@ import { formatSlateDate } from '@/lib/utils'
 const NO_STORE_HEADERS = { 'Cache-Control': 'no-store' }
 
 function getAdminSecret(): string | null {
-  return process.env.MANUAL_OVERRIDE_SECRET ?? null
+  const secret = process.env.MANUAL_OVERRIDE_SECRET?.trim()
+  return secret ? secret : null
 }
 
 function isAuthorized(req: NextRequest): boolean {
