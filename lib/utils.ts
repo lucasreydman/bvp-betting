@@ -1,5 +1,5 @@
 import { parlayOddsFromLines } from './odds'
-import type { FilterState, MatchupResult, SortState } from './types'
+import type { FilterState, MatchupResult, RecommendationTag, SortState } from './types'
 
 const TEAM_ABBR: Record<string, string> = {
   'Arizona Diamondbacks': 'ARI',
@@ -109,6 +109,10 @@ export interface RecommendedDouble {
   consensusParlayOddsAmerican: number | null
 }
 
+export function matchupKey(matchup: Pick<MatchupResult, 'gamePk' | 'batterId' | 'pitcherId'>): string {
+  return `${matchup.gamePk}:${matchup.batterId}:${matchup.pitcherId}`
+}
+
 export function isSmashDouble(first: MatchupResult, second: MatchupResult): boolean {
   return first.ops > 0.950 && second.ops > 0.950 && first.h >= 7 && second.h >= 7
 }
@@ -213,6 +217,31 @@ export function suggestRecommendedDoubles(matchups: MatchupResult[]): Recommende
 
 export function suggestDailyDouble(matchups: MatchupResult[]): RecommendedDouble | null {
   return suggestRecommendedDoubles(matchups)[0] ?? null
+}
+
+export function buildRecommendationTags(
+  topPlays: MatchupResult[],
+  recommendedDoubles: RecommendedDouble[],
+): Record<string, RecommendationTag> {
+  const tags: Record<string, RecommendationTag> = {}
+
+  for (const matchup of topPlays) {
+    tags[matchupKey(matchup)] = 'T4'
+  }
+
+  for (const [index, double] of recommendedDoubles.entries()) {
+    const tag: RecommendationTag = double.isSmash
+      ? 'SMASH'
+      : recommendedDoubles.length === 1 || index === 0
+        ? 'RD'
+        : 'SD'
+
+    for (const leg of [double.first, double.second]) {
+      tags[matchupKey(leg)] = tag
+    }
+  }
+
+  return tags
 }
 
 /** Relative time until first pitch. Returns null if start is in the past or invalid. */

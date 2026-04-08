@@ -5,6 +5,7 @@ import { fmtOdds } from '@/lib/odds'
 import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
 import MatchupRow from './MatchupRow'
 import GameTimeCell from './GameTimeCell'
+import RecommendationTagBadge from './RecommendationTagBadge'
 
 interface Props {
   matchups: MatchupResult[]
@@ -144,7 +145,10 @@ export default function MatchupTable({
                   {/* Row 1: Batter identity + AVG/result */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium text-white text-sm truncate">{m.batterName}</div>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="font-medium text-white text-sm truncate">{m.batterName}</div>
+                        <RecommendationTagBadge tag={m.recommendationTag} />
+                      </div>
                       <div className="mt-0.5 text-gray-500 text-xs font-mono">{teamAbbr(m.batterTeam)}</div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 pt-0.5">

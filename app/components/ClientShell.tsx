@@ -1,8 +1,8 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import type { MatchupResult, FilterState, MatchupsResponse, SortState } from '@/lib/types'
+import type { MatchupResult, FilterState, MatchupsResponse, RecommendationTag, SortState } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
-import { applyFilters, formatLocalDate, sortMatchups, suggestRecommendedDoubles } from '@/lib/utils'
+import { applyFilters, buildRecommendationTags, formatLocalDate, matchupKey, sortMatchups, suggestRecommendedDoubles } from '@/lib/utils'
 import type { RecommendedDouble } from '@/lib/utils'
 import StatusBar from './StatusBar'
 import DatePicker from './DatePicker'
@@ -22,6 +22,7 @@ export default function ClientShell() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tick, setTick] = useState(0)
+  const [trackedRecommendationTags, setTrackedRecommendationTags] = useState<Record<string, RecommendationTag>>({})
   const hasEstimatedUpcoming = allMatchups.some(m => m.gameStatus === 'upcoming' && m.lineupSource === 'estimated')
   const backgroundRefreshMs = hasEstimatedUpcoming ? 30_000 : 300_000
 
@@ -102,6 +103,44 @@ export default function ClientShell() {
   // Recommended doubles always computed from the same filtered top-play set shown in TopPlays,
   // so filters (min AB, min AVG) apply consistently to both.
   const recommendedDoubles: RecommendedDouble[] = suggestRecommendedDoubles(topPlaysMatchups)
+  const currentRecommendationTags = buildRecommendationTags(topPlaysMatchups, recommendedDoubles)
+  const currentRecommendationTagsKey = JSON.stringify(currentRecommendationTags)
+
+  useEffect(() => {
+    setTrackedRecommendationTags({})
+  }, [date])
+
+  useEffect(() => {
+    const nextEntries = Object.entries(JSON.parse(currentRecommendationTagsKey) as Record<string, RecommendationTag>)
+
+    setTrackedRecommendationTags(prev => {
+      let changed = false
+      const next = { ...prev }
+
+      for (const [key, tag] of nextEntries) {
+        if (next[key] !== tag) {
+          next[key] = tag
+          changed = true
+        }
+      }
+
+      return changed ? next : prev
+    })
+  }, [currentRecommendationTagsKey])
+
+  const attachRecommendationTags = (matchups: MatchupResult[]) => matchups.map(matchup => {
+    const key = matchupKey(matchup)
+    const recommendationTag = matchup.gameStatus === 'upcoming'
+      ? currentRecommendationTags[key]
+      : trackedRecommendationTags[key]
+
+    if (matchup.recommendationTag === recommendationTag) return matchup
+    return { ...matchup, recommendationTag }
+  })
+
+  const taggedUpcoming = attachRecommendationTags(upcoming)
+  const taggedInProgress = attachRecommendationTags(inProgress)
+  const taggedSettled = attachRecommendationTags(settled)
 
   return (
     <div>
@@ -126,7 +165,7 @@ export default function ClientShell() {
         <LoadingSkeleton date={date} />
       ) : (
         <>
-          <TopPlays matchups={upcoming} overrideRecommendedDoubles={recommendedDoubles} now={now} />
+          <TopPlays matchups={taggedUpcoming} overrideRecommendedDoubles={recommendedDoubles} now={now} />
           <Filters
             key={filtersKey}
             filters={filters}
@@ -136,7 +175,7 @@ export default function ClientShell() {
             recommendedDoubles={recommendedDoubles}
           />
           <MatchupTable
-            matchups={upcoming}
+            matchups={taggedUpcoming}
             sort={sort}
             onSort={handleSort}
             totalMatchups={totalUpcoming}
@@ -147,7 +186,7 @@ export default function ClientShell() {
           {inProgress.length > 0 && (
             <div className="mt-6">
               <MatchupTable
-                matchups={inProgress}
+                matchups={taggedInProgress}
                 sort={sort}
                 onSort={handleSort}
                 totalMatchups={totalInProgress}
@@ -159,7 +198,7 @@ export default function ClientShell() {
           {settled.length > 0 && (
             <div className="mt-6">
               <MatchupTable
-                matchups={settled}
+                matchups={taggedSettled}
                 sort={sort}
                 onSort={() => {}}
                 totalMatchups={allSettled.length}

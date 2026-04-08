@@ -26,13 +26,6 @@ const LINEUP_BADGE_STYLES = {
   estimated: 'bg-amber-900/40 text-amber-400',
 } as const
 
-const RECOMMENDATION_BADGE_STYLES = {
-  smash: 'bg-orange-950/60 text-orange-300 border border-orange-500/30',
-  primary: 'bg-yellow-950/60 text-yellow-300 border border-yellow-500/30',
-  secondary: 'bg-sky-950/60 text-sky-300 border border-sky-500/30',
-  single: 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/30',
-} as const
-
 function FormulaBlock({
   title,
   accent,
@@ -90,21 +83,6 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
     return index === 0 ? 'One of the two recommended Top 4 doubles.' : 'Another recommended double from the current Top 4.'
   }
 
-  const recommendationBadges = new Map<string, { text: string; style: string }>()
-  for (const [index, double] of recommendedDoubles.entries()) {
-    const badge = double.isSmash
-      ? { text: 'Smash', style: RECOMMENDATION_BADGE_STYLES.smash }
-      : !hasTwoDoubles
-        ? { text: 'Best', style: RECOMMENDATION_BADGE_STYLES.single }
-        : index === 0
-          ? { text: 'D1', style: RECOMMENDATION_BADGE_STYLES.primary }
-          : { text: 'D2', style: RECOMMENDATION_BADGE_STYLES.secondary }
-
-    for (const leg of [double.first, double.second]) {
-      recommendationBadges.set(`${leg.batterId}:${leg.pitcherId}:${leg.gameTime}`, badge)
-    }
-  }
-
   const header = (
     <div className="mb-4">
       <div className="mb-3 flex flex-col gap-1.5 sm:flex-row sm:items-end sm:justify-between">
@@ -114,9 +92,6 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
           </div>
           <p className="mt-1 text-xs leading-5 text-gray-500">Capped at four to keep the board concentrated on the strongest historical edges and avoid padding the slate with lower-conviction plays.</p>
         </div>
-        {recommendedDoubles.length > 0 && (
-          <p className="text-[11px] leading-5 text-gray-600 sm:max-w-xs sm:text-right">Badges mark where each play lands: Best, Smash, D1, or D2.</p>
-        )}
       </div>
       <div className="rounded-2xl border border-slate-700 bg-slate-950 p-4 text-xs text-slate-300 sm:hidden">
         <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-400">How Top Plays are ranked</div>
@@ -316,8 +291,6 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
       {header}
       <ol className="-mx-4 divide-y divide-gray-800/40 px-0 sm:mx-0 sm:space-y-2 sm:divide-y-0 sm:px-0">
         {topPlays.map(({ m, expectedAB, hitPct }, i) => {
-          const pairingBadge = recommendationBadges.get(`${m.batterId}:${m.pitcherId}:${m.gameTime}`)
-
           return (
           <li key={`${m.batterId}-${m.pitcherId}-${m.gameTime}`} className="px-4 py-2 sm:px-0 sm:py-0">
             <div className="sm:hidden">
@@ -334,11 +307,6 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
                 >
                   {getLineupBadgeText(m)}
                 </span>
-                {pairingBadge && (
-                  <span className={`inline-flex shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${pairingBadge.style}`}>
-                    {pairingBadge.text}
-                  </span>
-                )}
               </div>
               <div className="mt-1 flex items-center gap-2 pl-6 text-[11px]">
                 <span className="shrink-0 font-mono text-gray-400">Est. {expectedAB.toFixed(1)} AB</span>
@@ -360,11 +328,6 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
               >
                 {getLineupBadgeText(m)}
               </span>
-              {pairingBadge && (
-                <span className={`inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${pairingBadge.style}`}>
-                  {pairingBadge.text}
-                </span>
-              )}
               <span className="text-gray-400">vs {m.pitcherName}</span>
               <span className={`font-mono font-bold ${CONFIDENCE_COLORS[m.confidence]}`}>{m.avg.toFixed(3)} AVG</span>
               <span className="font-mono text-gray-500">{m.ab} AB</span>

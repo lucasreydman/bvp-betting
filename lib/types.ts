@@ -1,3 +1,5 @@
+export type RecommendationTag = 'SMASH' | 'RD' | 'SD' | 'T4'
+
 export interface MatchupResult {
   batterId: number
   batterName: string
@@ -39,6 +41,7 @@ export interface MatchupResult {
   // Odds enrichment (upcoming rows only; null = no line found for this player)
   consensusHitOddsAmerican?: number | null
   bookCount?: number
+  recommendationTag?: RecommendationTag
 }
 
 export interface FilterState {

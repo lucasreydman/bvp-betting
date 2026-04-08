@@ -1,4 +1,4 @@
-import { formatTime, formatLocalDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, hitProbability, suggestDailyDouble, suggestRecommendedDoubles, generateRecommendedDoublesCSV, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
+import { buildRecommendationTags, formatTime, formatLocalDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, hitProbability, suggestDailyDouble, suggestRecommendedDoubles, generateRecommendedDoublesCSV, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
 import { DEFAULT_FILTERS, type MatchupResult } from '@/lib/types'
 
 const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => ({
@@ -246,6 +246,33 @@ describe('generateRecommendedDoublesCSV', () => {
     expect(csv).toContain('Double,Type,Combined Hit %,Parlay Odds,Leg')
     expect(csv).toContain('Smash Double')
     expect(csv).toContain('Second Batter')
+  })
+})
+
+describe('buildRecommendationTags', () => {
+  it('marks a lone recommended double as RD and the leftover Top 4 play as T4', () => {
+    const a = makeMatchup({ batterId: 1, pitcherId: 11, ops: 0.910, h: 6, avg: 0.360, ab: 26 })
+    const b = makeMatchup({ batterId: 2, pitcherId: 22, ops: 0.900, h: 5, avg: 0.385, ab: 24 })
+    const c = makeMatchup({ batterId: 3, pitcherId: 33, ops: 0.840, h: 4, avg: 0.305, ab: 18 })
+    const tags = buildRecommendationTags([a, b, c], suggestRecommendedDoubles([a, b, c]))
+
+    expect(tags['123456:1:11']).toBe('RD')
+    expect(tags['123456:2:22']).toBe('RD')
+    expect(tags['123456:3:33']).toBe('T4')
+  })
+
+  it('marks a smash pair first and the other pair as SD when four plays qualify', () => {
+    const smashA = makeMatchup({ batterId: 1, pitcherId: 11, ops: 0.980, h: 8, avg: 0.310, ab: 18 })
+    const smashB = makeMatchup({ batterId: 2, pitcherId: 22, ops: 0.970, h: 7, avg: 0.305, ab: 18 })
+    const c = makeMatchup({ batterId: 3, pitcherId: 33, avg: 0.420, ab: 45, ops: 0.910, h: 10 })
+    const d = makeMatchup({ batterId: 4, pitcherId: 44, avg: 0.410, ab: 42, ops: 0.900, h: 9 })
+    const doubles = suggestRecommendedDoubles([smashA, smashB, c, d])
+    const tags = buildRecommendationTags([smashA, smashB, c, d], doubles)
+
+    expect(tags['123456:1:11']).toBe('SMASH')
+    expect(tags['123456:2:22']).toBe('SMASH')
+    expect(tags['123456:3:33']).toBe('SD')
+    expect(tags['123456:4:44']).toBe('SD')
   })
 })
 
