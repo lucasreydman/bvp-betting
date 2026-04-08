@@ -162,16 +162,21 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
           type="button"
           onClick={() => setIsDesktopLogicOpen(open => !open)}
           aria-label={isDesktopLogicOpen ? 'Collapse scoring and selection logic' : 'Expand scoring and selection logic'}
-          className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-600/70 bg-slate-950/70 text-slate-300 transition-all duration-300 hover:border-sky-400/50 hover:bg-slate-900 hover:text-white"
+          className="group absolute right-4 top-4 inline-flex items-center gap-2 rounded-full border border-slate-600/70 bg-slate-950/75 px-2 py-2 text-slate-300 shadow-[0_10px_30px_rgba(2,6,23,0.28)] backdrop-blur-sm transition-all duration-300 hover:border-sky-400/50 hover:bg-slate-900/95 hover:text-white"
         >
-          <svg
-            viewBox="0 0 20 20"
-            fill="none"
-            className={`h-4 w-4 transition-transform duration-300 ${isDesktopLogicOpen ? 'rotate-180' : 'rotate-0'}`}
-            aria-hidden="true"
-          >
-            <path d="M5 8l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <span className="pl-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-300 transition-colors duration-300 group-hover:text-white">
+            {isDesktopLogicOpen ? 'Collapse' : 'Expand'}
+          </span>
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-600/60 bg-slate-900/90 text-slate-200 transition-all duration-300 group-hover:border-sky-400/40 group-hover:bg-slate-800 group-hover:text-white">
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              className={`h-4 w-4 shrink-0 transition-transform duration-300 ease-out ${isDesktopLogicOpen ? 'rotate-180' : 'rotate-0'}`}
+              aria-hidden="true"
+            >
+              <path d="M5 8l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
         </button>
 
         <div className="border-b border-slate-800/80 pb-5 text-center">
