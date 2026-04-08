@@ -83,6 +83,26 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
     return index === 0 ? 'Top non-smash pair from the locked Top 4.' : 'Optional second pair from the locked Top 4.'
   }
 
+  const boardStatusText = (() => {
+    if (!boardDebug) return null
+
+    if (boardDebug.lockState === 'locked') {
+      if (boardDebug.trackedCount < TOP_PLAYS_LIMIT && boardDebug.estimatedQualifyingUpcomingCount > 0) {
+        return `Locked short at ${boardDebug.trackedCount}. Can still fill to 4.`
+      }
+      if (boardDebug.trackedCount < TOP_PLAYS_LIMIT) {
+        return `Locked at ${boardDebug.trackedCount}. No more confirmed fills yet.`
+      }
+      return 'Locked at 4.'
+    }
+
+    if (boardDebug.qualifyingUpcomingCount === 0) {
+      return 'No qualifying upcoming plays yet.'
+    }
+
+    return `Live board: best ${Math.min(boardDebug.qualifyingUpcomingCount, TOP_PLAYS_LIMIT)} of ${boardDebug.qualifyingUpcomingCount}.`
+  })()
+
   const header = (
     <div className="mb-4">
       <div className="mb-3 flex flex-col gap-1.5 sm:flex-row sm:items-end sm:justify-between">
@@ -98,14 +118,14 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
               : 'Before first pitch, the board shows the current Top 4 candidates. Estimated-lineup plays can appear until official lineups post, and the board keeps preferring the best available options as confirmations come in.'}
           </p>
           {boardDebug && (
-            <div className="mt-2 rounded-xl border border-slate-700/80 bg-slate-950/80 px-3 py-2 text-xs leading-5 text-slate-300">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span className="font-semibold text-white">{boardDebug.explanation}</span>
-                <span className="text-slate-500">Tracked: {boardDebug.trackedCount}</span>
-                <span className="text-slate-500">Upcoming qualifiers: {boardDebug.qualifyingUpcomingCount}</span>
-                <span className="text-slate-500">Confirmed: {boardDebug.confirmedQualifyingUpcomingCount}</span>
-                {boardDebug.estimatedQualifyingUpcomingCount > 0 && <span className="text-amber-400/90">Estimated: {boardDebug.estimatedQualifyingUpcomingCount}</span>}
-                {boardDebug.gamesSkippedMissingProbable > 0 && <span className="text-orange-400/90">Missing probable pitchers: {boardDebug.gamesSkippedMissingProbable}</span>}
+            <div className="mt-2 rounded-xl border border-slate-700/80 bg-slate-950/80 px-3 py-2 text-xs text-slate-300">
+              <div className="font-semibold text-white">{boardStatusText}</div>
+              <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] leading-4">
+                <span className="rounded-full border border-slate-700 px-2 py-1 text-slate-400">Tracked {boardDebug.trackedCount}</span>
+                <span className="rounded-full border border-slate-700 px-2 py-1 text-slate-400">Pool {boardDebug.qualifyingUpcomingCount}</span>
+                <span className="rounded-full border border-slate-700 px-2 py-1 text-slate-400">Confirmed {boardDebug.confirmedQualifyingUpcomingCount}</span>
+                {boardDebug.estimatedQualifyingUpcomingCount > 0 && <span className="rounded-full border border-amber-700/60 px-2 py-1 text-amber-400/90">Estimated {boardDebug.estimatedQualifyingUpcomingCount}</span>}
+                {boardDebug.gamesSkippedMissingProbable > 0 && <span className="rounded-full border border-orange-700/60 px-2 py-1 text-orange-400/90">Missing pitchers {boardDebug.gamesSkippedMissingProbable}</span>}
               </div>
             </div>
           )}

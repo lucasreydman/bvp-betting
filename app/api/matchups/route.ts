@@ -307,7 +307,6 @@ export async function GET(req: NextRequest) {
     let slateTopPlaysSnapshot = await kvGet<SlateTopPlaysSnapshot>(slateTopPlaysKey)
     const currentCandidateTopPlays = selectTopPlays(upcomingResults)
     const currentConfirmedTopPlays = selectTopPlays(confirmedSlatePool)
-    const currentConfirmedUpcomingResults = upcomingResults.filter(matchup => matchup.lineupSource === 'confirmed')
 
     if (!slateTopPlaysSnapshot && slateLockReached) {
       slateTopPlaysSnapshot = {
@@ -325,7 +324,7 @@ export async function GET(req: NextRequest) {
       const preservedStartedTopPlays = slateTopPlaysSnapshot.topPlays.filter(
         matchup => gameStatusByPk.get(matchup.gamePk) && gameStatusByPk.get(matchup.gamePk) !== 'upcoming'
       )
-      const refreshedTrackedTopPlays = fillOpenTopPlaySlots(preservedStartedTopPlays, currentConfirmedUpcomingResults)
+      const refreshedTrackedTopPlays = fillOpenTopPlaySlots(preservedStartedTopPlays, upcomingResults)
       const previousKeys = slateTopPlaysSnapshot.topPlays.map(matchup => matchupKey(matchup)).sort().join('|')
       const refreshedKeys = refreshedTrackedTopPlays.map(matchup => matchupKey(matchup)).sort().join('|')
 
@@ -344,7 +343,6 @@ export async function GET(req: NextRequest) {
     const trackedTopPlays = slateTopPlaysSnapshot?.topPlays ?? currentCandidateTopPlays
     const trackedKeys = new Set(trackedTopPlays.map(matchup => matchupKey(matchup)))
     const trackedRecommendationTags = buildRecommendationTags(trackedTopPlays, suggestRecommendedDoubles(trackedTopPlays))
-    const currentCandidateRecommendationTags = buildRecommendationTags(currentCandidateTopPlays, suggestRecommendedDoubles(currentCandidateTopPlays))
 
     const attachRecommendationTags = (matchups: MatchupResult[], tagsByMatchup: Record<string, MatchupResult['recommendationTags']>) => matchups.map(matchup => {
       const tags = tagsByMatchup[matchupKey(matchup)]
@@ -371,7 +369,10 @@ export async function GET(req: NextRequest) {
     }
 
     // ── Build and cache response ─────────────────────────────────────────────
-    const currentUpcomingResults = attachRecommendationTags(currentCandidateTopPlays, currentCandidateRecommendationTags)
+    const currentUpcomingResults = attachRecommendationTags(
+      upcomingResults.filter(matchup => trackedKeys.has(matchupKey(matchup))),
+      trackedRecommendationTags,
+    )
     const results = [...currentUpcomingResults, ...attachRecommendationTags(nonUpcomingResults, trackedRecommendationTags)]
     const debug = buildMatchupsDebugInfo({
       slateLockedAt: slateTopPlaysSnapshot?.lockedAt ?? null,
