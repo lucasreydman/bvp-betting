@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import type { MatchupResult, MatchupsDebugInfo } from '@/lib/types'
+import type { MatchupResult } from '@/lib/types'
 import { formatTime, expectedAtBats, hitProbability, regressedAvg, resolveLineupPosition, suggestRecommendedDoubles, TOP_PLAYS_LIMIT } from '@/lib/utils'
 import type { RecommendedDouble } from '@/lib/utils'
 import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
@@ -15,7 +15,6 @@ interface Props {
   overrideRecommendedDoubles?: RecommendedDouble[]
   now: number
   slateLockedAt?: string | null
-  boardDebug?: MatchupsDebugInfo | null
 }
 const CONFIDENCE_COLORS = {
   high: 'text-green-400',
@@ -28,15 +27,11 @@ const LINEUP_BADGE_STYLES = {
   estimated: 'bg-amber-900/40 text-amber-400',
 } as const
 
-export default function TopPlays({ matchups, overrideRecommendedDoubles, now, slateLockedAt = null, boardDebug = null }: Props) {
+export default function TopPlays({ matchups, overrideRecommendedDoubles, now, slateLockedAt = null }: Props) {
   const [isDesktopLogicOpen, setIsDesktopLogicOpen] = useState(true)
   const score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
   const isSlateLocked = slateLockedAt !== null
-  const canBackfillLockedSlots = Boolean(
-    boardDebug?.lockState === 'locked'
-    && boardDebug.trackedCount < TOP_PLAYS_LIMIT
-    && boardDebug.estimatedQualifyingUpcomingCount > 0
-  )
+  const canBackfillLockedSlots = isSlateLocked && matchups.length < TOP_PLAYS_LIMIT
 
   const enriched = matchups.map(m => {
     const expectedAB = expectedAtBats(resolveLineupPosition(m))
@@ -83,26 +78,6 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
     return index === 0 ? 'Top non-smash pair from the locked Top 4.' : 'Optional second pair from the locked Top 4.'
   }
 
-  const boardStatusText = (() => {
-    if (!boardDebug) return null
-
-    if (boardDebug.lockState === 'locked') {
-      if (boardDebug.trackedCount < TOP_PLAYS_LIMIT && boardDebug.estimatedQualifyingUpcomingCount > 0) {
-        return `Locked short at ${boardDebug.trackedCount}. Can still fill to 4.`
-      }
-      if (boardDebug.trackedCount < TOP_PLAYS_LIMIT) {
-        return `Locked at ${boardDebug.trackedCount}. No more confirmed fills yet.`
-      }
-      return 'Locked at 4.'
-    }
-
-    if (boardDebug.qualifyingUpcomingCount === 0) {
-      return 'No qualifying upcoming plays yet.'
-    }
-
-    return `Live board: best ${Math.min(boardDebug.qualifyingUpcomingCount, TOP_PLAYS_LIMIT)} of ${boardDebug.qualifyingUpcomingCount}.`
-  })()
-
   const header = (
     <div className="mb-4">
       <div className="mb-3 flex flex-col gap-1.5 sm:flex-row sm:items-end sm:justify-between">
@@ -117,18 +92,6 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
                 : 'Started plays stay tracked after first pitch while the upcoming board keeps preferring the best available options.'
               : 'Before first pitch, the board shows the current Top 4 candidates. Estimated-lineup plays can appear until official lineups post, and the board keeps preferring the best available options as confirmations come in.'}
           </p>
-          {boardDebug && (
-            <div className="mt-2 rounded-xl border border-slate-700/80 bg-slate-950/80 px-3 py-2 text-xs text-slate-300">
-              <div className="font-semibold text-white">{boardStatusText}</div>
-              <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] leading-4">
-                <span className="rounded-full border border-slate-700 px-2 py-1 text-slate-400">Tracked {boardDebug.trackedCount}</span>
-                <span className="rounded-full border border-slate-700 px-2 py-1 text-slate-400">Pool {boardDebug.qualifyingUpcomingCount}</span>
-                <span className="rounded-full border border-slate-700 px-2 py-1 text-slate-400">Confirmed {boardDebug.confirmedQualifyingUpcomingCount}</span>
-                {boardDebug.estimatedQualifyingUpcomingCount > 0 && <span className="rounded-full border border-amber-700/60 px-2 py-1 text-amber-400/90">Estimated {boardDebug.estimatedQualifyingUpcomingCount}</span>}
-                {boardDebug.gamesSkippedMissingProbable > 0 && <span className="rounded-full border border-orange-700/60 px-2 py-1 text-orange-400/90">Missing pitchers {boardDebug.gamesSkippedMissingProbable}</span>}
-              </div>
-            </div>
-          )}
         </div>
       </div>
       <Link

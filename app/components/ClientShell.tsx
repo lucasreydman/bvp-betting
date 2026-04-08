@@ -126,7 +126,7 @@ export default function ClientShell() {
         <LoadingSkeleton date={date} />
       ) : (
         <>
-          <TopPlays matchups={trackedUpcoming} overrideRecommendedDoubles={recommendedDoubles} now={now} slateLockedAt={meta?.slateLockedAt ?? null} boardDebug={meta?.debug ?? null} />
+          <TopPlays matchups={trackedUpcoming} overrideRecommendedDoubles={recommendedDoubles} now={now} slateLockedAt={meta?.slateLockedAt ?? null} />
           <Filters
             key={filtersKey}
             date={date}
