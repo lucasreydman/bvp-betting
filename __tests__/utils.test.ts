@@ -367,7 +367,7 @@ describe('generateRecommendedDoublesCSV', () => {
     const doubles = suggestRecommendedDoubles([first, second])
     const csv = generateRecommendedDoublesCSV(doubles)
 
-    expect(csv).toContain('Double,Type,Combined Hit %,Parlay Odds,Leg')
+    expect(csv).toContain('Double,Type,Combined Hit %,Leg')
     expect(csv).toContain('Smash Double')
     expect(csv).toContain('Second Batter')
   })

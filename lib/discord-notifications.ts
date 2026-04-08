@@ -1,4 +1,3 @@
-import { fmtOdds } from './odds'
 import type { DiscordTopPlaysSnapshot, MatchupResult, MatchupsResponse } from './types'
 import { fillOpenTopPlaySlots, matchupKey, selectTopPlays, suggestRecommendedDoubles, teamAbbr } from './utils'
 
@@ -25,14 +24,6 @@ export interface DiscordNotificationSource {
   addedTopPlays?: MatchupResult[]
 }
 
-interface ReturnSummary {
-  betCount: number
-  settledCount: number
-  wins: number
-  staked: number
-  net: number
-}
-
 function getDoubleLabel(isSmash: boolean, index: number, total: number): string {
   if (isSmash) return 'Smash Double'
   if (total === 1) return 'Daily Double'
@@ -40,10 +31,7 @@ function getDoubleLabel(isSmash: boolean, index: number, total: number): string 
 }
 
 function formatLeg(matchup: MatchupResult): string {
-  const odds = matchup.consensusHitOddsAmerican == null ? null : fmtOdds(matchup.consensusHitOddsAmerican)
-  return odds == null
-    ? `${matchup.batterName} (${teamAbbr(matchup.batterTeam)}) vs ${matchup.pitcherName}`
-    : `${matchup.batterName} (${teamAbbr(matchup.batterTeam)}) vs ${matchup.pitcherName} ${odds}`
+  return `${matchup.batterName} (${teamAbbr(matchup.batterTeam)}) vs ${matchup.pitcherName}`
 }
 
 export function buildDiscordWebhookPayload(content: string): DiscordWebhookPayload {
@@ -146,7 +134,6 @@ function buildDoubleLockEvents(snapshot: DiscordTopPlaysSnapshot): DiscordNotifi
   const recommendedDoubles = suggestRecommendedDoubles(snapshot.topPlays)
   return recommendedDoubles.map((double, index) => {
     const label = getDoubleLabel(double.isSmash, index, recommendedDoubles.length)
-    const parlayOdds = double.consensusParlayOddsAmerican == null ? null : `Parlay ${fmtOdds(double.consensusParlayOddsAmerican)}`
     const legsKey = [matchupKey(double.first), matchupKey(double.second)].sort().join(':')
 
     return {
@@ -155,8 +142,7 @@ function buildDoubleLockEvents(snapshot: DiscordTopPlaysSnapshot): DiscordNotifi
         `${label} locked for ${snapshot.date} (${snapshot.leadMinutes}m before first pitch).`,
         `Leg 1: ${formatLeg(double.first)}`,
         `Leg 2: ${formatLeg(double.second)}`,
-        parlayOdds,
-      ].filter((line): line is string => line !== null).join('\n'),
+      ].join('\n'),
     }
   })
 }
@@ -183,87 +169,12 @@ function buildDoubleHitEvents(snapshot: DiscordTopPlaysSnapshot, topPlays: Match
     }
 
     const label = getDoubleLabel(double.isSmash, index, recommendedDoubles.length)
-    const parlayOdds = double.consensusParlayOddsAmerican == null ? null : `Parlay ${fmtOdds(double.consensusParlayOddsAmerican)}`
     const legsKey = [matchupKey(double.first), matchupKey(double.second)].sort().join(':')
 
     return [{
       id: `double-hit:${snapshot.date}:${label}:${legsKey}`,
-      content: [
-        `${label} hit: ${first.batterName} and ${second.batterName} both recorded a hit.`,
-        parlayOdds,
-      ].filter((line): line is string => line !== null).join(' '),
+      content: `${label} hit: ${first.batterName} and ${second.batterName} both recorded a hit.`,
     }]
-  })
-}
-
-function profitFromAmericanOdds(stake: number, american: number): number {
-  if (american > 0) return stake * american / 100
-  return stake * 100 / Math.abs(american)
-}
-
-function formatSignedCurrency(value: number): string {
-  const rounded = Math.round(value * 100) / 100
-  const sign = rounded > 0 ? '+' : rounded < 0 ? '-' : ''
-  return `${sign}$${Math.abs(rounded).toFixed(2)}`
-}
-
-function formatPercent(value: number): string {
-  const rounded = Math.round(value * 10) / 10
-  const sign = rounded > 0 ? '+' : rounded < 0 ? '-' : ''
-  return `${sign}${Math.abs(rounded).toFixed(1)}%`
-}
-
-function summarizeSingles(topPlays: MatchupResult[], stake = 10): ReturnSummary {
-  return topPlays.reduce<ReturnSummary>((summary, matchup) => {
-    if (matchup.consensusHitOddsAmerican == null || (matchup.hitResult !== 'win' && matchup.hitResult !== 'loss')) {
-      return summary
-    }
-
-    const win = matchup.hitResult === 'win'
-    return {
-      betCount: summary.betCount + 1,
-      settledCount: summary.settledCount + 1,
-      wins: summary.wins + (win ? 1 : 0),
-      staked: summary.staked + stake,
-      net: summary.net + (win ? profitFromAmericanOdds(stake, matchup.consensusHitOddsAmerican) : -stake),
-    }
-  }, {
-    betCount: 0,
-    settledCount: 0,
-    wins: 0,
-    staked: 0,
-    net: 0,
-  })
-}
-
-function summarizeDoubles(snapshot: DiscordTopPlaysSnapshot, topPlays: MatchupResult[], stake = 10): ReturnSummary {
-  const resultsByKey = new Map(topPlays.map(matchup => [matchupKey(matchup), matchup]))
-
-  return suggestRecommendedDoubles(snapshot.topPlays).reduce<ReturnSummary>((summary, double) => {
-    if (double.consensusParlayOddsAmerican == null) {
-      return summary
-    }
-
-    const first = resultsByKey.get(matchupKey(double.first))
-    const second = resultsByKey.get(matchupKey(double.second))
-    if (!first || !second || (first.hitResult !== 'win' && first.hitResult !== 'loss') || (second.hitResult !== 'win' && second.hitResult !== 'loss')) {
-      return summary
-    }
-
-    const win = first.hitResult === 'win' && second.hitResult === 'win'
-    return {
-      betCount: summary.betCount + 1,
-      settledCount: summary.settledCount + 1,
-      wins: summary.wins + (win ? 1 : 0),
-      staked: summary.staked + stake,
-      net: summary.net + (win ? profitFromAmericanOdds(stake, double.consensusParlayOddsAmerican) : -stake),
-    }
-  }, {
-    betCount: 0,
-    settledCount: 0,
-    wins: 0,
-    staked: 0,
-    net: 0,
   })
 }
 
@@ -273,31 +184,17 @@ function buildDaySummaryEvent(snapshot: DiscordTopPlaysSnapshot, topPlays: Match
   }
 
   const playWins = topPlays.filter(matchup => matchup.hitResult === 'win').length
-  const singles = summarizeSingles(topPlays)
-  const doubles = summarizeDoubles(snapshot, topPlays)
-  const totalStaked = singles.staked + doubles.staked
-  const totalNet = singles.net + doubles.net
-  const totalRoi = totalStaked > 0 ? totalNet / totalStaked * 100 : 0
+  const recommendedDoubles = suggestRecommendedDoubles(snapshot.topPlays)
+  const doubleWins = recommendedDoubles.filter(double => {
+    const first = topPlays.find(matchup => matchupKey(matchup) === matchupKey(double.first))
+    const second = topPlays.find(matchup => matchupKey(matchup) === matchupKey(double.second))
+    return first?.hitResult === 'win' && second?.hitResult === 'win'
+  }).length
 
   const lines = [
     `Day summary for ${snapshot.date}: ${playWins}/${topPlays.length} plays hit.`,
+    `Recommended doubles: ${doubleWins}/${recommendedDoubles.length} hit.`,
   ]
-
-  if (singles.betCount > 0) {
-    const singlesRoi = singles.staked > 0 ? singles.net / singles.staked * 100 : 0
-    lines.push(`Singles ($10 each): ${singles.wins}/${singles.betCount} won, net ${formatSignedCurrency(singles.net)}, ROI ${formatPercent(singlesRoi)}.`)
-  }
-
-  if (doubles.betCount > 0) {
-    const doublesRoi = doubles.staked > 0 ? doubles.net / doubles.staked * 100 : 0
-    lines.push(`Doubles ($10 each): ${doubles.wins}/${doubles.betCount} won, net ${formatSignedCurrency(doubles.net)}, ROI ${formatPercent(doublesRoi)}.`)
-  }
-
-  if (totalStaked > 0) {
-    lines.push(`Total risk ${formatSignedCurrency(totalStaked).replace('+', '')}, net ${formatSignedCurrency(totalNet)}, ROI ${formatPercent(totalRoi)}.`)
-  } else {
-    lines.push('No priced bets were available to calculate ROI.')
-  }
 
   return {
     id: `day-summary:${snapshot.date}:${snapshot.lockedAt}`,

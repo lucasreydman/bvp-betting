@@ -56,7 +56,7 @@ export default function Home() {
         <h1 className="text-2xl font-bold text-white tracking-tight">MLB BvP Betting</h1>
         <p className="text-gray-400 text-sm mt-1 max-w-full text-balance">
           Daily <span className="text-white font-semibold">batter versus pitcher stats</span> for the <span className="text-white font-semibold">Player to Record a Hit</span> prop (1+ hits / over 0.5 hits).
-          Matchups are ranked by career BvP batting average weighted by sample size, with consensus odds from major U.S. sportsbooks attached to each play.
+          Matchups are ranked by career BvP batting average weighted by sample size so the board stays focused on the strongest historical hit matchups.
         </p>
       </header>
 

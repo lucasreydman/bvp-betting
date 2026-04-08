@@ -91,16 +91,8 @@ export default function Image() {
           Career BvP stats for the Player Hits prop with a 15 AB minimum and .300 AVG floor. Official Top 4 locks at first pitch, with Daily Double, Secondary Double, and Smash Double pairings built from that board.
         </div>
 
-        {/* Sportsbook pills */}
         <div style={{ display: 'flex', gap: 16 }}>
-          {[
-            { label: 'FanDuel', color: '#1493FF' },
-            { label: 'Bet365', color: '#126E51' },
-            { label: 'theScore Bet', color: '#FFCC00' },
-            { label: 'DraftKings', color: '#61B50E' },
-            { label: 'BetMGM', color: '#B1801E' },
-            
-          ].map(({ label, color }) => (
+          {['Top 4 Plays', 'Daily Double', 'Smash Double'].map(label => (
             <div
               key={label}
               style={{
@@ -108,11 +100,11 @@ export default function Image() {
                 alignItems: 'center',
                 padding: '10px 24px',
                 borderRadius: 999,
-                border: `2px solid ${color}40`,
-                background: `${color}15`,
+                border: '2px solid rgba(56,189,248,0.2)',
+                background: 'rgba(15,23,42,0.75)',
                 fontSize: 20,
                 fontWeight: 600,
-                color,
+                color: '#cbd5e1',
               }}
             >
               {label}

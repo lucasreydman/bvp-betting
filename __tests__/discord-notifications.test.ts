@@ -38,7 +38,6 @@ const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => (
   xbh: 4,
   confidence: 'high',
   gameStatus: 'upcoming',
-  consensusHitOddsAmerican: -120,
   recommendationTags: ['T4'],
   ...overrides,
 })
@@ -76,10 +75,10 @@ const makeSnapshot = (topPlays: MatchupResult[], leadMinutes = 25): DiscordTopPl
 describe('buildDiscordNotificationEvents', () => {
   it('builds top-4 and double lock events from the Discord snapshot', () => {
     const topPlays = [
-      makeMatchup({ batterId: 1, pitcherId: 11, batterName: 'Juan Soto', consensusHitOddsAmerican: -135 }),
-      makeMatchup({ batterId: 2, pitcherId: 22, batterName: 'Mookie Betts', consensusHitOddsAmerican: -125 }),
-      makeMatchup({ batterId: 3, pitcherId: 33, batterName: 'Freddie Freeman', consensusHitOddsAmerican: -110, ops: 0.91, h: 6 }),
-      makeMatchup({ batterId: 4, pitcherId: 44, batterName: 'Rafael Devers', consensusHitOddsAmerican: 105, ops: 0.9, h: 5 }),
+      makeMatchup({ batterId: 1, pitcherId: 11, batterName: 'Juan Soto' }),
+      makeMatchup({ batterId: 2, pitcherId: 22, batterName: 'Mookie Betts' }),
+      makeMatchup({ batterId: 3, pitcherId: 33, batterName: 'Freddie Freeman', ops: 0.91, h: 6 }),
+      makeMatchup({ batterId: 4, pitcherId: 44, batterName: 'Rafael Devers', ops: 0.9, h: 5 }),
     ]
 
     const events = buildDiscordNotificationEvents({
@@ -124,9 +123,9 @@ describe('buildDiscordNotificationEvents', () => {
     expect(events.some(event => event.content.includes('Extra Batter'))).toBe(false)
   })
 
-  it('omits missing odds text from lock and hit messages', () => {
-    const topPlayA = makeMatchup({ batterId: 1, pitcherId: 11, batterName: 'Juan Soto', consensusHitOddsAmerican: null, hitResult: 'win', gameStatus: 'inProgress' })
-    const topPlayB = makeMatchup({ batterId: 2, pitcherId: 22, batterName: 'Mookie Betts', consensusHitOddsAmerican: null, hitResult: 'win', gameStatus: 'inProgress' })
+  it('omits odds text from lock and hit messages', () => {
+    const topPlayA = makeMatchup({ batterId: 1, pitcherId: 11, batterName: 'Juan Soto', hitResult: 'win', gameStatus: 'inProgress' })
+    const topPlayB = makeMatchup({ batterId: 2, pitcherId: 22, batterName: 'Mookie Betts', hitResult: 'win', gameStatus: 'inProgress' })
 
     const events = buildDiscordNotificationEvents({
       date: '2026-04-08',
@@ -134,8 +133,8 @@ describe('buildDiscordNotificationEvents', () => {
       results: [topPlayA, topPlayB],
     })
 
-    expect(events.every(event => !event.content.includes('N/A'))).toBe(true)
-    expect(events.every(event => !event.content.includes('Parlay odds'))).toBe(true)
+    expect(events.every(event => !event.content.includes('+'))).toBe(true)
+    expect(events.every(event => !event.content.includes('Parlay'))).toBe(true)
   })
 
   it('builds fill events when new confirmed plays enter after the initial lock', () => {
@@ -153,8 +152,8 @@ describe('buildDiscordNotificationEvents', () => {
   })
 
   it('builds a day summary once all tracked plays are settled', () => {
-    const winnerA = makeMatchup({ batterId: 1, pitcherId: 11, batterName: 'Juan Soto', hitResult: 'win', gameStatus: 'settled', consensusHitOddsAmerican: -120 })
-    const winnerB = makeMatchup({ batterId: 2, pitcherId: 22, batterName: 'Mookie Betts', hitResult: 'win', gameStatus: 'settled', consensusHitOddsAmerican: -120 })
+    const winnerA = makeMatchup({ batterId: 1, pitcherId: 11, batterName: 'Juan Soto', hitResult: 'win', gameStatus: 'settled' })
+    const winnerB = makeMatchup({ batterId: 2, pitcherId: 22, batterName: 'Mookie Betts', hitResult: 'win', gameStatus: 'settled' })
 
     const events = buildDiscordNotificationEvents({
       date: '2026-04-08',
@@ -165,15 +164,12 @@ describe('buildDiscordNotificationEvents', () => {
     const summary = events.find(event => event.id === 'day-summary:2026-04-08:2026-04-08T17:40:00.000Z')
     expect(summary).toBeDefined()
     expect(summary?.content).toContain('Day summary for 2026-04-08: 2/2 plays hit.')
-    expect(summary?.content).toContain('Singles ($10 each): 2/2 won')
-    expect(summary?.content).toContain('Doubles ($10 each): 1/1 won')
-    expect(summary?.content).toContain('Total risk $30.00')
-    expect(summary?.content).toContain('ROI')
+    expect(summary?.content).toContain('Recommended doubles: 1/1 hit.')
   })
 
   it('does not build a day summary until all tracked plays are settled', () => {
-    const winner = makeMatchup({ batterId: 1, pitcherId: 11, hitResult: 'win', gameStatus: 'settled', consensusHitOddsAmerican: -120 })
-    const pending = makeMatchup({ batterId: 2, pitcherId: 22, hitResult: 'pending', gameStatus: 'inProgress', consensusHitOddsAmerican: -120 })
+    const winner = makeMatchup({ batterId: 1, pitcherId: 11, hitResult: 'win', gameStatus: 'settled' })
+    const pending = makeMatchup({ batterId: 2, pitcherId: 22, hitResult: 'pending', gameStatus: 'inProgress' })
 
     const events = buildDiscordNotificationEvents({
       date: '2026-04-08',

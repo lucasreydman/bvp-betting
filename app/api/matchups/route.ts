@@ -6,7 +6,6 @@ import { createCache } from '@/lib/cache'
 import { kvDel, kvGet, kvSet } from '@/lib/kv'
 import { TOP_PLAYS_LIMIT, buildMatchupsDebugInfo, buildRecommendationTags, fillOpenTopPlaySlots, formatSlateDate, getEarliestGameTimeMs, isSlateLockReached, matchupKey, medianLineupPosition, selectTopPlays, suggestRecommendedDoubles } from '@/lib/utils'
 import type { MatchupResult, MatchupsResponse, SlateTopPlaysSnapshot } from '@/lib/types'
-import { fetchDayOdds, buildOddsMap, normalizePlayerName } from '@/lib/odds'
 
 // Module-level caches — survive across requests in the same serverless instance
 const bvpCache = createCache<ReturnType<typeof parseSplit>>(3600_000)  // 60 min
@@ -247,21 +246,6 @@ export async function GET(req: NextRequest) {
     const keyCounts = new Map<string, number>()
     for (const r of upcomingRaw) keyCounts.set(statKey(r), (keyCounts.get(statKey(r)) ?? 0) + 1)
     const upcomingResults = upcomingRaw.filter(r => keyCounts.get(statKey(r))! < 3)
-
-    // ── Attach consensus odds to upcoming rows (must run before KV snapshots) ─
-    const oddsRows = await fetchDayOdds(date)
-    const oddsMap = buildOddsMap(oddsRows)
-    for (const row of upcomingResults) {
-      const normalized = normalizePlayerName(row.batterName)
-      const match = oddsMap.get(normalized)
-      if (match) {
-        row.consensusHitOddsAmerican = match.consensusHitOddsAmerican
-        row.bookCount = match.bookCount
-      } else {
-        row.consensusHitOddsAmerican = null
-        row.bookCount = undefined
-      }
-    }
 
     // ── Write per-game KV snapshots for upcoming games (fire-and-forget) ─────
     const byGame = new Map<number, MatchupResult[]>()

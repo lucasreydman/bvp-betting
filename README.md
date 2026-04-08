@@ -1,6 +1,6 @@
 # MLB BvP
 
-Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or **Hits (1+)** on **Bet365** and **theScore Bet**. These props mean the same thing at the same odds. Any single, double, triple, or homer wins. This tool surfaces today's best historical matchups ranked by **career BvP batting average**, weighted by sample size for reliability.
+Built for the **Player Hits (1+)** prop and similar 1+ hit markets. Any single, double, triple, or homer wins. This tool surfaces today's best historical matchups ranked by **career BvP batting average**, weighted by sample size for reliability.
 
 **Live:** [bvp-betting.vercel.app](https://bvp-betting.vercel.app)
 
@@ -160,7 +160,7 @@ The notifier route lives at `/api/notifications/discord`. On this repo it is sch
 
 Discord alerts now use their own pregame freeze window so bettors get the board before the site's official first-pitch lock. The site still freezes the official tracked Top 4 at first pitch, but Discord freezes a separate `discord-top4:{date}` snapshot from the best confirmed plays available a configurable number of minutes earlier and uses that same snapshot for the later leg-hit and double-hit posts. By default, that Discord snapshot locks 60 minutes before the slate's first pitch and only from confirmed plays.
 
-Once every tracked Discord play for the date is settled, the notifier also sends a day summary showing plays hit plus a simple $10-per-single / $10-per-double ROI recap based on the tracked snapshot's available odds.
+Once every tracked Discord play for the date is settled, the notifier also sends a day summary showing how many tracked plays hit and how many recommended doubles got there.
 
 Optional notifier timing env:
 

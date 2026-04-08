@@ -1,4 +1,3 @@
-import { parlayOddsFromLines } from './odds'
 import type { FilterState, MatchupResult, MatchupsDebugInfo, RecommendationTag, SortState } from './types'
 
 export const TOP_PLAYS_LIMIT = 4
@@ -290,7 +289,6 @@ export interface RecommendedDouble {
   secondProbability: number
   combinedProbability: number
   isSmash: boolean  // true when both legs have OPS > 0.950 AND H >= 7
-  consensusParlayOddsAmerican: number | null
 }
 
 export function matchupKey(matchup: Pick<MatchupResult, 'gamePk' | 'batterId' | 'pitcherId'>): string {
@@ -325,7 +323,6 @@ function buildRecommendedDouble(a: EnrichedRecommendationLeg, b: EnrichedRecomme
     secondProbability: second.probability,
     combinedProbability: first.probability * second.probability,
     isSmash: isSmashDouble(first.matchup, second.matchup),
-    consensusParlayOddsAmerican: parlayOddsFromLines(first.matchup.consensusHitOddsAmerican, second.matchup.consensusHitOddsAmerican),
   }
 }
 
@@ -494,7 +491,7 @@ export function generateCSV(matchups: MatchupResult[]): string {
 
 export function generateRecommendedDoublesCSV(doubles: RecommendedDouble[]): string {
   const headers = [
-    'Double', 'Type', 'Combined Hit %', 'Parlay Odds', 'Leg',
+    'Double', 'Type', 'Combined Hit %', 'Leg',
     'Batter', 'Team', 'Pitcher', 'Opp Team', 'Game Time',
     'AB', 'H', 'AVG', 'OPS', 'Confidence', 'Lineup Slot', 'Lineup Source',
   ]
@@ -508,7 +505,6 @@ export function generateRecommendedDoublesCSV(doubles: RecommendedDouble[]): str
       index + 1,
       type,
       `${(double.combinedProbability * 100).toFixed(2)}%`,
-      double.consensusParlayOddsAmerican == null ? '' : String(double.consensusParlayOddsAmerican >= 0 ? `+${double.consensusParlayOddsAmerican}` : double.consensusParlayOddsAmerican),
       legIndex,
       leg.batterName,
       leg.batterTeam,

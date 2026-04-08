@@ -6,7 +6,6 @@ import type { MatchupResult } from '@/lib/types'
 import { formatTime, expectedAtBats, hitProbability, regressedAvg, resolveLineupPosition, suggestRecommendedDoubles, TOP_PLAYS_LIMIT } from '@/lib/utils'
 import type { RecommendedDouble } from '@/lib/utils'
 import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
-import { fmtOdds } from '@/lib/odds'
 import InfoTooltip from './InfoTooltip'
 import ScoringLogicContent from './ScoringLogicContent'
 
@@ -192,11 +191,6 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
               <div className="mt-1 flex items-center gap-2 pl-6 text-[11px]">
                 <span className="shrink-0 font-mono text-gray-400">Est. {expectedAB.toFixed(1)} AB</span>
                 <span className="shrink-0 text-xs font-semibold text-green-300">{(hitPct * 100).toFixed(2)}%</span>
-                {m.consensusHitOddsAmerican != null && (
-                  <span className="shrink-0 font-mono text-xs text-gray-500" title={m.bookCount ? `${m.bookCount} books` : undefined}>
-                    {fmtOdds(m.consensusHitOddsAmerican)}
-                  </span>
-                )}
                 <span className="shrink-0 text-xs text-gray-600">{formatTime(m.gameTime)}</span>
               </div>
             </div>
@@ -215,14 +209,6 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
               <span className="select-none text-gray-700">·</span>
               <span className="font-mono text-gray-400">Est. {expectedAB.toFixed(1)} AB</span>
               <span className="font-semibold text-green-300">{(hitPct * 100).toFixed(2)}%</span>
-              {m.consensusHitOddsAmerican != null && (
-                <>
-                  <span className="select-none text-gray-700">·</span>
-                  <span className="font-mono text-sm text-gray-400" title={m.bookCount ? `${m.bookCount} books` : undefined}>
-                    {fmtOdds(m.consensusHitOddsAmerican)}
-                  </span>
-                </>
-              )}
               <span className="ml-auto text-xs text-gray-600">{formatTime(m.gameTime)}</span>
             </div>
           </li>
@@ -279,14 +265,6 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
                           <span className={`font-mono text-xs ${double.isSmash ? 'text-orange-300' : 'text-gray-500'}`}>{leg.ops.toFixed(3)} OPS</span>
                           <span className="font-mono text-xs text-gray-600">{leg.ab} AB</span>
                           <span className="text-xs font-semibold text-green-300">{(prob * 100).toFixed(2)}% hit chance</span>
-                          {leg.consensusHitOddsAmerican != null && (
-                            <>
-                              <span className="select-none text-gray-700">·</span>
-                              <span className="font-mono text-xs text-gray-400" title={leg.bookCount ? `${leg.bookCount} books` : undefined}>
-                                {fmtOdds(leg.consensusHitOddsAmerican)}
-                              </span>
-                            </>
-                          )}
                         </div>
                         <div className="sm:hidden">
                           <div className="flex items-center gap-2">
@@ -313,7 +291,6 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
 
                 <div className={`mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t pt-2 ${double.isSmash ? 'border-orange-500/20' : 'border-gray-800'}`}>
                   <span className="font-semibold text-green-300">Combined: {(double.combinedProbability * 100).toFixed(2)}%</span>
-                  {double.consensusParlayOddsAmerican != null && <span className="font-mono text-xs text-sky-300">Odds: {fmtOdds(double.consensusParlayOddsAmerican)}</span>}
                   {anyLegStarted && <span className="text-xs text-gray-500">This card remains fixed from the official Top 4 locked at first pitch.</span>}
                 </div>
 
