@@ -65,6 +65,11 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
           {getLineupBadgeText(m)}
         </span>
       </td>
+      {gameKind === 'upcoming' && (
+        <td className="px-3 py-2 hidden sm:table-cell" aria-hidden="true">
+          <span className="invisible">—</span>
+        </td>
+      )}
       {gameKind !== 'upcoming' && (
         <td className="px-3 py-2">
           <ResultBadge hitResult={m.hitResult} />
