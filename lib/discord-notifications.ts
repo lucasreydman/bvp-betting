@@ -11,6 +11,13 @@ export interface DiscordNotificationEvent {
   content: string
 }
 
+export interface DiscordWebhookPayload {
+  content: string
+  allowed_mentions: {
+    parse: string[]
+  }
+}
+
 export interface DiscordNotificationSource {
   date: string
   snapshot: DiscordTopPlaysSnapshot
@@ -37,6 +44,19 @@ function formatLeg(matchup: MatchupResult): string {
   return odds == null
     ? `${matchup.batterName} (${teamAbbr(matchup.batterTeam)}) vs ${matchup.pitcherName}`
     : `${matchup.batterName} (${teamAbbr(matchup.batterTeam)}) vs ${matchup.pitcherName} ${odds}`
+}
+
+export function buildDiscordWebhookPayload(content: string): DiscordWebhookPayload {
+  const normalizedContent = content.trimStart().startsWith('@everyone')
+    ? content
+    : `@everyone\n${content}`
+
+  return {
+    content: normalizedContent,
+    allowed_mentions: {
+      parse: ['everyone'],
+    },
+  }
 }
 
 export function getDiscordSnapshotKey(date: string): string {

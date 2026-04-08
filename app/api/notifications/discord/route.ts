@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { fetchBoxscoreHitting, fetchSchedule } from '@/lib/mlb-api'
 import { computeHitResult, getGameStatus } from '@/lib/game-status'
 import {
+  buildDiscordWebhookPayload,
   buildDiscordNotificationEvents,
   buildDiscordTopPlaysSnapshot,
   extendDiscordTopPlaysSnapshot,
@@ -33,7 +34,7 @@ async function postDiscordMessage(webhookUrl: string, content: string): Promise<
   const response = await fetch(webhookUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content }),
+    body: JSON.stringify(buildDiscordWebhookPayload(content)),
   })
 
   if (!response.ok) {

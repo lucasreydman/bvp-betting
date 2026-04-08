@@ -1,4 +1,5 @@
 import {
+  buildDiscordWebhookPayload,
   buildDiscordNotificationEvents,
   buildDiscordTopPlaysSnapshot,
   extendDiscordTopPlaysSnapshot,
@@ -221,5 +222,16 @@ describe('Discord snapshot cutoff', () => {
     expect(extended.snapshot.topPlays).toHaveLength(4)
     expect(extended.snapshot.topPlays.map(matchup => matchup.batterId).sort()).toEqual([1, 2, 3, 4])
     expect(extended.addedTopPlays).toHaveLength(3)
+  })
+
+  it('prepends @everyone and allows the mention in webhook payloads', () => {
+    expect(buildDiscordWebhookPayload('Top 4 locked.')).toEqual({
+      content: '@everyone\nTop 4 locked.',
+      allowed_mentions: {
+        parse: ['everyone'],
+      },
+    })
+
+    expect(buildDiscordWebhookPayload('@everyone\nAlready tagged.').content).toBe('@everyone\nAlready tagged.')
   })
 })
