@@ -72,7 +72,7 @@ export default function MatchupTable({
   const headerCellClass = (key: keyof MatchupResult) => {
     if (key === 'avg' || key === 'h' || key === 'ab' || key === 'ops') return 'px-2.5 text-center'
     if (key === 'gameTime') return 'px-4 text-left'
-    if (key === 'lineupSource') return 'pl-6 pr-2 text-center'
+    if (key === 'lineupSource') return 'pl-10 pr-0 text-center'
     return 'px-3 text-left'
   }
 
@@ -226,14 +226,14 @@ export default function MatchupTable({
                   ))}
                   {gameKind === 'upcoming' && (
                     <th
-                      className="pl-4 pr-2 py-2 text-right text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell text-transparent select-none"
+                      className="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell text-transparent select-none"
                       aria-hidden="true"
                     >
                       Result
                     </th>
                   )}
                   {gameKind !== 'upcoming' && (
-                    <th className="pl-4 pr-2 py-2 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
+                    <th className="px-4 py-2 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
                       Result
                     </th>
                   )}
