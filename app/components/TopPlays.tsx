@@ -1,4 +1,6 @@
-import type { ReactNode } from 'react'
+'use client'
+
+import { useState, type ReactNode } from 'react'
 import type { MatchupResult } from '@/lib/types'
 import { formatTime, expectedAtBats, hitProbability, regressedAvg, resolveLineupPosition, suggestRecommendedDoubles } from '@/lib/utils'
 import type { RecommendedDouble } from '@/lib/utils'
@@ -44,6 +46,7 @@ function FormulaBlock({
 }
 
 export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: Props) {
+  const [isDesktopLogicOpen, setIsDesktopLogicOpen] = useState(true)
   const score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
 
   const enriched = matchups.map(m => {
@@ -155,21 +158,26 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
         className="hidden overflow-hidden rounded-[1.75rem] border border-slate-700/90 bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.12),_transparent_32%),radial-gradient(circle_at_top_right,_rgba(34,197,94,0.10),_transparent_28%),linear-gradient(180deg,_rgba(2,6,23,0.98),_rgba(2,6,23,0.92))] p-5 text-slate-200 sm:block"
         style={{ fontFamily: MATH_FONT_STACK }}
       >
-        <div className="mb-4 flex items-start justify-between gap-4 border-b border-slate-800/80 pb-4">
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.28em] text-slate-400">Top 4 formulas</div>
-            <div className="mt-1 text-lg text-white">Scoring and selection logic used in this card</div>
-          </div>
-          <div className="max-w-sm shrink-0 text-right text-[11px] leading-5 text-slate-400">
-            <div>AVG = career BvP batting average</div>
-            <div>AB = career at-bats vs this pitcher</div>
-            <div>P = probability of at least one hit</div>
-            <div>E[AB] = expected at-bats from batting slot</div>
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={() => setIsDesktopLogicOpen(open => !open)}
+          className="flex w-full flex-col items-center gap-3 border-b border-slate-800/80 pb-4 text-center"
+        >
+          <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+            Scoring and Selection Logic
+          </span>
+          <span className="grid w-full grid-cols-4 gap-3 text-center text-[11px] leading-5 text-slate-400">
+            <span>AVG = career BvP batting average</span>
+            <span>AB = career at-bats vs this pitcher</span>
+            <span>P = probability of at least one hit</span>
+            <span>E[AB] = expected at-bats from batting slot</span>
+          </span>
+          <span className="text-xs text-slate-500">{isDesktopLogicOpen ? 'Hide formulas' : 'Show formulas'}</span>
+        </button>
 
-        <div className="grid auto-rows-fr gap-3 lg:grid-cols-2 xl:grid-cols-3">
-          <FormulaBlock title="Ranking" accent="text-sky-300">
+        {isDesktopLogicOpen && (
+          <div className="mt-4 grid auto-rows-fr gap-3 lg:grid-cols-2 xl:grid-cols-3">
+            <FormulaBlock title="Ranking" accent="text-sky-300">
             <Formula className="text-slate-100 leading-6">
               <span>score</span>
               <span>=</span>
@@ -189,9 +197,9 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
               <span>=</span>
               <span>score ↓, AVG ↓, AB ↓</span>
             </Formula>
-          </FormulaBlock>
+            </FormulaBlock>
 
-          <FormulaBlock title="Regression" accent="text-emerald-300">
+            <FormulaBlock title="Regression" accent="text-emerald-300">
             <Formula className="text-slate-100 leading-6">
               <span>adjusted AVG</span>
               <span>=</span>
@@ -213,9 +221,9 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
               <span>=</span>
               <span>w × AVG + (1 − w) × 0.320</span>
             </Formula>
-          </FormulaBlock>
+            </FormulaBlock>
 
-          <FormulaBlock title="Expected At-Bats" accent="text-amber-300">
+            <FormulaBlock title="Expected At-Bats" accent="text-amber-300">
             <div className="text-[0.88rem] leading-5 text-slate-100">
               <div>slot = confirmed slot</div>
               <div>or estimated slot</div>
@@ -226,9 +234,9 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
               <div>E[AB] = 4.05, 5 ≤ slot ≤ 6</div>
               <div>E[AB] = 3.85, slot ≥ 7</div>
             </div>
-          </FormulaBlock>
+            </FormulaBlock>
 
-          <FormulaBlock title="Hit Chance" accent="text-lime-300">
+            <FormulaBlock title="Hit Chance" accent="text-lime-300">
             <Formula className="text-slate-100 leading-6">
               <span>P(≥1 hit)</span>
               <span>=</span>
@@ -240,9 +248,9 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
               <span>=</span>
               <span>100 × P(≥1 hit)</span>
             </Formula>
-          </FormulaBlock>
+            </FormulaBlock>
 
-          <FormulaBlock title="Recommended Doubles" accent="text-yellow-300">
+            <FormulaBlock title="Recommended Doubles" accent="text-yellow-300">
             <Formula className="text-slate-100 leading-6">
               <span>P(double)</span>
               <span>=</span>
@@ -258,9 +266,9 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
               <span>=</span>
               <span>best single pair only</span>
             </Formula>
-          </FormulaBlock>
+            </FormulaBlock>
 
-          <FormulaBlock title="Smash Priority" accent="text-orange-300">
+            <FormulaBlock title="Smash Priority" accent="text-orange-300">
             <div className="space-y-0.5 text-[0.9rem] leading-6 text-slate-100">
               <div>smash = (OPS₁ &gt; .950 ∧ H₁ ≥ 7)</div>
               <div className="pl-16 text-slate-300">and</div>
@@ -271,8 +279,9 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
               <span>=</span>
               <span>smash first, leftovers second</span>
             </Formula>
-          </FormulaBlock>
-        </div>
+            </FormulaBlock>
+          </div>
+        )}
       </div>
     </div>
   )
