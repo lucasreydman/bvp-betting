@@ -68,7 +68,7 @@ export default function ScoringLogicContent() {
         <SymbolCard
           label="E[AB]"
           title="Expected at-bats"
-          description="Projected opportunities based on confirmed lineup spot, or an estimate when the lineup is not official yet."
+          description="Projected opportunities based on confirmed lineup slot, or an estimated slot when lineup is not yet official."
           accent="text-amber-300"
         />
       </div>
