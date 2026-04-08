@@ -19,15 +19,17 @@ interface Props {
 }
 
 const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> = [
-  { key: 'batterName', label: 'Batter', cls: 'min-w-[13rem]' },
-  { key: 'pitcherName', label: 'Pitcher', cls: 'min-w-[14rem]' },
-  { key: 'avg', label: 'AVG', cls: 'min-w-[4.5rem]' },
-  { key: 'h', label: 'H', cls: 'min-w-[3rem]' },
-  { key: 'ab', label: 'AB', cls: 'min-w-[3rem]' },
-  { key: 'ops', label: 'OPS', cls: 'hidden sm:table-cell min-w-[4.5rem]' },
-  { key: 'gameTime', label: 'Game', cls: 'min-w-[10.5rem]' },
-  { key: 'lineupSource', label: 'Lineup', cls: 'hidden sm:table-cell min-w-[6.5rem]' },
+  { key: 'batterName', label: 'Batter', cls: 'w-[16rem]' },
+  { key: 'pitcherName', label: 'Pitcher', cls: 'w-[16rem]' },
+  { key: 'avg', label: 'AVG', cls: 'w-[4.5rem]' },
+  { key: 'h', label: 'H', cls: 'w-[3.5rem]' },
+  { key: 'ab', label: 'AB', cls: 'w-[3.5rem]' },
+  { key: 'ops', label: 'OPS', cls: 'hidden sm:table-cell w-[5rem]' },
+  { key: 'gameTime', label: 'Game', cls: 'w-[11rem]' },
+  { key: 'lineupSource', label: 'Lineup', cls: 'hidden sm:table-cell w-[9rem]' },
 ]
+
+const RESULT_COLUMN_CLASS = 'hidden sm:table-column w-[5rem]'
 
 const MOBILE_SORT_COLS: Array<{ key: keyof MatchupResult; label: string }> = [
   { key: 'avg', label: 'AVG' },
@@ -197,12 +199,12 @@ export default function MatchupTable({
 
           {/* ── Desktop table view ── */}
           <div className="hidden sm:block overflow-x-auto scrollbar-styled">
-            <table className="w-full min-w-full sm:min-w-[1100px] text-sm table-auto">
+            <table className="w-full min-w-[1170px] text-sm table-fixed">
               <colgroup>
                 {COLUMNS.map(col => (
                   <col key={col.key} className={col.cls} />
                 ))}
-                <col className="hidden sm:table-column min-w-[5rem]" />
+                <col className={RESULT_COLUMN_CLASS} />
               </colgroup>
               <thead>
                 <tr className="bg-gray-800/60">
