@@ -2,11 +2,12 @@
 import { useId, useState, useEffect, useRef } from 'react'
 import type { FilterState, MatchupResult } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
-import { formatLocalDate, generateCSV, generateRecommendedDoublesCSV } from '@/lib/utils'
+import { generateCSV, generateRecommendedDoublesCSV } from '@/lib/utils'
 import type { RecommendedDouble } from '@/lib/utils'
 
 
 interface Props {
+  date: string
   filters: FilterState
   onApply: (filters: FilterState) => void
   matchups: MatchupResult[]
@@ -17,7 +18,7 @@ interface Props {
 const DEFAULT_OPS_VALUE = 0.950
 const DEFAULT_H_VALUE = 7
 
-export default function Filters({ filters, onApply, matchups, topPlays, recommendedDoubles = [] }: Props) {
+export default function Filters({ date, filters, onApply, matchups, topPlays, recommendedDoubles = [] }: Props) {
   const minOpsId = useId()
   const minHId = useId()
   const [opsDisplay, setOpsDisplay] = useState(
@@ -71,7 +72,7 @@ export default function Filters({ filters, onApply, matchups, topPlays, recommen
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `bvp-${label}-${formatLocalDate()}.csv`
+    a.download = `bvp-${label}-${date}.csv`
     a.click()
     URL.revokeObjectURL(url)
     setShowExportMenu(false)
@@ -84,7 +85,7 @@ export default function Filters({ filters, onApply, matchups, topPlays, recommen
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `bvp-recommended-doubles-${formatLocalDate()}.csv`
+    a.download = `bvp-recommended-doubles-${date}.csv`
     a.click()
     URL.revokeObjectURL(url)
     setShowExportMenu(false)

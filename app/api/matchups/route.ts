@@ -4,7 +4,7 @@ import { getGameStatus, computeHitResult } from '@/lib/game-status'
 import { parseSplit } from '@/lib/stats'
 import { createCache } from '@/lib/cache'
 import { kvDel, kvGet, kvSet } from '@/lib/kv'
-import { medianLineupPosition } from '@/lib/utils'
+import { formatSlateDate, medianLineupPosition } from '@/lib/utils'
 import type { MatchupResult, MatchupsResponse } from '@/lib/types'
 import { fetchDayOdds, buildOddsMap, normalizePlayerName } from '@/lib/odds'
 
@@ -103,7 +103,7 @@ async function getLineupPlayerIds(
 }
 
 export async function GET(req: NextRequest) {
-  const date = req.nextUrl.searchParams.get('date') ?? new Date().toISOString().split('T')[0]
+  const date = req.nextUrl.searchParams.get('date') ?? formatSlateDate()
 
   try {
     const responseCacheKey = `matchups-response:${date}`

@@ -1,4 +1,4 @@
-import { buildRecommendationTags, formatTime, formatLocalDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, hitProbability, suggestDailyDouble, suggestRecommendedDoubles, generateRecommendedDoublesCSV, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
+import { buildRecommendationTags, formatTime, formatLocalDate, formatSlateDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, hitProbability, suggestDailyDouble, suggestRecommendedDoubles, generateRecommendedDoublesCSV, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
 import { DEFAULT_FILTERS, type MatchupResult } from '@/lib/types'
 
 const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => ({
@@ -57,6 +57,14 @@ describe('formatLocalDate', () => {
     getMonthSpy.mockRestore()
     getDateSpy.mockRestore()
     toISOStringSpy.mockRestore()
+  })
+})
+
+describe('formatSlateDate', () => {
+  it('uses the Pacific calendar day for the active slate', () => {
+    const date = new Date('2026-04-08T03:08:00Z')
+
+    expect(formatSlateDate(date)).toBe('2026-04-07')
   })
 })
 

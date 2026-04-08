@@ -48,18 +48,18 @@ describe('calcStats', () => {
 })
 
 describe('assignConfidence', () => {
-  it('returns high for 25+ AB', () => {
-    expect(assignConfidence(25)).toBe('high')
+  it('returns high for 21+ AB', () => {
+    expect(assignConfidence(21)).toBe('high')
     expect(assignConfidence(50)).toBe('high')
   })
 
-  it('returns medium for 20-24 AB', () => {
+  it('returns medium for 18-20 AB', () => {
+    expect(assignConfidence(18)).toBe('medium')
     expect(assignConfidence(20)).toBe('medium')
-    expect(assignConfidence(24)).toBe('medium')
   })
 
-  it('returns low for 15-19 AB', () => {
+  it('returns low for 15-17 AB', () => {
     expect(assignConfidence(15)).toBe('low')
-    expect(assignConfidence(19)).toBe('low')
+    expect(assignConfidence(17)).toBe('low')
   })
 })

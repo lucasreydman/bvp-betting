@@ -50,9 +50,20 @@ The **Smash Double** requires both legs to carry a career OPS above .950 and at 
 
 If one or more legs are already in progress, the recommended doubles section remains visible so you can track the bet or export it. In-progress legs are marked and dimmed.
 
+## Recommendation tags
+
+Recommendation tags now live in the matchup tables so tagged players stay identifiable as they move from **Upcoming** to **In progress** to **Settled**.
+
+- **SMASH**: leg of the Smash Double
+- **RD**: leg of the primary recommended double, or the only recommended double when there is just one
+- **SD**: leg of the secondary double when two doubles are shown
+- **T4**: Top 4 play that is not currently part of a recommended double
+
 ## Date navigation
 
-Today and the next two days are available. The arrows move one day at a time within that range.
+One day back and the next two days are available. The arrows move one day at a time within that range.
+
+The active slate day rolls over on the **Pacific** calendar day, not at the viewer's local midnight. Game times still render in the viewer's local browser time zone.
 
 ## Filters
 
@@ -76,9 +87,9 @@ The Export CSV button (desktop only) offers three options:
 
 Sample size (career AB vs this pitcher):
 
-- **High** (green): 25+ AB
-- **Medium** (yellow): 20–24 AB
-- **Low** (red): 15–19 AB
+- **High** (green): 21+ AB
+- **Medium** (yellow): 18–20 AB
+- **Low** (red): 15–17 AB
 
 ## Data quality
 
@@ -100,7 +111,7 @@ The site is fully responsive. On small screens:
 
 ## Time zones
 
-Game times render in the viewer's local browser time zone.
+Game times render in the viewer's local browser time zone. The selected slate date uses the Pacific calendar day.
 
 ## Stack
 

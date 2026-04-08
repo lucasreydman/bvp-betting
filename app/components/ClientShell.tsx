@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { MatchupResult, FilterState, MatchupsResponse, RecommendationTag, SortState } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
-import { applyFilters, buildRecommendationTags, formatLocalDate, matchupKey, sortMatchups, suggestRecommendedDoubles } from '@/lib/utils'
+import { applyFilters, buildRecommendationTags, formatSlateDate, matchupKey, sortMatchups, suggestRecommendedDoubles } from '@/lib/utils'
 import type { RecommendedDouble } from '@/lib/utils'
 import StatusBar from './StatusBar'
 import DatePicker from './DatePicker'
@@ -14,7 +14,7 @@ import MatchupTable from './MatchupTable'
 const TOP_PLAYS_LIMIT = 4
 
 export default function ClientShell() {
-  const [date, setDate] = useState(formatLocalDate)
+  const [date, setDate] = useState(formatSlateDate)
   const [allMatchups, setAllMatchups] = useState<MatchupResult[]>([])
   const [meta, setMeta] = useState<Omit<MatchupsResponse, 'results'> | null>(null)
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)
@@ -168,6 +168,7 @@ export default function ClientShell() {
           <TopPlays matchups={taggedUpcoming} overrideRecommendedDoubles={recommendedDoubles} now={now} />
           <Filters
             key={filtersKey}
+            date={date}
             filters={filters}
             onApply={setFilters}
             matchups={csvMatchups}

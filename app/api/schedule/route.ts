@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { fetchSchedule } from '@/lib/mlb-api'
 import type { ScheduleResponse } from '@/lib/types'
+import { formatSlateDate } from '@/lib/utils'
 
 export async function GET(req: NextRequest) {
-  const date = req.nextUrl.searchParams.get('date') ?? new Date().toISOString().split('T')[0]
+  const date = req.nextUrl.searchParams.get('date') ?? formatSlateDate()
 
   try {
     const games = await fetchSchedule(date)

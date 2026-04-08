@@ -56,6 +56,32 @@ export function formatLocalDate(date = new Date()): string {
   return `${year}-${month}-${day}`
 }
 
+export const SLATE_TIME_ZONE = 'America/Los_Angeles'
+
+export function formatDateInTimeZone(date = new Date(), timeZone: string): string {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+
+  const parts = formatter.formatToParts(date)
+  const year = parts.find(part => part.type === 'year')?.value
+  const month = parts.find(part => part.type === 'month')?.value
+  const day = parts.find(part => part.type === 'day')?.value
+
+  if (!year || !month || !day) {
+    throw new Error(`Unable to format date for time zone ${timeZone}`)
+  }
+
+  return `${year}-${month}-${day}`
+}
+
+export function formatSlateDate(date = new Date()): string {
+  return formatDateInTimeZone(date, SLATE_TIME_ZONE)
+}
+
 // Regression target is ~0.320 (conditional mean of pre-filtered matchups: min 15 AB, min .300 AVG)
 // rather than the league-wide average of .260, which undershoots this pre-selected population.
 export function regressedAvg(avg: number, ab: number, leagueAvg = 0.32, regStrength = 50): number {

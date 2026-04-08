@@ -1,14 +1,16 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { formatLocalDate } from '@/lib/utils'
+import { formatSlateDate } from '@/lib/utils'
 
 interface Props {
   date: string  // YYYY-MM-DD
 }
 
 function dateLabel(date: string): string {
-  const tomorrow = formatLocalDate(new Date(Date.now() + 86400000))
-  const dayAfter = formatLocalDate(new Date(Date.now() + 2 * 86400000))
+  const yesterday = formatSlateDate(new Date(Date.now() - 86400000))
+  const tomorrow = formatSlateDate(new Date(Date.now() + 86400000))
+  const dayAfter = formatSlateDate(new Date(Date.now() + 2 * 86400000))
+  if (date === yesterday) return "yesterday's"
   if (date === tomorrow) return "tomorrow's"
   if (date === dayAfter) return "day after tomorrow's"
   return "today's"

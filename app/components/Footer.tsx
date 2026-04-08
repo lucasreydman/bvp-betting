@@ -36,9 +36,9 @@ export default function Footer() {
         <div>
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Confidence &amp; Top 4</h3>
           <p className="leading-relaxed">
-            Confidence reflects sample size: <span className="text-green-500">green</span> = 25+ AB,{' '}
-            <span className="text-yellow-500">yellow</span> = 20–24 AB,{' '}
-            <span className="text-red-500">red</span> = 15–19 AB.
+            Confidence reflects sample size in career at-bats versus that pitcher: <span className="text-red-500">red</span> = 15–17 AB,{' '}
+            <span className="text-yellow-500">yellow</span> = 18–20 AB,{' '}
+            <span className="text-green-500">green</span> = 21+ AB.
             Top 4 Plays ranks by{' '}
             <Formula inline className="text-gray-400 text-[0.9rem]">
               <span>AVG</span>
