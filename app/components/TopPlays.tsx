@@ -84,10 +84,10 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
   }
 
   const getDoubleSubcopy = (double: RecommendedDouble, index: number) => {
-    if (double.isSmash) return 'Forced to the top because both legs clear the Smash Double threshold.'
+    if (double.isSmash) return 'Top qualifying smash pair from the current Top 4.'
     if (!hasTwoDoubles) return 'Best available 2-leg parlay from the current Top 4.'
-    if (recommendedDoubles[0]?.isSmash && index === 1) return 'Remaining pair after locking in the Smash Double first.'
-    return index === 0 ? 'Stronger of the two available Top 4 pairings.' : 'Second-best pairing from the current Top 4 split.'
+    if (recommendedDoubles[0]?.isSmash && index === 1) return 'Second recommended double from the current Top 4.'
+    return index === 0 ? 'One of the two recommended Top 4 doubles.' : 'Another recommended double from the current Top 4.'
   }
 
   const recommendationBadges = new Map<string, { text: string; style: string }>()
