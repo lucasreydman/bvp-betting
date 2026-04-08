@@ -32,6 +32,11 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
   const [isDesktopLogicOpen, setIsDesktopLogicOpen] = useState(true)
   const score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
   const isSlateLocked = slateLockedAt !== null
+  const canBackfillLockedSlots = Boolean(
+    boardDebug?.lockState === 'locked'
+    && boardDebug.trackedCount < TOP_PLAYS_LIMIT
+    && boardDebug.estimatedQualifyingUpcomingCount > 0
+  )
 
   const enriched = matchups.map(m => {
     const expectedAB = expectedAtBats(resolveLineupPosition(m))
@@ -58,13 +63,17 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
   const getDoubleTooltip = () => {
     if (hasTwoDoubles) {
       return isSlateLocked
-        ? 'Recommended doubles are locked from the official Top 4 frozen at the slate\'s first scheduled pitch. If a Smash Double exists, it takes the lead slot and the remaining two legs become the Secondary Double. If no smash pair exists, the app chooses the strongest overall split of the locked Top 4 and shows the best pair first as the Daily Double.'
+        ? canBackfillLockedSlots
+          ? 'Locked plays stay on the board after the slate\'s first scheduled pitch, but any open Top 4 slots can still fill as later lineups confirm. Recommended doubles update when those new confirmed plays enter.'
+          : 'Recommended doubles are locked from the official Top 4 frozen at the slate\'s first scheduled pitch. If a Smash Double exists, it takes the lead slot and the remaining two legs become the Secondary Double. If no smash pair exists, the app chooses the strongest overall split of the locked Top 4 and shows the best pair first as the Daily Double.'
         : 'Before first pitch, the board shows the current Top 4 candidates, including estimated-lineup plays when lineups are not posted yet. At the slate\'s first scheduled pitch, the official Top 4 locks and recommended doubles stop changing.'
     }
 
     return isSlateLocked
-      ? 'Recommended doubles are locked from the official Top 4 frozen at the slate\'s first scheduled pitch. When fewer than four tracked plays qualify by lock time, the app shows the strongest available 2-leg parlay only.'
-      : 'Before first pitch, the board shows the current Top 4 candidates, including estimated-lineup plays when lineups are not posted yet. At the slate\'s first scheduled pitch, the official Top 4 locks and only those plays continue to be tracked.'
+      ? canBackfillLockedSlots
+        ? 'Locked plays stay on the board after first pitch, but open Top 4 slots can still fill as later lineups confirm. Until then, the board shows the strongest available 2-leg parlay from the locked plays already in.'
+        : 'Recommended doubles are locked from the official Top 4 frozen at the slate\'s first scheduled pitch. When fewer than four tracked plays qualify by lock time, the app shows the strongest available 2-leg parlay only.'
+      : 'Before first pitch, the board shows the current Top 4 candidates, including estimated-lineup plays when lineups are not posted yet. At the slate\'s first scheduled pitch, the locked plays stay in and any open slots can keep filling as later lineups confirm.'
   }
 
   const getDoubleSubcopy = (double: RecommendedDouble, index: number) => {
@@ -83,8 +92,10 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
           </div>
           <p className="mt-1 text-xs leading-5 text-gray-500">
             {isSlateLocked
-              ? 'The official Top 4 locked at the slate\'s first scheduled pitch. Only those plays keep tags and move through the board.'
-              : 'Before first pitch, the board shows the current Top 4 candidates. Estimated-lineup plays can appear until official lineups post. At first pitch, the official Top 4 locks and nothing new can enter.'}
+              ? canBackfillLockedSlots
+                ? 'The slate is locked at first pitch, but the locked plays stay in and any empty Top 4 slots can still fill as later lineups confirm.'
+                : 'The official Top 4 locked at the slate\'s first scheduled pitch. Only those plays keep tags and move through the board.'
+              : 'Before first pitch, the board shows the current Top 4 candidates. Estimated-lineup plays can appear until official lineups post. At first pitch, the locked plays stay in and any open slots can keep filling as later lineups confirm.'}
           </p>
           {boardDebug && (
             <div className="mt-2 rounded-xl border border-slate-700/80 bg-slate-950/80 px-3 py-2 text-xs leading-5 text-slate-300">
@@ -244,7 +255,11 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
                     <InfoTooltip width="w-64" align="left" text={getDoubleTooltip()} />
                   </div>
                   <div className={`text-[10px] ${anyLegStarted ? 'text-gray-500' : double.isSmash ? 'text-orange-400/70' : 'text-gray-500'}`}>
-                    {anyLegStarted || isSlateLocked ? 'Locked from the official Top 4 at first pitch.' : getDoubleSubcopy(double, index)}
+                    {anyLegStarted || (isSlateLocked && !canBackfillLockedSlots)
+                      ? 'Locked from the official Top 4 at first pitch.'
+                      : isSlateLocked
+                        ? 'Locked plays stay fixed; open slots can still fill on later confirmations.'
+                        : getDoubleSubcopy(double, index)}
                   </div>
                 </div>
 

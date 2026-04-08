@@ -4,6 +4,7 @@ import { computeHitResult, getGameStatus } from '@/lib/game-status'
 import {
   buildDiscordNotificationEvents,
   buildDiscordTopPlaysSnapshot,
+  extendDiscordTopPlaysSnapshot,
   getDiscordSentKey,
   getDiscordSentTtlSeconds,
   getDiscordSnapshotKey,
@@ -13,7 +14,7 @@ import {
 } from '@/lib/discord-notifications'
 import { kvDel, kvGet, kvSet } from '@/lib/kv'
 import type { DiscordTopPlaysSnapshot, MatchupResult, MatchupsResponse } from '@/lib/types'
-import { formatSlateDate } from '@/lib/utils'
+import { formatSlateDate, matchupKey } from '@/lib/utils'
 
 const NO_STORE_HEADERS = { 'Cache-Control': 'no-store' }
 
@@ -114,6 +115,7 @@ export async function GET(req: NextRequest) {
     const nowMs = Date.now()
     const cutoffReached = shouldLockDiscordSnapshot(matchups.earliestGameTime, nowMs, leadMinutes)
     let snapshot = await kvGet<DiscordTopPlaysSnapshot>(snapshotKey)
+    let addedTopPlays: MatchupResult[] = []
 
     if (!snapshot && cutoffReached) {
       const nextSnapshot = buildDiscordTopPlaysSnapshot(matchups, new Date(nowMs).toISOString(), leadMinutes)
@@ -125,11 +127,22 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    if (snapshot) {
+      const extended = extendDiscordTopPlaysSnapshot(snapshot, matchups)
+      snapshot = extended.snapshot
+      addedTopPlays = extended.addedTopPlays
+
+      if (addedTopPlays.length > 0 && !isDryRun) {
+        await kvSet(snapshotKey, snapshot, getDiscordSnapshotTtlSeconds())
+      }
+    }
+
     const snapshotResults = snapshot ? await hydrateSnapshotResults(date, snapshot) : []
     const events = snapshot
       ? buildDiscordNotificationEvents({
         date,
         snapshot,
+        addedTopPlays,
         results: snapshotResults,
       })
       : []
@@ -145,6 +158,7 @@ export async function GET(req: NextRequest) {
         leadMinutes,
         cutoffReached,
         snapshotLockedAt: snapshot?.lockedAt ?? null,
+        addedTopPlays: addedTopPlays.map(matchup => matchupKey(matchup)),
         totalEvents: events.length,
         unsentEvents: unsentEvents.map(event => ({ id: event.id, content: event.content })),
       }, { headers: NO_STORE_HEADERS })

@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { MatchupResult, FilterState, MatchupsResponse, SortState } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
-import { applyFilters, formatSlateDate, selectTopPlays, sortMatchups, suggestRecommendedDoubles } from '@/lib/utils'
+import { TOP_PLAYS_LIMIT, applyFilters, formatSlateDate, selectTopPlays, sortMatchups, suggestRecommendedDoubles } from '@/lib/utils'
 import type { RecommendedDouble } from '@/lib/utils'
 import StatusBar from './StatusBar'
 import DatePicker from './DatePicker'
@@ -23,7 +23,12 @@ export default function ClientShell() {
   const [error, setError] = useState<string | null>(null)
   const [tick, setTick] = useState(0)
   const hasEstimatedUpcoming = allMatchups.some(m => m.gameStatus === 'upcoming' && m.lineupSource === 'estimated')
-  const backgroundRefreshMs = hasEstimatedUpcoming ? 30_000 : 300_000
+  const hasOpenLockedSlots = Boolean(
+    meta?.debug.lockState === 'locked'
+    && meta.debug.trackedCount < TOP_PLAYS_LIMIT
+    && meta.debug.estimatedQualifyingUpcomingCount > 0
+  )
+  const backgroundRefreshMs = hasEstimatedUpcoming || hasOpenLockedSlots ? 30_000 : 300_000
 
   const fetchMatchups = useCallback(async (d: string) => {
     setIsLoading(true)

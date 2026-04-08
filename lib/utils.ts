@@ -38,6 +38,10 @@ export function buildMatchupsDebugInfo({
 
   if (lockState === 'locked') {
     if (trackedCount === 0) {
+      const backfillClause = estimatedQualifyingUpcomingCount > 0
+        ? ' Open slots can still fill if later lineups confirm.'
+        : ''
+
       return {
         lockState,
         trackedCount,
@@ -47,12 +51,15 @@ export function buildMatchupsDebugInfo({
         confirmedSlatePoolCount,
         gamesWithProbablePitchers,
         gamesSkippedMissingProbable,
-        explanation: `The official Top 4 locked at first pitch with no confirmed qualifying plays.${skippedClause}`,
+        explanation: `The official Top 4 locked at first pitch with no confirmed qualifying plays.${backfillClause}${skippedClause}`,
       }
     }
 
     const qualifierClause = trackedCount < TOP_PLAYS_LIMIT
       ? ` Only ${pluralize(confirmedSlatePoolCount, 'confirmed qualifier')} were available at lock time.`
+      : ''
+    const backfillClause = trackedCount < TOP_PLAYS_LIMIT && estimatedQualifyingUpcomingCount > 0
+      ? ' Open slots can still fill as later lineups confirm.'
       : ''
 
     return {
@@ -64,7 +71,7 @@ export function buildMatchupsDebugInfo({
       confirmedSlatePoolCount,
       gamesWithProbablePitchers,
       gamesSkippedMissingProbable,
-      explanation: `The official Top 4 locked at first pitch with ${pluralize(trackedCount, 'play')}.${qualifierClause}${missingProbablesPressureClause}${skippedClause}`,
+      explanation: `The official Top 4 locked at first pitch with ${pluralize(trackedCount, 'play')}.${qualifierClause}${backfillClause}${missingProbablesPressureClause}${skippedClause}`,
     }
   }
 
@@ -247,6 +254,22 @@ export function sortTopPlays(matchups: MatchupResult[]): MatchupResult[] {
 
 export function selectTopPlays(matchups: MatchupResult[], limit = TOP_PLAYS_LIMIT): MatchupResult[] {
   return sortTopPlays(matchups).slice(0, limit)
+}
+
+export function fillOpenTopPlaySlots(
+  lockedTopPlays: MatchupResult[],
+  candidatePool: MatchupResult[],
+  limit = TOP_PLAYS_LIMIT,
+): MatchupResult[] {
+  const existingKeys = new Set(lockedTopPlays.map(matchup => matchupKey(matchup)))
+  if (existingKeys.size >= limit) {
+    return sortTopPlays(lockedTopPlays).slice(0, limit)
+  }
+
+  const additions = sortTopPlays(candidatePool.filter(matchup => !existingKeys.has(matchupKey(matchup))))
+    .slice(0, Math.max(0, limit - existingKeys.size))
+
+  return sortTopPlays([...lockedTopPlays, ...additions])
 }
 
 const CONFIDENCE_WEIGHTS: Record<MatchupResult['confidence'], number> = {

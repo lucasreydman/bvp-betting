@@ -4,7 +4,7 @@ import { getGameStatus, computeHitResult } from '@/lib/game-status'
 import { parseSplit } from '@/lib/stats'
 import { createCache } from '@/lib/cache'
 import { kvDel, kvGet, kvSet } from '@/lib/kv'
-import { buildMatchupsDebugInfo, buildRecommendationTags, formatSlateDate, getEarliestGameTimeMs, isSlateLockReached, matchupKey, medianLineupPosition, selectTopPlays, suggestRecommendedDoubles } from '@/lib/utils'
+import { TOP_PLAYS_LIMIT, buildMatchupsDebugInfo, buildRecommendationTags, fillOpenTopPlaySlots, formatSlateDate, getEarliestGameTimeMs, isSlateLockReached, matchupKey, medianLineupPosition, selectTopPlays, suggestRecommendedDoubles } from '@/lib/utils'
 import type { MatchupResult, MatchupsResponse, SlateTopPlaysSnapshot } from '@/lib/types'
 import { fetchDayOdds, buildOddsMap, normalizePlayerName } from '@/lib/odds'
 
@@ -319,6 +319,20 @@ export async function GET(req: NextRequest) {
       )
     }
 
+    if (slateTopPlaysSnapshot && slateTopPlaysSnapshot.topPlays.length < TOP_PLAYS_LIMIT) {
+      const filledTopPlays = fillOpenTopPlaySlots(slateTopPlaysSnapshot.topPlays, confirmedSlatePool)
+      if (filledTopPlays.length > slateTopPlaysSnapshot.topPlays.length) {
+        slateTopPlaysSnapshot = {
+          ...slateTopPlaysSnapshot,
+          topPlays: filledTopPlays,
+        }
+
+        kvSet(slateTopPlaysKey, slateTopPlaysSnapshot, SNAPSHOT_TTL_SECONDS).catch(err =>
+          console.error(`Failed to update slate Top 4 snapshot for ${date}:`, err)
+        )
+      }
+    }
+
     const trackedTopPlays = slateTopPlaysSnapshot?.topPlays ?? currentCandidateTopPlays
     const trackedKeys = new Set(trackedTopPlays.map(matchup => matchupKey(matchup)))
     const recommendationTags = buildRecommendationTags(trackedTopPlays, suggestRecommendedDoubles(trackedTopPlays))
@@ -375,9 +389,15 @@ export async function GET(req: NextRequest) {
       results,
     }
 
-    const responseTtlBaseSeconds = slateTopPlaysSnapshot
-      ? DEFAULT_RESPONSE_TTL_SECONDS
-      : FAST_LINEUP_RESPONSE_TTL_SECONDS
+    const shouldUseFastRefresh = !slateTopPlaysSnapshot
+      || (
+        slateTopPlaysSnapshot.topPlays.length < TOP_PLAYS_LIMIT
+        && upcomingResults.some(matchup => matchup.lineupSource === 'estimated')
+      )
+
+    const responseTtlBaseSeconds = shouldUseFastRefresh
+      ? FAST_LINEUP_RESPONSE_TTL_SECONDS
+      : DEFAULT_RESPONSE_TTL_SECONDS
 
     const secondsUntilSlateLock = earliestGameTimeMs == null
       ? null

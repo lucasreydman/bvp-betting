@@ -1,6 +1,7 @@
 import {
   buildDiscordNotificationEvents,
   buildDiscordTopPlaysSnapshot,
+  extendDiscordTopPlaysSnapshot,
   getNotificationLeadMinutes,
   shouldLockDiscordSnapshot,
 } from '@/lib/discord-notifications'
@@ -135,6 +136,20 @@ describe('buildDiscordNotificationEvents', () => {
     expect(events.every(event => !event.content.includes('N/A'))).toBe(true)
     expect(events.every(event => !event.content.includes('Parlay odds'))).toBe(true)
   })
+
+  it('builds fill events when new confirmed plays enter after the initial lock', () => {
+    const locked = makeMatchup({ batterId: 1, pitcherId: 11, batterName: 'Juan Soto' })
+    const added = makeMatchup({ batterId: 2, pitcherId: 22, batterName: 'Mookie Betts' })
+
+    const events = buildDiscordNotificationEvents({
+      date: '2026-04-08',
+      snapshot: makeSnapshot([locked, added]),
+      addedTopPlays: [added],
+      results: [locked, added],
+    })
+
+    expect(events.some(event => event.id === `top4-fill:2026-04-08:2026-04-08T17:40:00.000Z:${added.gamePk}:${added.batterId}:${added.pitcherId}`)).toBe(true)
+  })
 })
 
 describe('Discord snapshot cutoff', () => {
@@ -158,5 +173,21 @@ describe('Discord snapshot cutoff', () => {
   it('defaults the lead time to 60 minutes when env input is invalid', () => {
     expect(getNotificationLeadMinutes('abc')).toBe(60)
     expect(getNotificationLeadMinutes('-5')).toBe(60)
+  })
+
+  it('extends an existing Discord snapshot with newly confirmed top plays without dropping locked plays', () => {
+    const locked = makeMatchup({ batterId: 1, pitcherId: 11, avg: 0.36, ab: 28 })
+    const confirmedA = makeMatchup({ batterId: 2, pitcherId: 22, avg: 0.41, ab: 35 })
+    const confirmedB = makeMatchup({ batterId: 3, pitcherId: 33, avg: 0.4, ab: 32 })
+    const confirmedC = makeMatchup({ batterId: 4, pitcherId: 44, avg: 0.39, ab: 31 })
+    const snapshot = makeSnapshot([locked], 60)
+    const response = makeResponse([confirmedA, confirmedB, confirmedC], '2026-04-08T17:05:00.000Z')
+    response.confirmedTopPlaysPreview = [confirmedA, confirmedB, confirmedC]
+
+    const extended = extendDiscordTopPlaysSnapshot(snapshot, response)
+
+    expect(extended.snapshot.topPlays).toHaveLength(4)
+    expect(extended.snapshot.topPlays.map(matchup => matchup.batterId).sort()).toEqual([1, 2, 3, 4])
+    expect(extended.addedTopPlays).toHaveLength(3)
   })
 })

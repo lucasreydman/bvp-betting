@@ -1,6 +1,6 @@
 import { fmtOdds } from './odds'
 import type { DiscordTopPlaysSnapshot, MatchupResult, MatchupsResponse } from './types'
-import { matchupKey, selectTopPlays, suggestRecommendedDoubles, teamAbbr } from './utils'
+import { fillOpenTopPlaySlots, matchupKey, selectTopPlays, suggestRecommendedDoubles, teamAbbr } from './utils'
 
 const DISCORD_SENT_TTL_SECONDS = 259200
 const DISCORD_SNAPSHOT_TTL_SECONDS = 259200
@@ -15,6 +15,7 @@ export interface DiscordNotificationSource {
   date: string
   snapshot: DiscordTopPlaysSnapshot
   results: MatchupResult[]
+  addedTopPlays?: MatchupResult[]
 }
 
 function getDoubleLabel(isSmash: boolean, index: number, total: number): string {
@@ -73,6 +74,27 @@ export function buildDiscordTopPlaysSnapshot(
   }
 }
 
+export function extendDiscordTopPlaysSnapshot(
+  snapshot: DiscordTopPlaysSnapshot,
+  response: MatchupsResponse,
+): { snapshot: DiscordTopPlaysSnapshot; addedTopPlays: MatchupResult[] } {
+  const filledTopPlays = fillOpenTopPlaySlots(snapshot.topPlays, response.confirmedTopPlaysPreview ?? [])
+  const existingKeys = new Set(snapshot.topPlays.map(matchup => matchupKey(matchup)))
+  const addedTopPlays = filledTopPlays.filter(matchup => !existingKeys.has(matchupKey(matchup)))
+
+  if (addedTopPlays.length === 0) {
+    return { snapshot, addedTopPlays }
+  }
+
+  return {
+    snapshot: {
+      ...snapshot,
+      topPlays: filledTopPlays,
+    },
+    addedTopPlays,
+  }
+}
+
 function buildTop4LockEvent(snapshot: DiscordTopPlaysSnapshot): DiscordNotificationEvent | null {
   if (snapshot.topPlays.length === 0) return null
 
@@ -81,6 +103,13 @@ function buildTop4LockEvent(snapshot: DiscordTopPlaysSnapshot): DiscordNotificat
     id: `top4-lock:${snapshot.date}:${snapshot.lockedAt}`,
     content: [`Top 4 alert board locked for ${snapshot.date} (${snapshot.leadMinutes}m before first pitch).`, ...lines].join('\n'),
   }
+}
+
+function buildTop4FillEvents(snapshot: DiscordTopPlaysSnapshot, addedTopPlays: MatchupResult[]): DiscordNotificationEvent[] {
+  return addedTopPlays.map(matchup => ({
+    id: `top4-fill:${snapshot.date}:${snapshot.lockedAt}:${matchupKey(matchup)}`,
+    content: `Top 4 alert board added after lock for ${snapshot.date}: ${formatLeg(matchup)}.`,
+  }))
 }
 
 function buildDoubleLockEvents(snapshot: DiscordTopPlaysSnapshot): DiscordNotificationEvent[] {
@@ -144,6 +173,7 @@ export function buildDiscordNotificationEvents(source: DiscordNotificationSource
 
   return [
     buildTop4LockEvent(source.snapshot),
+    ...buildTop4FillEvents(source.snapshot, source.addedTopPlays ?? []),
     ...buildDoubleLockEvents(source.snapshot),
     ...buildLegHitEvents(source.date, trackedResults),
     ...buildDoubleHitEvents(source.snapshot, trackedResults),

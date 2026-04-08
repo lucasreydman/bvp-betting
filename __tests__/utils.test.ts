@@ -1,4 +1,4 @@
-import { buildMatchupsDebugInfo, buildRecommendationTags, formatTime, formatLocalDate, formatSlateDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, getEarliestGameTimeMs, hitProbability, isSlateLockReached, selectTopPlays, suggestDailyDouble, suggestRecommendedDoubles, generateRecommendedDoublesCSV, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
+import { buildMatchupsDebugInfo, buildRecommendationTags, fillOpenTopPlaySlots, formatTime, formatLocalDate, formatSlateDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, getEarliestGameTimeMs, hitProbability, isSlateLockReached, selectTopPlays, suggestDailyDouble, suggestRecommendedDoubles, generateRecommendedDoublesCSV, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
 import { DEFAULT_FILTERS, type MatchupResult } from '@/lib/types'
 
 const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => ({
@@ -112,7 +112,7 @@ describe('buildMatchupsDebugInfo', () => {
       trackedCount: 3,
       qualifyingUpcomingCount: 0,
       confirmedQualifyingUpcomingCount: 0,
-      estimatedQualifyingUpcomingCount: 0,
+      estimatedQualifyingUpcomingCount: 1,
       confirmedSlatePoolCount: 3,
       gamesWithProbablePitchers: 6,
       gamesSkippedMissingProbable: 0,
@@ -121,6 +121,7 @@ describe('buildMatchupsDebugInfo', () => {
     expect(debug.lockState).toBe('locked')
     expect(debug.explanation).toContain('locked at first pitch with 3 plays')
     expect(debug.explanation).toContain('Only 3 confirmed qualifiers were available at lock time')
+    expect(debug.explanation).toContain('Open slots can still fill as later lineups confirm')
   })
 
   it('explains empty pre-lock boards when nothing qualifies yet', () => {
@@ -153,6 +154,21 @@ describe('buildMatchupsDebugInfo', () => {
 
     expect(debug.explanation).toContain('No games are usable yet because probable pitchers have not been posted')
     expect(debug.explanation).toContain('4 games were skipped for missing probable pitchers')
+  })
+})
+
+describe('fillOpenTopPlaySlots', () => {
+  it('preserves locked plays and fills remaining slots with the best new candidates', () => {
+    const lockedA = makeMatchup({ batterId: 1, pitcherId: 11, avg: 0.41, ab: 35 })
+    const lockedB = makeMatchup({ batterId: 2, pitcherId: 22, avg: 0.4, ab: 32 })
+    const newTop = makeMatchup({ batterId: 3, pitcherId: 33, avg: 0.39, ab: 31 })
+    const newSecond = makeMatchup({ batterId: 4, pitcherId: 44, avg: 0.38, ab: 30 })
+    const ignored = makeMatchup({ batterId: 5, pitcherId: 55, avg: 0.31, ab: 18 })
+
+    const filled = fillOpenTopPlaySlots([lockedA, lockedB], [lockedA, newTop, newSecond, ignored])
+
+    expect(filled).toHaveLength(4)
+    expect(filled.map(matchup => matchup.batterId).sort()).toEqual([1, 2, 3, 4])
   })
 })
 
