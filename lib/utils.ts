@@ -1,6 +1,8 @@
 import { parlayOddsFromLines } from './odds'
 import type { FilterState, MatchupResult, RecommendationTag, SortState } from './types'
 
+export const TOP_PLAYS_LIMIT = 4
+
 const TEAM_ABBR: Record<string, string> = {
   'Arizona Diamondbacks': 'ARI',
   'Atlanta Braves': 'ATL',
@@ -82,6 +84,24 @@ export function formatSlateDate(date = new Date()): string {
   return formatDateInTimeZone(date, SLATE_TIME_ZONE)
 }
 
+export function getEarliestGameTimeMs(gameTimes: string[]): number | null {
+  let earliest: number | null = null
+
+  for (const gameTime of gameTimes) {
+    const parsed = new Date(gameTime).getTime()
+    if (Number.isNaN(parsed)) continue
+    earliest = earliest === null ? parsed : Math.min(earliest, parsed)
+  }
+
+  return earliest
+}
+
+export function isSlateLockReached(gameTimes: string[], nowMs: number): boolean {
+  const earliest = getEarliestGameTimeMs(gameTimes)
+  if (earliest === null) return false
+  return nowMs >= earliest
+}
+
 // Regression target is ~0.320 (conditional mean of pre-filtered matchups: min 15 AB, min .300 AVG)
 // rather than the league-wide average of .260, which undershoots this pre-selected population.
 export function regressedAvg(avg: number, ab: number, leagueAvg = 0.32, regStrength = 50): number {
@@ -112,6 +132,18 @@ export function medianLineupPosition(positions: number[]): number | undefined {
 
 export function hitProbability(avg: number, atBats: number): number {
   return 1 - Math.pow(1 - avg, atBats)
+}
+
+export function topPlayScore(matchup: MatchupResult): number {
+  return matchup.avg * Math.min(matchup.ab / 30, 1)
+}
+
+export function sortTopPlays(matchups: MatchupResult[]): MatchupResult[] {
+  return [...matchups].sort((a, b) => topPlayScore(b) - topPlayScore(a) || b.avg - a.avg || b.ab - a.ab)
+}
+
+export function selectTopPlays(matchups: MatchupResult[], limit = TOP_PLAYS_LIMIT): MatchupResult[] {
+  return sortTopPlays(matchups).slice(0, limit)
 }
 
 const CONFIDENCE_WEIGHTS: Record<MatchupResult['confidence'], number> = {
@@ -217,7 +249,7 @@ function compareRecommendedDoubleSets(a: RecommendedDouble[], b: RecommendedDoub
 
 export function suggestRecommendedDoubles(matchups: MatchupResult[]): RecommendedDouble[] {
   const enriched = matchups
-    .slice(0, 4)
+    .slice(0, TOP_PLAYS_LIMIT)
     .map(buildRecommendationLeg)
 
   if (enriched.length < 2) return []

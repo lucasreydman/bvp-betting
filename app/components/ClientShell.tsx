@@ -1,8 +1,8 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import type { MatchupResult, FilterState, MatchupsResponse, RecommendationTag, SortState } from '@/lib/types'
+import type { MatchupResult, FilterState, MatchupsResponse, SortState } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
-import { applyFilters, buildRecommendationTags, formatSlateDate, matchupKey, sortMatchups, suggestRecommendedDoubles } from '@/lib/utils'
+import { applyFilters, formatSlateDate, selectTopPlays, sortMatchups, suggestRecommendedDoubles } from '@/lib/utils'
 import type { RecommendedDouble } from '@/lib/utils'
 import StatusBar from './StatusBar'
 import DatePicker from './DatePicker'
@@ -10,8 +10,6 @@ import LoadingSkeleton from './LoadingSkeleton'
 import TopPlays from './TopPlays'
 import Filters from './Filters'
 import MatchupTable from './MatchupTable'
-
-const TOP_PLAYS_LIMIT = 4
 
 export default function ClientShell() {
   const [date, setDate] = useState(formatSlateDate)
@@ -22,7 +20,6 @@ export default function ClientShell() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tick, setTick] = useState(0)
-  const [trackedRecommendationTags, setTrackedRecommendationTags] = useState<Record<string, RecommendationTag[]>>({})
   const hasEstimatedUpcoming = allMatchups.some(m => m.gameStatus === 'upcoming' && m.lineupSource === 'estimated')
   const backgroundRefreshMs = hasEstimatedUpcoming ? 30_000 : 300_000
 
@@ -34,7 +31,7 @@ export default function ClientShell() {
       if (!res.ok) throw new Error(`Server error: ${res.status}`)
       const data: MatchupsResponse = await res.json()
       setAllMatchups(data.results)
-      setMeta({ date: data.date, fetchedAt: data.fetchedAt, gamesScanned: data.gamesScanned, gamesSkipped: data.gamesSkipped, matchupsFound: data.matchupsFound })
+      setMeta({ date: data.date, fetchedAt: data.fetchedAt, slateLockedAt: data.slateLockedAt, gamesScanned: data.gamesScanned, gamesSkipped: data.gamesSkipped, matchupsFound: data.matchupsFound })
     } catch {
       setError('Could not load MLB data. Try again in a moment.')
     } finally {
@@ -62,7 +59,7 @@ export default function ClientShell() {
         if (!res.ok) return
         const data: MatchupsResponse = await res.json()
         setAllMatchups(data.results)
-        setMeta({ date: data.date, fetchedAt: data.fetchedAt, gamesScanned: data.gamesScanned, gamesSkipped: data.gamesSkipped, matchupsFound: data.matchupsFound })
+        setMeta({ date: data.date, fetchedAt: data.fetchedAt, slateLockedAt: data.slateLockedAt, gamesScanned: data.gamesScanned, gamesSkipped: data.gamesSkipped, matchupsFound: data.matchupsFound })
       } catch {
         // silent — don't disrupt the user for a background refresh failure
       }
@@ -91,65 +88,14 @@ export default function ClientShell() {
   const totalUpcoming   = allUpcoming.length
   const totalInProgress = allInProgress.length
   const hasActiveOptionalFilters = filters.minOPS !== null || filters.minH !== null
-
-  const topPlayScore = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
   const filtersKey = `${filters.minOPS ?? 'none'}-${filters.minH ?? 'none'}`
 
-  // Top plays for display + Top Plays CSV: upcoming only (bettable)
-  const topPlaysMatchups = [...upcoming]
-    .sort((a, b) => topPlayScore(b) - topPlayScore(a) || b.avg - a.avg || b.ab - a.ab)
-    .slice(0, TOP_PLAYS_LIMIT)
-
-  // Recommended doubles always computed from the same filtered top-play set shown in TopPlays,
-  // so filters (min AB, min AVG) apply consistently to both.
-  const recommendedDoubles: RecommendedDouble[] = suggestRecommendedDoubles(topPlaysMatchups)
-  const currentRecommendationTags = buildRecommendationTags(topPlaysMatchups, recommendedDoubles)
-  const currentRecommendationTagsKey = JSON.stringify(currentRecommendationTags)
-
-  useEffect(() => {
-    setTrackedRecommendationTags({})
-  }, [date])
-
-  useEffect(() => {
-    const nextEntries = Object.entries(JSON.parse(currentRecommendationTagsKey) as Record<string, RecommendationTag[]>)
-
-    setTrackedRecommendationTags(prev => {
-      let changed = false
-      const next = { ...prev }
-
-      for (const [key, tags] of nextEntries) {
-        const previousTags = next[key] ?? []
-        const sameLength = previousTags.length === tags.length
-        const sameTags = sameLength && previousTags.every((previousTag, index) => previousTag === tags[index])
-
-        if (!sameTags) {
-          next[key] = tags
-          changed = true
-        }
-      }
-
-      return changed ? next : prev
-    })
-  }, [currentRecommendationTagsKey])
-
-  const attachRecommendationTags = (matchups: MatchupResult[]) => matchups.map(matchup => {
-    const key = matchupKey(matchup)
-    const recommendationTags = matchup.gameStatus === 'upcoming'
-      ? currentRecommendationTags[key]
-      : trackedRecommendationTags[key]
-
-    const previousTags = matchup.recommendationTags ?? []
-    const nextTags = recommendationTags ?? []
-    const sameLength = previousTags.length === nextTags.length
-    const sameTags = sameLength && previousTags.every((tag, index) => tag === nextTags[index])
-
-    if (sameTags) return matchup
-    return { ...matchup, recommendationTags: nextTags.length > 0 ? nextTags : undefined }
-  })
-
-  const taggedUpcoming = attachRecommendationTags(upcoming)
-  const taggedInProgress = attachRecommendationTags(inProgress)
-  const taggedSettled = attachRecommendationTags(settled)
+  const trackedSlateMatchups = selectTopPlays(allMatchups.filter(matchup => matchup.recommendationTags?.includes('T4')))
+  const trackedUpcoming = upcoming
+  const trackedInProgress = inProgress
+  const trackedSettled = settled
+  const topPlaysMatchups = selectTopPlays(allUpcoming)
+  const recommendedDoubles: RecommendedDouble[] = suggestRecommendedDoubles(trackedSlateMatchups)
 
   return (
     <div>
@@ -174,7 +120,7 @@ export default function ClientShell() {
         <LoadingSkeleton date={date} />
       ) : (
         <>
-          <TopPlays matchups={taggedUpcoming} overrideRecommendedDoubles={recommendedDoubles} now={now} />
+          <TopPlays matchups={trackedUpcoming} overrideRecommendedDoubles={recommendedDoubles} now={now} slateLockedAt={meta?.slateLockedAt ?? null} />
           <Filters
             key={filtersKey}
             date={date}
@@ -185,7 +131,7 @@ export default function ClientShell() {
             recommendedDoubles={recommendedDoubles}
           />
           <MatchupTable
-            matchups={taggedUpcoming}
+            matchups={trackedUpcoming}
             sort={sort}
             onSort={handleSort}
             totalMatchups={totalUpcoming}
@@ -196,7 +142,7 @@ export default function ClientShell() {
           {inProgress.length > 0 && (
             <div className="mt-6">
               <MatchupTable
-                matchups={taggedInProgress}
+                matchups={trackedInProgress}
                 sort={sort}
                 onSort={handleSort}
                 totalMatchups={totalInProgress}
@@ -208,7 +154,7 @@ export default function ClientShell() {
           {settled.length > 0 && (
             <div className="mt-6">
               <MatchupTable
-                matchups={taggedSettled}
+                matchups={trackedSettled}
                 sort={sort}
                 onSort={() => {}}
                 totalMatchups={allSettled.length}

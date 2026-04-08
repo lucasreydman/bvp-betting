@@ -4,8 +4,8 @@ import { getGameStatus, computeHitResult } from '@/lib/game-status'
 import { parseSplit } from '@/lib/stats'
 import { createCache } from '@/lib/cache'
 import { kvDel, kvGet, kvSet } from '@/lib/kv'
-import { formatSlateDate, medianLineupPosition } from '@/lib/utils'
-import type { MatchupResult, MatchupsResponse } from '@/lib/types'
+import { buildRecommendationTags, formatSlateDate, getEarliestGameTimeMs, isSlateLockReached, matchupKey, medianLineupPosition, selectTopPlays, suggestRecommendedDoubles } from '@/lib/utils'
+import type { MatchupResult, MatchupsResponse, SlateTopPlaysSnapshot } from '@/lib/types'
 import { fetchDayOdds, buildOddsMap, normalizePlayerName } from '@/lib/odds'
 
 // Module-level caches — survive across requests in the same serverless instance
@@ -29,6 +29,7 @@ const BATCH_DELAY_MS = 200
 const DEFAULT_RESPONSE_TTL_SECONDS = 300
 const FAST_LINEUP_RESPONSE_TTL_SECONDS = 30
 const SNAPSHOT_TTL_SECONDS = 129600
+const SLATE_TOP_PLAYS_KEY_PREFIX = 'slate-top4:'
 const NO_STORE_HEADERS = { 'Cache-Control': 'no-store' }
 
 async function sleep(ms: number) {
@@ -107,6 +108,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const responseCacheKey = `matchups-response:${date}`
+    const slateTopPlaysKey = `${SLATE_TOP_PLAYS_KEY_PREFIX}${date}`
     const cached = await kvGet<MatchupsResponse>(responseCacheKey)
     if (cached) {
       return NextResponse.json(cached, { headers: NO_STORE_HEADERS })
@@ -114,6 +116,9 @@ export async function GET(req: NextRequest) {
 
     const games = await fetchSchedule(date)
     const nowMs = Date.now()
+    const slateGameTimes = games.map(game => game.gameDate)
+    const slateLockReached = isSlateLockReached(slateGameTimes, nowMs)
+    const earliestGameTimeMs = getEarliestGameTimeMs(slateGameTimes)
     let gamesScanned = 0
     let gamesSkipped = 0
 
@@ -281,17 +286,55 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // ── Process in-progress and settled games from KV snapshots ─────────────
-    const nonUpcomingResults: MatchupResult[] = []
-    for (const { game, gameStatus } of nonUpcomingGames) {
+    // ── Build confirmed slate pool and lock Top 4 once four confirmed plays exist ─
+    const nonUpcomingSnapshots = new Map<number, MatchupResult[]>()
+    const confirmedSlatePool: MatchupResult[] = upcomingResults.filter(matchup => matchup.lineupSource === 'confirmed')
+
+    for (const { game } of nonUpcomingGames) {
       const snapshot = await kvGet<MatchupResult[]>(`game-qualifying:${game.gamePk}`)
-      if (!snapshot) continue   // no pre-game snapshot — cannot verify qualification
+      if (!snapshot) continue
 
       const confirmedSnapshot = snapshot.filter(matchup => matchup.lineupSource === 'confirmed')
       if (confirmedSnapshot.length === 0) continue
 
+      nonUpcomingSnapshots.set(game.gamePk, confirmedSnapshot)
+      confirmedSlatePool.push(...confirmedSnapshot)
+    }
+
+    let slateTopPlaysSnapshot = await kvGet<SlateTopPlaysSnapshot>(slateTopPlaysKey)
+    const currentConfirmedTopPlays = selectTopPlays(confirmedSlatePool)
+
+    if (!slateTopPlaysSnapshot && slateLockReached) {
+      slateTopPlaysSnapshot = {
+        date,
+        lockedAt: new Date().toISOString(),
+        topPlays: currentConfirmedTopPlays,
+      }
+
+      kvSet(slateTopPlaysKey, slateTopPlaysSnapshot, SNAPSHOT_TTL_SECONDS).catch(err =>
+        console.error(`Failed to write slate Top 4 snapshot for ${date}:`, err)
+      )
+    }
+
+    const trackedTopPlays = slateTopPlaysSnapshot?.topPlays ?? currentConfirmedTopPlays
+    const trackedKeys = new Set(trackedTopPlays.map(matchup => matchupKey(matchup)))
+    const recommendationTags = buildRecommendationTags(trackedTopPlays, suggestRecommendedDoubles(trackedTopPlays))
+
+    const attachRecommendationTags = (matchups: MatchupResult[]) => matchups.map(matchup => {
+      const tags = recommendationTags[matchupKey(matchup)]
+      return tags ? { ...matchup, recommendationTags: tags } : matchup
+    })
+
+    // ── Process in-progress and settled games from KV snapshots ─────────────
+    const nonUpcomingResults: MatchupResult[] = []
+    for (const { game, gameStatus } of nonUpcomingGames) {
+      const confirmedSnapshot = nonUpcomingSnapshots.get(game.gamePk)
+      if (confirmedSnapshot.length === 0) continue
+
       const hitsMap = await fetchBoxscoreHitting(game.gamePk)
       for (const m of confirmedSnapshot) {
+        if (!trackedKeys.has(matchupKey(m))) continue
+
         const h = hitsMap.get(m.batterId)?.h ?? 0
         nonUpcomingResults.push({
           ...m,
@@ -302,19 +345,31 @@ export async function GET(req: NextRequest) {
     }
 
     // ── Build and cache response ─────────────────────────────────────────────
-    const results = [...upcomingResults, ...nonUpcomingResults]
+    const trackedUpcomingResults = attachRecommendationTags(
+      upcomingResults.filter(matchup => trackedKeys.has(matchupKey(matchup)))
+    )
+    const results = [...trackedUpcomingResults, ...attachRecommendationTags(nonUpcomingResults)]
     const response: MatchupsResponse = {
       date,
       fetchedAt: new Date().toISOString(),
+      slateLockedAt: slateTopPlaysSnapshot?.lockedAt ?? null,
       gamesScanned,
       gamesSkipped,
       matchupsFound: results.length,
       results,
     }
 
-    const responseTtlSeconds = upcomingResults.some(matchup => matchup.lineupSource === 'estimated')
-      ? FAST_LINEUP_RESPONSE_TTL_SECONDS
-      : DEFAULT_RESPONSE_TTL_SECONDS
+    const responseTtlBaseSeconds = slateTopPlaysSnapshot
+      ? DEFAULT_RESPONSE_TTL_SECONDS
+      : FAST_LINEUP_RESPONSE_TTL_SECONDS
+
+    const secondsUntilSlateLock = earliestGameTimeMs == null
+      ? null
+      : Math.max(1, Math.ceil((earliestGameTimeMs - nowMs) / 1000))
+
+    const responseTtlSeconds = slateTopPlaysSnapshot || secondsUntilSlateLock == null
+      ? responseTtlBaseSeconds
+      : Math.min(responseTtlBaseSeconds, secondsUntilSlateLock)
 
     kvSet(responseCacheKey, response, responseTtlSeconds).catch(err =>
       console.error('Failed to cache matchups response:', err)

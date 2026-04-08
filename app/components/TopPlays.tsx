@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import type { MatchupResult } from '@/lib/types'
-import { formatTime, expectedAtBats, hitProbability, regressedAvg, resolveLineupPosition, suggestRecommendedDoubles } from '@/lib/utils'
+import { formatTime, expectedAtBats, hitProbability, regressedAvg, resolveLineupPosition, suggestRecommendedDoubles, TOP_PLAYS_LIMIT } from '@/lib/utils'
 import type { RecommendedDouble } from '@/lib/utils'
 import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
 import { fmtOdds } from '@/lib/odds'
@@ -14,10 +14,8 @@ interface Props {
   matchups: MatchupResult[]
   overrideRecommendedDoubles?: RecommendedDouble[]
   now: number
+  slateLockedAt?: string | null
 }
-
-const TOP_PLAYS_LIMIT = 4
-
 const CONFIDENCE_COLORS = {
   high: 'text-green-400',
   medium: 'text-yellow-400',
@@ -29,9 +27,10 @@ const LINEUP_BADGE_STYLES = {
   estimated: 'bg-amber-900/40 text-amber-400',
 } as const
 
-export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: Props) {
+export default function TopPlays({ matchups, overrideRecommendedDoubles, now, slateLockedAt = null }: Props) {
   const [isDesktopLogicOpen, setIsDesktopLogicOpen] = useState(true)
   const score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
+  const isSlateLocked = slateLockedAt !== null
 
   const enriched = matchups.map(m => {
     const expectedAB = expectedAtBats(resolveLineupPosition(m))
@@ -57,17 +56,21 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
 
   const getDoubleTooltip = () => {
     if (hasTwoDoubles) {
-      return 'When all four Top 4 plays qualify, the app can show two doubles. If a Smash Double exists, it takes the lead slot and the remaining two legs become the Secondary Double. If no smash pair exists, the app chooses the strongest overall split of the Top 4 and shows the best pair first as the Daily Double.'
+      return isSlateLocked
+        ? 'Recommended doubles are locked from the official Top 4 frozen at the slate\'s first scheduled pitch. If a Smash Double exists, it takes the lead slot and the remaining two legs become the Secondary Double. If no smash pair exists, the app chooses the strongest overall split of the locked Top 4 and shows the best pair first as the Daily Double.'
+        : 'Before first pitch, the board shows the current confirmed Top 4 candidates only. At the slate\'s first scheduled pitch, the official Top 4 locks and recommended doubles stop changing.'
     }
 
-    return 'When only two or three Top 4 plays qualify, the app shows the single strongest available 2-leg parlay as the Daily Double. Smash Double rules still apply if that pair clears OPS above .950 and at least 7 hits against the pitcher.'
+    return isSlateLocked
+      ? 'Recommended doubles are locked from the official Top 4 frozen at the slate\'s first scheduled pitch. When fewer than four tracked plays qualify by lock time, the app shows the strongest available 2-leg parlay only.'
+      : 'Before first pitch, the board shows the current confirmed Top 4 candidates only. At the slate\'s first scheduled pitch, the official Top 4 locks and only those plays continue to be tracked.'
   }
 
   const getDoubleSubcopy = (double: RecommendedDouble, index: number) => {
-    if (double.isSmash) return 'Top qualifying smash pair from the current Top 4.'
-    if (!hasTwoDoubles) return 'Best available 2-leg parlay from the current Top 4.'
-    if (recommendedDoubles[0]?.isSmash && index === 1) return 'Second-best optional pair from the current Top 4 after the Smash Double.'
-    return index === 0 ? 'Top non-smash pair from the current Top 4.' : 'Optional second pair from the current Top 4.'
+    if (double.isSmash) return 'Top qualifying smash pair from the locked Top 4.'
+    if (!hasTwoDoubles) return 'Best available 2-leg parlay from the locked Top 4.'
+    if (recommendedDoubles[0]?.isSmash && index === 1) return 'Second-best optional pair from the locked Top 4 after the Smash Double.'
+    return index === 0 ? 'Top non-smash pair from the locked Top 4.' : 'Optional second pair from the locked Top 4.'
   }
 
   const header = (
@@ -77,7 +80,11 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400">Top 4 Plays</h2>
           </div>
-          <p className="mt-1 text-xs leading-5 text-gray-500">Capped at four to keep the board concentrated on the strongest historical edges and avoid padding the slate with lower-conviction plays.</p>
+          <p className="mt-1 text-xs leading-5 text-gray-500">
+            {isSlateLocked
+              ? 'The official Top 4 locked at the slate\'s first scheduled pitch. Only those plays keep tags and move through the board.'
+              : 'Before first pitch, the board shows the current confirmed Top 4 candidates only. At first pitch, the official Top 4 locks and nothing new can enter.'}
+          </p>
         </div>
       </div>
       <Link
@@ -128,7 +135,11 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
     return (
       <div className="mb-4 rounded-lg bg-gray-900 p-4">
         {header}
-        <p className="text-sm text-gray-500">No upcoming games with data for this date.</p>
+        <p className="text-sm text-gray-500">
+          {isSlateLocked
+            ? 'No tracked Top 4 plays are still upcoming for this date.'
+            : 'No confirmed Top 4 candidates are currently upcoming for this date.'}
+        </p>
       </div>
     )
   }
@@ -219,11 +230,9 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
                     {getDoubleLabel(double, index)}
                     <InfoTooltip width="w-64" align="left" text={getDoubleTooltip()} />
                   </div>
-                  {anyLegStarted ? (
-                    <div className="text-[10px] text-gray-500">Current recommendation updates as the upcoming slate changes.</div>
-                  ) : (
-                    <div className={`text-[10px] ${double.isSmash ? 'text-orange-400/70' : 'text-gray-500'}`}>{getDoubleSubcopy(double, index)}</div>
-                  )}
+                  <div className={`text-[10px] ${anyLegStarted ? 'text-gray-500' : double.isSmash ? 'text-orange-400/70' : 'text-gray-500'}`}>
+                    {anyLegStarted || isSlateLocked ? 'Locked from the official Top 4 at first pitch.' : getDoubleSubcopy(double, index)}
+                  </div>
                 </div>
 
                 <div className="mt-2 space-y-2">
@@ -278,7 +287,7 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
                 <div className={`mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t pt-2 ${double.isSmash ? 'border-orange-500/20' : 'border-gray-800'}`}>
                   <span className="font-semibold text-green-300">Combined: {(double.combinedProbability * 100).toFixed(2)}%</span>
                   {double.consensusParlayOddsAmerican != null && <span className="font-mono text-xs text-sky-300">Odds: {fmtOdds(double.consensusParlayOddsAmerican)}</span>}
-                  {anyLegStarted && <span className="text-xs text-gray-500">This card reflects the current recommendation from the filtered Top 4 remaining in the upcoming slate.</span>}
+                  {anyLegStarted && <span className="text-xs text-gray-500">This card remains fixed from the official Top 4 locked at first pitch.</span>}
                 </div>
 
                 {!anyLegStarted && unconfirmedLegs > 0 && (

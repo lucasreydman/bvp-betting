@@ -1,4 +1,4 @@
-import { buildRecommendationTags, formatTime, formatLocalDate, formatSlateDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, hitProbability, suggestDailyDouble, suggestRecommendedDoubles, generateRecommendedDoublesCSV, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
+import { buildRecommendationTags, formatTime, formatLocalDate, formatSlateDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, getEarliestGameTimeMs, hitProbability, isSlateLockReached, selectTopPlays, suggestDailyDouble, suggestRecommendedDoubles, generateRecommendedDoublesCSV, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
 import { DEFAULT_FILTERS, type MatchupResult } from '@/lib/types'
 
 const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => ({
@@ -65,6 +65,24 @@ describe('formatSlateDate', () => {
     const date = new Date('2026-04-08T03:08:00Z')
 
     expect(formatSlateDate(date)).toBe('2026-04-07')
+  })
+})
+
+describe('slate lock timing', () => {
+  it('finds the earliest valid game time on the slate', () => {
+    expect(getEarliestGameTimeMs([
+      '2026-04-08T23:10:00Z',
+      'invalid',
+      '2026-04-08T17:05:00Z',
+      '2026-04-08T20:40:00Z',
+    ])).toBe(new Date('2026-04-08T17:05:00Z').getTime())
+  })
+
+  it('locks the official Top 4 once the first scheduled pitch is reached', () => {
+    const gameTimes = ['2026-04-08T17:05:00Z', '2026-04-08T20:40:00Z']
+
+    expect(isSlateLockReached(gameTimes, new Date('2026-04-08T17:04:59Z').getTime())).toBe(false)
+    expect(isSlateLockReached(gameTimes, new Date('2026-04-08T17:05:00Z').getTime())).toBe(true)
   })
 })
 
@@ -162,6 +180,18 @@ describe('medianLineupPosition', () => {
 describe('hitProbability', () => {
   it('computes probability of at least one hit in multiple AB', () => {
     expect(hitProbability(0.4, 4)).toBeCloseTo(0.8704)
+  })
+})
+
+describe('selectTopPlays', () => {
+  it('caps the official set at four plays using weighted avg, avg, and AB tiebreakers', () => {
+    const first = makeMatchup({ batterId: 1, pitcherId: 11, avg: 0.410, ab: 40 })
+    const second = makeMatchup({ batterId: 2, pitcherId: 22, avg: 0.405, ab: 36 })
+    const third = makeMatchup({ batterId: 3, pitcherId: 33, avg: 0.390, ab: 34 })
+    const fourth = makeMatchup({ batterId: 4, pitcherId: 44, avg: 0.380, ab: 32 })
+    const fifth = makeMatchup({ batterId: 5, pitcherId: 55, avg: 0.380, ab: 28 })
+
+    expect(selectTopPlays([fifth, third, first, fourth, second])).toEqual([first, second, third, fourth])
   })
 })
 

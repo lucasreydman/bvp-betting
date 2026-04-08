@@ -57,10 +57,17 @@ export const DEFAULT_FILTERS: FilterState = {
 export interface MatchupsResponse {
   date: string
   fetchedAt: string
+  slateLockedAt: string | null
   gamesScanned: number      // each game in a doubleheader counted separately
   gamesSkipped: number      // games skipped due to missing probable pitcher
   matchupsFound: number     // count after server-side AB < 15 / AVG < .300 exclusion
   results: MatchupResult[]
+}
+
+export interface SlateTopPlaysSnapshot {
+  date: string
+  lockedAt: string
+  topPlays: MatchupResult[]
 }
 
 export interface ScheduleGame {
