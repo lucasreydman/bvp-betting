@@ -107,12 +107,16 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
 
   const header = (
     <div className="mb-4">
-      <div className="mb-3">
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Top 4 Plays</h2>
+      <div className="mb-3 flex flex-col gap-1.5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400">Top 4 Plays</h2>
+          </div>
+          <p className="mt-1 text-xs leading-5 text-gray-500">Capped at four to keep the board concentrated on the strongest historical edges and avoid padding the slate with lower-conviction plays.</p>
         </div>
-        <p className="mt-1 max-w-2xl text-xs text-gray-500">Capped at four to keep the board concentrated on the strongest historical edges and avoid padding the slate with lower-conviction plays.</p>
-        {recommendedDoubles.length > 0 && <p className="mt-1 max-w-2xl text-[11px] text-gray-600">Pair badges on each play show where that leg lands in the recommended doubles.</p>}
+        {recommendedDoubles.length > 0 && (
+          <p className="text-[11px] leading-5 text-gray-600 sm:max-w-xs sm:text-right">Badges mark where each play lands: Best, Smash, D1, or D2.</p>
+        )}
       </div>
       <div className="rounded-2xl border border-slate-700 bg-slate-950 p-4 text-xs text-slate-300 sm:hidden">
         <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-400">How Top Plays are ranked</div>
