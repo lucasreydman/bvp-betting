@@ -11,7 +11,7 @@ const TAG_TITLES: Record<RecommendationTag, string> = {
   SMASH: 'Part of the Smash Double',
   DD: 'Part of the Daily Double',
   SD: 'Part of the Secondary Double',
-  T4: 'Current Top 4 play',
+  T4: 'Official Top 4 tracked play',
 }
 
 interface Props {

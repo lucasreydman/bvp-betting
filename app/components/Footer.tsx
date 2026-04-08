@@ -47,7 +47,7 @@ export default function Footer() {
               <Fraction top={<span>AB</span>} bottom={<span>30</span>} />
               <span>, 1)</span>
             </Formula>, so a .350 in 30 AB
-            scores higher than a .500 in 15 AB. Larger samples carry less variance and are generally more reliable at the same AVG.
+            scores higher than a .500 in 15 AB. Larger samples carry less variance and are generally more reliable at the same AVG. Before first pitch the board shows only confirmed candidates, and at first pitch the official Top 4 locks for tracking.
           </p>
         </div>
         <div>

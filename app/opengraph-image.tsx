@@ -88,7 +88,7 @@ export default function Image() {
             display: 'flex',
           }}
         >
-          Career BvP stats for the Player Hits prop with a 15 AB minimum and .300 AVG floor. Daily Double, Secondary Double, and Smash Double pairings ranked from the Top 4.
+          Career BvP stats for the Player Hits prop with a 15 AB minimum and .300 AVG floor. Official Top 4 locks at first pitch, with Daily Double, Secondary Double, and Smash Double pairings built from that board.
         </div>
 
         {/* Sportsbook pills */}

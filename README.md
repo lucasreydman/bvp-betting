@@ -6,11 +6,11 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 
 ## How to use it for best results
 
-**Best bet: take the recommended double.** When all four Top 4 plays qualify, the board can show two 2-leg parlays, but the first non-smash card is the Daily Double and is the main recommendation. If only two or three plays qualify, it falls back to the single strongest double on the slate.
+**Best bet: take the recommended double.** Before first pitch, the board shows only the current confirmed Top 4 candidates. At the slate's first scheduled pitch, the official Top 4 locks. If all four locked plays qualify, the board can show two 2-leg parlays, but the first non-smash card is the Daily Double and is the main recommendation. If only two or three locked plays qualify, it falls back to the single strongest double on the slate.
 
 **If it says Smash Double, even better.** A Smash Double is the lead card whenever both legs have a career OPS above .950 and at least 7 hits against their pitcher. When one exists, it takes priority over the Daily Double and the remaining two Top 4 plays become the Secondary Double.
 
-**Want more action? Take the Secondary Double if available.** When four Top 4 plays qualify, the board can show a second optional 2-leg parlay alongside the lead card.
+**Want more action? Take the Secondary Double if available.** When four locked Top 4 plays qualify, the board can show a second optional 2-leg parlay alongside the lead card.
 
 **Prefer lower risk?** Pick your favorites out of the Top 4 Plays and take them as singles. Less risk per bet than a parlay, with a smaller payout to match.
 
@@ -24,7 +24,7 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 2. Builds each lineup: official order from the schedule or boxscore when available, otherwise the top 9 active players by career plate appearances.
 3. Fetches career BvP for each batter vs the opposing starter, then excludes rows below 15 AB or .300 AVG.
 4. Computes AVG, OPS, SLG, OBP, and XBH from the split.
-5. Splits results into **Upcoming**, **In progress**, and **Settled** tables based on game status from the MLB API. The qualifying player list for each game is frozen at game start, so no new players can enter or leave mid-game.
+5. Before the slate's first scheduled pitch, the API returns only the current confirmed Top 4 candidates. At first pitch, it freezes a slate-wide official Top 4 snapshot. Only those tracked plays continue into **Upcoming**, **In progress**, and **Settled**.
 6. In-progress rows show whether each batter has gotten a hit yet (HIT / pending). Settled rows show the final result (HIT / NO HIT).
 7. Data refreshes silently in the background every 5 minutes, and faster while any upcoming lineup is still estimated, with no manual refresh needed.
 7. Sorts tables client-side (default: **AVG desc**).
@@ -44,7 +44,7 @@ hit chance   = 1 − (1 − adjusted AVG) ^ (expected AB)
 
 ## Recommended Doubles and Smash Double
 
-When **four** plays populate the Top 4 card, the app recommends **two doubles**. If any pair qualifies as a **Smash Double**, that pair is forced into the first slot and the other two legs become the second double. If no smash pair exists, the app evaluates the possible Top 4 splits and orders the two doubles by pair strength.
+When **four** locked plays populate the Top 4 card, the app recommends **two doubles**. If any pair qualifies as a **Smash Double**, that pair is forced into the first slot and the other two legs become the second double. If no smash pair exists, the app evaluates the possible Top 4 splits and orders the two doubles by pair strength.
 
 When only **two or three** plays qualify, the app shows just the single best available 2-leg parlay.
 
@@ -59,7 +59,7 @@ Recommendation tags now live in the matchup tables so tagged players stay identi
 - **SMASH**: leg of the Smash Double
 - **DD**: leg of the Daily Double, or the only non-smash double when there is just one
 - **SD**: leg of the secondary double when two doubles are shown
-- **T4**: current Top 4 play, including ones that also belong to SMASH, DD, or SD
+- **T4**: official locked Top 4 play, including ones that also belong to SMASH, DD, or SD
 
 ## Date navigation
 
@@ -84,7 +84,7 @@ All active filters apply at once (AND logic). Filters apply to the Upcoming, In 
 The Export CSV button (desktop only) offers three options:
 
 - **Daily / Secondary / Smash Double**: one or two 2-leg parlay recommendations
-- **Top 4 Plays**: top 4 upcoming plays by primary score
+- **Top 4 Plays**: the official tracked Top 4 or, before lock, the current confirmed Top 4 candidates
 - **Full List**: all upcoming and in-progress rows that pass the current filters
 
 ## Confidence
@@ -98,7 +98,9 @@ Sample size (career AB vs this pitcher):
 ## Data quality
 
 - The API sometimes returns team-level aggregates instead of true individual BvP. Any raw stat line shared by **three or more** batters on the same team against the same pitcher is dropped.
-- When a game is upcoming, the qualifying matchups for that game are snapshotted to KV. Once the game starts, only players from that pre-game snapshot appear in the In progress and Settled tables, so no new players can enter mid-game.
+- Before the slate lock, only confirmed qualifying plays can appear in the Top 4 board. Estimated rows never enter the tracked set.
+- At the slate's first scheduled pitch, the API freezes a slate-wide `slate-top4:{date}` snapshot from the confirmed qualifying plays available at that cutoff. No later lineup confirmations can replace those tracked players.
+- Upcoming games still write per-game qualifying snapshots to KV. Once those tracked players start, only players from those pre-game snapshots appear in the In progress and Settled tables, so no new players can enter mid-game.
 - If no pre-game snapshot exists for a game (e.g. the server first saw it already in progress), that game is omitted from In progress and Settled rather than showing unverified data.
 - Lineup data is always fetched fresh (no caching) so scratches and late lineup changes propagate within a short response-cache window, and estimated upcoming rows refresh faster until lineups are confirmed.
 
@@ -154,7 +156,7 @@ npm run build
 
 ```
 app/
-  api/matchups/    Schedule -> lineups -> BvP; 5-min KV response cache
+  api/matchups/    Schedule -> lineups -> BvP -> first-pitch Top 4 lock; short pre-lock KV cache
   api/bvp/         Single BvP lookup (debug)
   api/schedule/    Schedule JSON for a date
   scoring-logic/   Mobile scoring explainer page
@@ -172,8 +174,9 @@ lib/
 
 | Key | Value | TTL | Purpose |
 |-----|-------|-----|---------|
-| `matchups-response:{date}` | `MatchupsResponse` | 5 min | Full compiled matchups response; absorbs concurrent load |
-| `game-qualifying:{gamePk}` | `MatchupResult[]` | 24 hr | Pre-game snapshot of qualifying matchups; frozen at game start for in-progress/settled display |
+| `matchups-response:{date}` | `MatchupsResponse` | 30 sec pre-lock, 5 min post-lock | Full compiled matchups response; short-lived before first pitch so confirmed lineups can refresh into the candidate board |
+| `slate-top4:{date}` | `SlateTopPlaysSnapshot` | 36 hr | Official Top 4 snapshot frozen at the slate's first scheduled pitch |
+| `game-qualifying:{gamePk}` | `MatchupResult[]` | 36 hr | Pre-game snapshot of qualifying matchups for tracked-player carryover into in-progress/settled display |
 
 ## Disclaimer
 

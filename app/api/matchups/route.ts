@@ -286,7 +286,7 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // ── Build confirmed slate pool and lock Top 4 once four confirmed plays exist ─
+    // ── Build confirmed slate pool and lock Top 4 at the slate's first pitch ─
     const nonUpcomingSnapshots = new Map<number, MatchupResult[]>()
     const confirmedSlatePool: MatchupResult[] = upcomingResults.filter(matchup => matchup.lineupSource === 'confirmed')
 
