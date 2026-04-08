@@ -468,7 +468,7 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
                 <div className={`mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t pt-2 ${double.isSmash ? 'border-orange-500/20' : 'border-gray-800'}`}>
                   <span className="font-semibold text-green-300">Combined: {(double.combinedProbability * 100).toFixed(2)}%</span>
                   {double.consensusParlayOddsAmerican != null && <span className="font-mono text-xs text-sky-300">Odds: {fmtOdds(double.consensusParlayOddsAmerican)}</span>}
-                  <span className="text-xs text-gray-500">{anyLegStarted ? 'This card reflects the current recommendation from the filtered Top 4 remaining in the upcoming slate.' : getDoubleSubcopy(double, index)}</span>
+                  {anyLegStarted && <span className="text-xs text-gray-500">This card reflects the current recommendation from the filtered Top 4 remaining in the upcoming slate.</span>}
                 </div>
 
                 {!anyLegStarted && unconfirmedLegs > 0 && (
