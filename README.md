@@ -147,6 +147,39 @@ KV_REST_API_TOKEN=...
 
 Without these, the app falls back to a process-local in-memory store. It now respects TTLs, but cached data is still isolated to the current dev server process.
 
+To enable Discord notifications, add:
+
+```
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+DISCORD_NOTIFIER_SECRET=choose-a-random-secret
+CRON_SECRET=use-the-same-secret-here
+```
+
+The notifier route lives at `/api/notifications/discord`. On this repo it is scheduled by GitHub Actions every 5 minutes, because Vercel Hobby does not support sub-daily cron jobs. Keep `CRON_SECRET` and `DISCORD_NOTIFIER_SECRET` set to the same value in Vercel so both scheduled and manual requests use the same bearer secret. If `DISCORD_WEBHOOK_URL` is missing, the route falls back to a dry-run preview mode so you can inspect the messages without posting anything.
+
+Manual test URLs:
+
+```bash
+# Preview messages without posting
+http://localhost:3000/api/notifications/discord?dryRun=1
+
+# Clear sent-event dedupe state for the slate date
+http://localhost:3000/api/notifications/discord?reset=1&secret=your-secret
+```
+
+The notifier currently posts four simple event types:
+
+- official Top 4 lock
+- locked Daily / Secondary / Smash Double cards
+- individual leg hit
+- double hit once both legs have recorded a hit
+
+GitHub Actions secret required for the scheduler:
+
+```
+DISCORD_NOTIFIER_SECRET=the-same-secret-you-set-in-Vercel
+```
+
 ```bash
 npm test
 npm run build
