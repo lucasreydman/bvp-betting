@@ -67,23 +67,23 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
 
   const getDoubleLabel = (double: RecommendedDouble, index: number) => {
     if (double.isSmash) return 'Smash Double'
-    if (!hasTwoDoubles) return 'Recommended Double'
-    return index === 0 ? 'Primary Double' : 'Secondary Double'
+    if (!hasTwoDoubles) return 'Daily Double'
+    return index === 0 ? 'Daily Double' : 'Secondary Double'
   }
 
   const getDoubleTooltip = () => {
     if (hasTwoDoubles) {
-      return 'When all four Top 4 plays qualify, the app recommends two doubles. If any pair qualifies as a Smash Double, that pair is forced into the first slot and the remaining two legs become the second double. If no smash pair exists, the app chooses the strongest overall split of the Top 4 and orders the two doubles by strength.'
+      return 'When all four Top 4 plays qualify, the app can show two doubles. If a Smash Double exists, it takes the lead slot and the remaining two legs become the Secondary Double. If no smash pair exists, the app chooses the strongest overall split of the Top 4 and shows the best pair first as the Daily Double.'
     }
 
-    return 'When only two or three Top 4 plays qualify, the app shows the single strongest available 2-leg parlay. Smash Double rules still apply if that pair clears OPS above .950 and at least 7 hits against the pitcher.'
+    return 'When only two or three Top 4 plays qualify, the app shows the single strongest available 2-leg parlay as the Daily Double. Smash Double rules still apply if that pair clears OPS above .950 and at least 7 hits against the pitcher.'
   }
 
   const getDoubleSubcopy = (double: RecommendedDouble, index: number) => {
     if (double.isSmash) return 'Top qualifying smash pair from the current Top 4.'
     if (!hasTwoDoubles) return 'Best available 2-leg parlay from the current Top 4.'
-    if (recommendedDoubles[0]?.isSmash && index === 1) return 'Second recommended double from the current Top 4.'
-    return index === 0 ? 'One of the two recommended Top 4 doubles.' : 'Another recommended double from the current Top 4.'
+    if (recommendedDoubles[0]?.isSmash && index === 1) return 'Second-best optional pair from the current Top 4 after the Smash Double.'
+    return index === 0 ? 'Top non-smash pair from the current Top 4.' : 'Optional second pair from the current Top 4.'
   }
 
   const header = (
@@ -121,7 +121,7 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
           <p>
             <span className="font-semibold text-green-300">Hit chance %:</span>
             <span className="text-green-300"> estimated chance of ≥1 hit using a regressed AVG and expected at-bats.</span>
-            <InfoTooltip width="w-72" text="Hit chance uses a regressed AVG that pulls toward .320 based on sample size. Smaller samples get pulled more. A higher raw AVG matters more here than ABs, which is the opposite of the ranking score. That is why a lower-ranked play can still land in the top recommended double." />
+            <InfoTooltip width="w-72" text="Hit chance uses a regressed AVG that pulls toward .320 based on sample size. Smaller samples get pulled more. A higher raw AVG matters more here than ABs, which is the opposite of the ranking score. That is why a lower-ranked play can still land in the Daily Double or Smash Double." />
           </p>
           <div className="pl-3 text-slate-300 sm:hidden" style={{ fontFamily: '"Cambria Math", "STIX Two Text", "Times New Roman", serif' }}>
             <div className="text-[0.88rem] leading-5">adjusted AVG =</div>
@@ -280,7 +280,7 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
             </Formula>
             </FormulaBlock>
 
-            <FormulaBlock title="Recommended Doubles" accent="text-yellow-300">
+            <FormulaBlock title="Double Selection" accent="text-yellow-300">
             <Formula className="text-slate-50 leading-6">
               <span>P(double)</span>
               <span>=</span>
@@ -492,10 +492,10 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
       ) : (
         <div className="mt-4 rounded-lg border border-gray-800 bg-gray-950 p-3 text-sm">
           <div className="mb-1 flex items-center gap-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Recommended Doubles</span>
-            <InfoTooltip width="w-64" text="When four Top 4 plays qualify, the app recommends two doubles. If any pair qualifies as a Smash Double, that pair is shown first and the remaining two legs become the second double. With only two or three qualified plays, the app shows just the strongest available double." />
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Daily Double</span>
+            <InfoTooltip width="w-64" text="When four Top 4 plays qualify, the app can show two doubles. If any pair qualifies as a Smash Double, that pair is shown first and the remaining two legs become the Secondary Double. With only two or three qualified plays, the app shows just the strongest available pair as the Daily Double." />
           </div>
-          <p className="text-gray-500">{topPlays.length < 2 ? 'Not enough qualified plays to form a recommended double. Fewer than 2 matchups meet the 15 AB / .300 AVG requirements today.' : 'No recommended doubles are available from the current upcoming slate.'}</p>
+          <p className="text-gray-500">{topPlays.length < 2 ? 'Not enough qualified plays to form a Daily Double. Fewer than 2 matchups meet the 15 AB / .300 AVG requirements today.' : 'No Daily Double is available from the current upcoming slate.'}</p>
         </div>
       )}
     </div>

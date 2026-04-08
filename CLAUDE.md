@@ -25,7 +25,7 @@ app/
     TopPlays.tsx         # Top 4 by AVG×confidence (AB-scaled); upcoming only; 2-row card layout on mobile; recommended doubles + Smash Double cards
     MatchupTable.tsx     # Sortable table (sm+) + card list (mobile); sort chips on mobile; TEAM_ABBR map for mobile cards; recommendation tags render beside batter names
     MatchupRow.tsx       # Single <tr> row; used only in the sm+ table path; renders recommendation tags in desktop rows
-    RecommendationTagBadge.tsx # Shared badge for SMASH / RD / SD / T4 table tags
+    RecommendationTagBadge.tsx # Shared badge for SMASH / DD / SD / T4 table tags
     InfoTooltip.tsx      # Hover/tap tooltip used in top plays
     GameTimeCell.tsx     # Game time display cell used in table rows
     LoadingSkeleton.tsx  # Loading state with elapsed timer and progress messages
@@ -65,7 +65,7 @@ lib/
 - **`formatTime()`:** Uses `Intl.DateTimeFormat().resolvedOptions().timeZone` (browser local time, not hardcoded ET).
 - **Slate date cutoff:** Use the Pacific calendar day (`America/Los_Angeles`) for the active slate date. Do not advance the selected board at local midnight in other time zones.
 - **Mobile layout:** `MatchupTable` renders a card list (`sm:hidden`) and a full table (`hidden sm:block`). Cards show batter, AVG, team abbreviation vs pitcher, H/AB, lineup badge, and `GameTimeCell`. Sort chips (AVG / AB / Time) replace column-header sorting on mobile. `TopPlays` uses `sm:hidden` / `hidden sm:flex` to switch between a 2-row card and the single-row desktop layout. Recommended doubles / Smash Double legs use a 2-row card on all screen sizes (name+AVG row 1, pitcher+OPS+AB+hit% row 2). `StatusBar` stacks clock + "Updated" on the left with the refresh button on the right on mobile; "games scanned" text is `hidden sm:inline`.
-- **Recommendation tags:** Top 4 itself does not render recommendation badges. Tags render in the matchup tables and card list so a tagged player remains trackable as they move Upcoming → In progress → Settled during the session. `T4` remains present for every current Top 4 play, even when it also carries `SMASH`, `RD`, or `SD`.
+- **Recommendation tags:** Top 4 itself does not render recommendation badges. Tags render in the matchup tables and card list so a tagged player remains trackable as they move Upcoming → In progress → Settled during the session. `T4` remains present for every current Top 4 play, even when it also carries `SMASH`, `DD`, or `SD`.
 - **Team abbreviations:** `TEAM_ABBR` map in `MatchupTable.tsx` covers all 30 MLB teams; `abbr()` falls back to initials for unknown names.
 - **KV TTLs:** Response cache uses 5-min TTL. `kvSet` accepts an optional third argument `ttlSeconds`.
 - **PPD/cancelled games:** Filtered in `fetchSchedule` before any lineup or BvP work. Status checked via `g.status.detailedState`.

@@ -2,15 +2,15 @@ import type { RecommendationTag } from '@/lib/types'
 
 const TAG_STYLES: Record<RecommendationTag, string> = {
   SMASH: 'border border-orange-500/30 bg-orange-950/60 text-orange-300',
-  RD: 'border border-emerald-500/30 bg-emerald-950/60 text-emerald-300',
+  DD: 'border border-emerald-500/30 bg-emerald-950/60 text-emerald-300',
   SD: 'border border-sky-500/30 bg-sky-950/60 text-sky-300',
   T4: 'border border-slate-600/60 bg-slate-900/80 text-slate-300',
 }
 
 const TAG_TITLES: Record<RecommendationTag, string> = {
   SMASH: 'Part of the Smash Double',
-  RD: 'Part of the primary recommended double',
-  SD: 'Part of the secondary recommended double',
+  DD: 'Part of the Daily Double',
+  SD: 'Part of the Secondary Double',
   T4: 'Current Top 4 play',
 }
 

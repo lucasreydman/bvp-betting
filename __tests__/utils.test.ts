@@ -258,14 +258,14 @@ describe('generateRecommendedDoublesCSV', () => {
 })
 
 describe('buildRecommendationTags', () => {
-  it('marks a lone recommended double as RD plus T4 and the leftover Top 4 play as T4', () => {
+  it('marks a lone daily double as DD plus T4 and the leftover Top 4 play as T4', () => {
     const a = makeMatchup({ batterId: 1, pitcherId: 11, ops: 0.910, h: 6, avg: 0.360, ab: 26 })
     const b = makeMatchup({ batterId: 2, pitcherId: 22, ops: 0.900, h: 5, avg: 0.385, ab: 24 })
     const c = makeMatchup({ batterId: 3, pitcherId: 33, ops: 0.840, h: 4, avg: 0.305, ab: 18 })
     const tags = buildRecommendationTags([a, b, c], suggestRecommendedDoubles([a, b, c]))
 
-    expect(tags['123456:1:11']).toEqual(['RD', 'T4'])
-    expect(tags['123456:2:22']).toEqual(['RD', 'T4'])
+    expect(tags['123456:1:11']).toEqual(['DD', 'T4'])
+    expect(tags['123456:2:22']).toEqual(['DD', 'T4'])
     expect(tags['123456:3:33']).toEqual(['T4'])
   })
 

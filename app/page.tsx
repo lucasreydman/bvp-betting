@@ -16,15 +16,19 @@ export default function Home() {
         <div className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">How to use this system</div>
         <p>
           <span className="text-white font-semibold">The page stays current automatically.</span>
-          <span className="text-slate-300"> Data refreshes every 5 minutes, and faster while any lineup is still estimated. Top 4 and the recommended doubles show the current upcoming slate only. Once a game starts, players move to In Progress, then Settled with a final result. Check back after lineups post (usually 3–4 hours before first pitch) for exact hit chances.</span>
+          <span className="text-slate-300"> Data refreshes every 5 minutes, and faster while any lineup is still estimated. Top 4 plus the current lead double card show the upcoming slate only. Once a game starts, players move to In Progress, then Settled with a final result. Check back after lineups post (usually 3–4 hours before first pitch) for exact hit chances.</span>
         </p>
         <p>
-          <span className="text-yellow-400 font-semibold">Best bet: take the recommended doubles.</span>
-          <span className="text-slate-300"> When all four plays populate, the board gives you two 2-leg parlays. If only two or three plays qualify, it falls back to the strongest single double. Before games start, these are the best current pairings on the board. After games begin, they reflect the remaining upcoming slate.</span>
+          <span className="text-yellow-400 font-semibold">Best bet: take the recommended double.</span>
+          <span className="text-slate-300"> When all four plays populate, the board can give you two 2-leg parlays, but the first non-smash card is the Daily Double and is the main recommendation. If only two or three plays qualify, it falls back to the strongest single double. Before games start, these are the best current pairings on the board. After games begin, they reflect the remaining upcoming slate.</span>
         </p>
         <p>
           <span className="text-orange-400 font-semibold">If it says Smash Double, even better.</span>
-          <span className="text-slate-300"> A Smash Double is the first recommended double whenever both legs have a career OPS above .950 and at least 7 hits against their pitcher. The hit floor ensures the high OPS reflects real contact, not a small-sample fluke. When one exists, it gets locked in first and the remaining two top plays form the second double.</span>
+          <span className="text-slate-300"> A Smash Double is the lead card whenever both legs have a career OPS above .950 and at least 7 hits against their pitcher. The hit floor ensures the high OPS reflects real contact, not a small-sample fluke. When one exists, it takes priority over the Daily Double and the remaining two top plays form the Secondary Double.</span>
+        </p>
+        <p>
+          <span className="text-sky-300 font-semibold">Want more action? Take the Secondary Double if available.</span>
+          <span className="text-slate-300"> When four plays qualify, the board can show a second 2-leg parlay alongside the lead card. It is the next-best split of the Top 4 and is optional, not the main recommendation.</span>
         </p>
         <p>
           <span className="text-white font-semibold">Prefer lower risk?</span>

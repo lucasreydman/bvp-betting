@@ -6,9 +6,11 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 
 ## How to use it for best results
 
-**Best bet: take the recommended doubles.** When all four Top 4 plays qualify, the board gives you two 2-leg parlays. If only two or three plays qualify, it falls back to the single strongest double on the slate.
+**Best bet: take the recommended double.** When all four Top 4 plays qualify, the board can show two 2-leg parlays, but the first non-smash card is the Daily Double and is the main recommendation. If only two or three plays qualify, it falls back to the single strongest double on the slate.
 
-**If it says Smash Double, even better.** A Smash Double is the first recommended double whenever both legs have a career OPS above .950 and at least 7 hits against their pitcher. When one exists, it is locked into the first slot and the remaining two Top 4 plays become the second double.
+**If it says Smash Double, even better.** A Smash Double is the lead card whenever both legs have a career OPS above .950 and at least 7 hits against their pitcher. When one exists, it takes priority over the Daily Double and the remaining two Top 4 plays become the Secondary Double.
+
+**Want more action? Take the Secondary Double if available.** When four Top 4 plays qualify, the board can show a second optional 2-leg parlay alongside the lead card.
 
 **Prefer lower risk?** Pick your favorites out of the Top 4 Plays and take them as singles. Less risk per bet than a parlay, with a smaller payout to match.
 
@@ -55,7 +57,7 @@ If one or more legs are already in progress, the recommended doubles section rem
 Recommendation tags now live in the matchup tables so tagged players stay identifiable as they move from **Upcoming** to **In progress** to **Settled**.
 
 - **SMASH**: leg of the Smash Double
-- **RD**: leg of the primary recommended double, or the only recommended double when there is just one
+- **DD**: leg of the Daily Double, or the only non-smash double when there is just one
 - **SD**: leg of the secondary double when two doubles are shown
 - **T4**: current Top 4 play, including ones that also belong to SMASH, RD, or SD
 

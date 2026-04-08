@@ -261,7 +261,7 @@ export function buildRecommendationTags(
     const tag: RecommendationTag = double.isSmash
       ? 'SMASH'
       : recommendedDoubles.length === 1 || index === 0
-        ? 'RD'
+        ? 'DD'
         : 'SD'
 
     for (const leg of [double.first, double.second]) {
@@ -342,7 +342,7 @@ export function generateRecommendedDoublesCSV(doubles: RecommendedDouble[]): str
   ]
 
   const rows = doubles.flatMap((double, index) => {
-    const type = double.isSmash ? 'Smash Double' : doubles.length === 1 ? 'Recommended Double' : index === 0 ? 'Primary Double' : 'Secondary Double'
+    const type = double.isSmash ? 'Smash Double' : index === 0 ? 'Daily Double' : 'Secondary Double'
     return [
       { leg: double.first, legIndex: 1 },
       { leg: double.second, legIndex: 2 },

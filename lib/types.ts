@@ -1,4 +1,4 @@
-export type RecommendationTag = 'SMASH' | 'RD' | 'SD' | 'T4'
+export type RecommendationTag = 'SMASH' | 'DD' | 'SD' | 'T4'
 
 export interface MatchupResult {
   batterId: number

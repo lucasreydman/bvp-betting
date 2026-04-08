@@ -246,7 +246,7 @@ export default function Filters({ date, filters, onApply, matchups, topPlays, re
                   className="w-full text-left px-4 py-2.5 hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   <div className={`text-sm font-medium ${recommendedDoubles[0]?.isSmash ? 'text-orange-400' : 'text-yellow-400'}`}>
-                    {recommendedDoubles.length > 1 ? 'Recommended Doubles' : recommendedDoubles[0]?.isSmash ? 'Smash Double' : 'Recommended Double'}
+                    {recommendedDoubles.length > 1 ? 'Daily + Secondary Doubles' : recommendedDoubles[0]?.isSmash ? 'Smash Double' : 'Daily Double'}
                   </div>
                   <div className="text-xs text-gray-500 mt-0.5">{recommendedDoubles.length} double{recommendedDoubles.length === 1 ? '' : 's'}{recommendedDoubles.length > 0 ? ` • ${recommendedDoubles.length * 2} legs` : ''}</div>
                 </button>
