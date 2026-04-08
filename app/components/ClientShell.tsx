@@ -97,12 +97,11 @@ export default function ClientShell() {
   const hasActiveOptionalFilters = filters.minOPS !== null || filters.minH !== null
   const filtersKey = `${filters.minOPS ?? 'none'}-${filters.minH ?? 'none'}`
 
-  const trackedSlateMatchups = selectTopPlays(allMatchups.filter(matchup => matchup.recommendationTags?.includes('T4')))
   const trackedUpcoming = upcoming
   const trackedInProgress = inProgress
   const trackedSettled = settled
   const topPlaysMatchups = selectTopPlays(allUpcoming)
-  const recommendedDoubles: RecommendedDouble[] = suggestRecommendedDoubles(trackedSlateMatchups)
+  const recommendedDoubles: RecommendedDouble[] = suggestRecommendedDoubles(trackedUpcoming)
 
   return (
     <div>
