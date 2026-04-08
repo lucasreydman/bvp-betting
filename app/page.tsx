@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import type { Metadata } from 'next'
 import ClientShell from './components/ClientShell'
 import Footer from './components/Footer'
@@ -14,29 +13,6 @@ export const metadata: Metadata = {
 }
 
 const siteUrl = getSiteUrl()
-
-const faqItems = [
-  {
-    question: 'What does BVP mean in MLB betting?',
-    answer:
-      'BVP means batter versus pitcher. In MLB betting, BVP stats show how a hitter has performed historically against the starting pitcher he is facing today. This site focuses on career BvP stats that matter for the player to record a hit market.',
-  },
-  {
-    question: 'How does batter versus pitcher betting work?',
-    answer:
-      'Batter versus pitcher betting usually means using matchup history as one input when betting MLB hit props, total bases, or same-game parlays. MLB BvP Betting ranks qualified matchups by batting average weighted by sample size so you can compare strong historical edges quickly.',
-  },
-  {
-    question: 'Why use BVP stats for MLB hit props?',
-    answer:
-      'BVP stats are useful for MLB hit props because any hit cashes the bet. Career batting average, hit count, and sample size versus a specific pitcher can be more directly relevant to a 1+ hits prop than broader power stats alone.',
-  },
-  {
-    question: 'What makes these MLB batter versus pitcher stats different?',
-    answer:
-      'This board filters out weak samples, attaches consensus sportsbook odds, adjusts hit probability for lineup position, and freezes the official Top 4 at first pitch so the tracked plays stay consistent throughout the slate.',
-  },
-]
 
 const structuredData = [
   {
@@ -65,18 +41,6 @@ const structuredData = [
       { '@type': 'Thing', name: 'MLB hit props' },
       { '@type': 'Thing', name: 'BVP betting' },
     ],
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqItems.map(item => ({
-      '@type': 'Question',
-      name: item.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.answer,
-      },
-    })),
   },
 ]
 
@@ -131,45 +95,6 @@ export default function Home() {
       </div>
 
       <ClientShell />
-
-      <section className="mb-8 mt-8 rounded-2xl border border-slate-800 bg-slate-950/80 p-5 text-slate-300 shadow-[0_20px_50px_rgba(2,6,23,0.22)]">
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div>
-            <h2 className="text-lg font-semibold tracking-tight text-white">MLB batter versus pitcher stats for daily hit props</h2>
-            <p className="mt-3 text-sm leading-7 text-slate-400">
-              MLB BvP Betting is built for people searching for <span className="text-slate-200">batter versus pitcher stats</span>, <span className="text-slate-200">BVP stats</span>, and
-              <span className="text-slate-200"> MLB hit props</span> in one place. The board pulls career hitter versus pitcher matchup data for today&apos;s slate, filters out weak samples, and ranks the best MLB BVP spots by batting average weighted by sample size.
-            </p>
-            <p className="mt-3 text-sm leading-7 text-slate-400">
-              If you are looking for <span className="text-slate-200">MLB BVP betting</span> angles, the site is specifically designed around the 1+ hit market. It attaches consensus odds, flags confirmed versus estimated lineups, and keeps the official Top 4 plays fixed at first pitch so the tracked board does not drift after lock.
-            </p>
-          </div>
-
-          <div>
-            <h2 className="text-lg font-semibold tracking-tight text-white">How this helps with batter versus pitcher betting</h2>
-            <p className="mt-3 text-sm leading-7 text-slate-400">
-              Batter versus pitcher betting works best when the matchup history is strong enough to matter. That is why the board only shows hitters with at least <span className="font-mono text-slate-200">15 AB</span> and a
-              <span className="font-mono text-slate-200"> .300 AVG</span> against the opposing starter. Once a matchup qualifies, the app adds hit probability context and recommended doubles for bettors who want a focused card instead of a giant list.
-            </p>
-            <p className="mt-3 text-sm leading-7 text-slate-400">
-              The methodology is fully transparent. You can review the <Link href="/scoring-logic" className="text-sky-300 transition-colors hover:text-sky-200">BvP scoring guide</Link> to see how the model ranks plays, then use the
-              <Link href="/disclaimer" className="ml-1 text-sky-300 transition-colors hover:text-sky-200">disclaimer</Link> as a reminder that MLB hit props are still probabilistic, not guaranteed outcomes.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-8 border-t border-slate-800 pt-6">
-          <h2 className="text-lg font-semibold tracking-tight text-white">FAQ</h2>
-          <div className="mt-4 space-y-3">
-            {faqItems.map(item => (
-              <details key={item.question} className="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3">
-                <summary className="cursor-pointer list-none text-sm font-medium text-slate-100">{item.question}</summary>
-                <p className="mt-2 text-sm leading-7 text-slate-400">{item.answer}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <Footer />
     </main>

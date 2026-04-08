@@ -18,7 +18,7 @@ export default function ClientShell() {
   const [allMatchups, setAllMatchups] = useState<MatchupResult[]>([])
   const [meta, setMeta] = useState<MatchupsMeta | null>(null)
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)
-  const [sort, setSort] = useState<SortState>({ column: 'avg', direction: 'desc' })
+  const [sort, setSort] = useState<SortState>({ column: 'gameTime', direction: 'asc' })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tick, setTick] = useState(0)

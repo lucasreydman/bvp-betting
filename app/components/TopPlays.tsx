@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { MatchupResult } from '@/lib/types'
 import { formatTime, expectedAtBats, hitProbability, regressedAvg, resolveLineupPosition, suggestRecommendedDoubles, TOP_PLAYS_LIMIT } from '@/lib/utils'
 import type { RecommendedDouble } from '@/lib/utils'
@@ -9,6 +9,8 @@ import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineup
 import { fmtOdds } from '@/lib/odds'
 import InfoTooltip from './InfoTooltip'
 import ScoringLogicContent from './ScoringLogicContent'
+
+const DESKTOP_LOGIC_STORAGE_KEY = 'bvp-top-plays-desktop-logic-open'
 
 interface Props {
   matchups: MatchupResult[]
@@ -29,9 +31,23 @@ const LINEUP_BADGE_STYLES = {
 
 export default function TopPlays({ matchups, overrideRecommendedDoubles, now, slateLockedAt = null }: Props) {
   const [isDesktopLogicOpen, setIsDesktopLogicOpen] = useState(true)
+  const hasLoadedLogicPreference = useRef(false)
   const score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
   const isSlateLocked = slateLockedAt !== null
   const canBackfillLockedSlots = isSlateLocked && matchups.length < TOP_PLAYS_LIMIT
+
+  useEffect(() => {
+    const storedPreference = window.localStorage.getItem(DESKTOP_LOGIC_STORAGE_KEY)
+    if (storedPreference !== null) {
+      setIsDesktopLogicOpen(storedPreference === 'true')
+    }
+    hasLoadedLogicPreference.current = true
+  }, [])
+
+  useEffect(() => {
+    if (!hasLoadedLogicPreference.current) return
+    window.localStorage.setItem(DESKTOP_LOGIC_STORAGE_KEY, String(isDesktopLogicOpen))
+  }, [isDesktopLogicOpen])
 
   const enriched = matchups.map(m => {
     const expectedAB = expectedAtBats(resolveLineupPosition(m))

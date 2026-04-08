@@ -28,7 +28,7 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 6. In-progress rows show whether each batter has gotten a hit yet (HIT / pending). Settled rows show the final result (HIT / NO HIT).
 7. Data refreshes silently in the background every 5 minutes, and faster while any upcoming lineup is still estimated, with no manual refresh needed.
 8. The matchups API includes a `debug` summary so the board can explain why it currently shows 0, 3, or 4 tracked plays.
-9. Sorts tables client-side (default: **AVG desc**).
+9. Sorts tables client-side (default: **Game time asc**, earliest first).
 
 **Why BvP for this prop:** Any hit (single through homer) wins. This app uses career hit stats vs that specific pitcher. Walks/HBP do not count as hits.
 

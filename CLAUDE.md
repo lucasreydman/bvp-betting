@@ -61,7 +61,7 @@ lib/
 - **Filters:** minAB (15) and minAVG (.300) are server-enforced hard minimums — not user-editable. Only minOPS is user-configurable (optional). OPS filter applies to all three tables (upcoming, inProgress, settled).
 - **Game status split:** Server-driven via `gameStatus` field on each `MatchupResult`. `getGameStatus(detailedState)` maps MLB API states → `upcoming | inProgress | settled`. Client reads `gameStatus` directly — no time-based split.
 - **TopPlays:** Before lock, shows the current Top 4 candidate board, which may include estimated-lineup plays. After lock, shows only official tracked Top 4 plays that are still upcoming.
-- **Default sort:** AVG desc by default (table). Top 4 card uses AVG × min(AB/30, 1) with tiebreakers raw AVG then AB.
+- **Default sort:** Game time asc by default for the Upcoming and In progress tables (earliest first). Top 4 card uses AVG × min(AB/30, 1) with tiebreakers raw AVG then AB.
 - **Confidence:** AB vs this pitcher: high ≥21 (green), medium 18–20 (yellow), low 15–17 (red). Server enforces 15 AB minimum so all three tiers are reachable.
 - **Slate Top 4 lock:** The official tracked set freezes at the slate's first scheduled pitch, not when the fourth confirmed play appears. Use only confirmed qualifying plays available by that cutoff.
 - **Caches:** Module-level only for BvP and roster/name TTL caches (not recreated inside the handler). Response-level KV cache at `matchups-response:{date}` is 30s pre-lock and 5 min post-lock.

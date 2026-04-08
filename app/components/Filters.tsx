@@ -41,7 +41,6 @@ export default function Filters({ date, filters, onApply, matchups, topPlays, re
     filters.minH !== null ? String(filters.minH) : String(DEFAULT_H_VALUE)
   )
   const [hEnabled, setHEnabled] = useState(filters.minH !== null)
-  const [flash, setFlash] = useState<'apply' | 'reset' | 'export' | null>(null)
   const [showExportMenu, setShowExportMenu] = useState(false)
   const exportRef = useRef<HTMLDivElement>(null)
 
@@ -56,17 +55,11 @@ export default function Filters({ date, filters, onApply, matchups, topPlays, re
     return () => document.removeEventListener('mousedown', handler)
   }, [showExportMenu])
 
-  const flashFor = (key: 'apply' | 'reset' | 'export') => {
-    setFlash(key)
-    setTimeout(() => setFlash(null), 1500)
-  }
-
   const handleApply = () => {
     onApply({
       minOPS: opsEnabled ? Number(opsDisplay) : null,
       minH: hEnabled ? Number(hDisplay) : null,
     })
-    flashFor('apply')
   }
 
   const handleReset = () => {
@@ -75,7 +68,6 @@ export default function Filters({ date, filters, onApply, matchups, topPlays, re
     setHDisplay(String(DEFAULT_H_VALUE))
     setHEnabled(false)
     onApply(DEFAULT_FILTERS)
-    flashFor('reset')
   }
 
   const downloadCSV = (rows: MatchupResult[], label: string) => {
@@ -88,7 +80,6 @@ export default function Filters({ date, filters, onApply, matchups, topPlays, re
     a.click()
     URL.revokeObjectURL(url)
     setShowExportMenu(false)
-    flashFor('export')
   }
 
   const downloadRecommendedDoublesCSV = (doubles: RecommendedDouble[]) => {
@@ -101,7 +92,6 @@ export default function Filters({ date, filters, onApply, matchups, topPlays, re
     a.click()
     URL.revokeObjectURL(url)
     setShowExportMenu(false)
-    flashFor('export')
   }
 
   return (
@@ -207,25 +197,17 @@ export default function Filters({ date, filters, onApply, matchups, topPlays, re
           <button
             type="button"
             onClick={handleApply}
-            className={`w-full px-4 py-2 text-sm font-medium rounded-lg transition-all touch-manipulation ${
-              flash === 'apply'
-                ? 'bg-green-600 text-white'
-                : 'bg-blue-600 hover:bg-blue-500 text-white'
-            }`}
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors hover:bg-blue-500 active:bg-blue-700 touch-manipulation sm:w-auto sm:min-w-[6.5rem]"
           >
-            {flash === 'apply' ? '✓ Applied' : 'Apply'}
+            Apply
           </button>
 
           <button
             type="button"
             onClick={handleReset}
-            className={`w-full px-4 py-2 text-sm font-medium rounded-lg border transition-all touch-manipulation ${
-              flash === 'reset'
-                ? 'border-green-700 text-green-400'
-                : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
-            }`}
+            className="w-full rounded-lg border border-gray-700 bg-gray-900 px-4 py-2 text-sm font-medium text-gray-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors hover:border-gray-500 hover:bg-gray-800 hover:text-gray-100 active:bg-gray-850 touch-manipulation sm:w-auto sm:min-w-[6.5rem]"
           >
-            {flash === 'reset' ? '✓ Reset' : 'Reset'}
+            Reset
           </button>
 
           <div ref={exportRef} className="relative hidden sm:block">
@@ -233,18 +215,12 @@ export default function Filters({ date, filters, onApply, matchups, topPlays, re
               type="button"
               onClick={() => setShowExportMenu(prev => !prev)}
               disabled={matchups.length === 0 && !topPlays?.length && recommendedDoubles.length === 0}
-              className={`inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-lg border transition-all disabled:opacity-40 touch-manipulation ${
-                flash === 'export'
-                  ? 'border-green-700 text-green-400'
-                  : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
-              }`}
+              className="inline-flex min-w-[6.5rem] items-center justify-center gap-1.5 rounded-lg border border-gray-700 bg-gray-900 px-4 py-2 text-sm font-medium text-gray-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors hover:border-gray-500 hover:bg-gray-800 hover:text-gray-100 active:bg-gray-850 disabled:opacity-40 touch-manipulation"
             >
-              {flash === 'export' ? '✓ Exported' : 'Export'}
-              {flash !== 'export' && (
-                <svg className="w-3 h-3 text-gray-600" viewBox="0 0 12 12" fill="currentColor">
-                  <path d="M6 8 2 4h8L6 8Z"/>
-                </svg>
-              )}
+              Export
+              <svg className="h-3 w-3 text-gray-500" viewBox="0 0 12 12" fill="currentColor">
+                <path d="M6 8 2 4h8L6 8Z"/>
+              </svg>
             </button>
 
             {showExportMenu && (
