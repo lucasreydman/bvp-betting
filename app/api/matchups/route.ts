@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { fetchSchedule, fetchConfirmedLineup, fetchActiveRoster, fetchCareerPA, fetchBvP, fetchPlayerName, fetchBoxscoreHitting, fetchRecentLineupPositions } from '@/lib/mlb-api'
 import { getGameStatus, computeHitResult } from '@/lib/game-status'
+import { buildEstimatedLineup } from '@/lib/lineup-estimation'
+import { getManualLineupExclusions, getScopedManualLineupExclusionPlayerIds } from '@/lib/manual-lineup-exclusions'
 import { parseSplit } from '@/lib/stats'
 import { createCache } from '@/lib/cache'
 import { kvDel, kvGet, kvSet } from '@/lib/kv'
-import { TOP_PLAYS_LIMIT, buildMatchupsDebugInfo, buildRecommendationTags, fillOpenTopPlaySlots, formatSlateDate, getEarliestGameTimeMs, isSlateLockReached, matchupKey, medianLineupPosition, selectTopPlays, suggestRecommendedDoubles } from '@/lib/utils'
+import { TOP_PLAYS_LIMIT, buildMatchupsDebugInfo, buildRecommendationTags, fillOpenTopPlaySlots, formatSlateDate, getEarliestGameTimeMs, isSlateLockReached, matchupKey, selectTopPlays, suggestRecommendedDoubles } from '@/lib/utils'
 import type { MatchupResult, MatchupsResponse, SlateTopPlaysSnapshot } from '@/lib/types'
 
 // Module-level caches — survive across requests in the same serverless instance
 const bvpCache = createCache<ReturnType<typeof parseSplit>>(3600_000)  // 60 min
-const rosterCache = createCache<number[]>(3600_000)           // 60 min
+const rosterCache = createCache<Array<{ id: number; pa: number }>>(3600_000) // 60 min
 const playerNameCache = createCache<string>(86400_000)        // 24h
-const lineupProjectionCache = createCache<Record<number, number>>(21600_000) // 6h
 
 // IMPORTANT: playerNameCache and getPlayerName MUST be at module scope (here),
 // NOT inside the GET handler — inside the handler they'd be re-created per request.
@@ -35,19 +36,13 @@ async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-async function buildProjectedPositions(teamId: number, targetDate: string, playerIds: number[]): Promise<Record<number, number>> {
-  const recentPositions = await fetchRecentLineupPositions(teamId, targetDate)
-  return Object.fromEntries(
-    playerIds.map((playerId, index) => [playerId, medianLineupPosition(recentPositions.get(playerId) ?? []) ?? index + 1])
-  )
-}
-
 async function getLineupPlayerIds(
   gamePk: number,
   teamId: number,
   gameStarted: boolean,
   scheduleLineup: number[],
   targetDate: string,
+  manualExclusions: Awaited<ReturnType<typeof getManualLineupExclusions>>,
 ): Promise<{ ids: number[]; source: 'confirmed' | 'estimated'; projectedPositions?: Record<number, number> }> {
   // Schedule hydration gives us the posted pre-game lineup — use it if complete
   if (scheduleLineup.length >= 8) {
@@ -69,18 +64,22 @@ async function getLineupPlayerIds(
     return { ids: [], source: 'confirmed' }
   }
 
-  // Pre-game estimated fallback: top-9 active roster by career PA
+  // Pre-game estimated fallback: recent starters first, with partial posted
+  // lineup IDs preserved and career PA only used as a final tiebreaker.
+  const recentPositions = await fetchRecentLineupPositions(teamId, targetDate)
   const cacheKey = `roster:${teamId}`
   const cached = rosterCache.get(cacheKey)
-  const projectionCacheKey = `projected-lineup:${teamId}:${targetDate}`
+  const excludedPlayerIds = getScopedManualLineupExclusionPlayerIds(manualExclusions, { teamId, gamePk })
+  const seededPlayerIds = [...new Set([...scheduleLineup, ...(confirmed ?? [])])]
 
   if (cached) {
-    let projected = lineupProjectionCache.get(projectionCacheKey)
-    if (!projected) {
-      projected = await buildProjectedPositions(teamId, targetDate, cached)
-      lineupProjectionCache.set(projectionCacheKey, projected)
-    }
-    return { ids: cached, source: 'estimated', projectedPositions: projected }
+    const estimated = buildEstimatedLineup({
+      roster: cached,
+      recentPositions,
+      seededPlayerIds,
+      excludedPlayerIds,
+    })
+    return { ids: estimated.ids, source: 'estimated', projectedPositions: estimated.projectedPositions }
   }
 
   const roster = await fetchActiveRoster(teamId)
@@ -90,16 +89,15 @@ async function getLineupPlayerIds(
       pa: await fetchCareerPA(player.person.id),
     }))
   )
-  const top9 = withPA
-    .sort((a, b) => b.pa - a.pa)
-    .slice(0, 9)
-    .map(p => p.id)
+  rosterCache.set(cacheKey, withPA)
 
-  const projectedPositions = await buildProjectedPositions(teamId, targetDate, top9)
-
-  rosterCache.set(cacheKey, top9)
-  lineupProjectionCache.set(projectionCacheKey, projectedPositions)
-  return { ids: top9, source: 'estimated', projectedPositions }
+  const estimated = buildEstimatedLineup({
+    roster: withPA,
+    recentPositions,
+    seededPlayerIds,
+    excludedPlayerIds,
+  })
+  return { ids: estimated.ids, source: 'estimated', projectedPositions: estimated.projectedPositions }
 }
 
 export async function GET(req: NextRequest) {
@@ -114,6 +112,7 @@ export async function GET(req: NextRequest) {
     }
 
     const games = await fetchSchedule(date)
+    const manualLineupExclusions = await getManualLineupExclusions(date)
     const nowMs = Date.now()
     const gameStatusByPk = new Map(games.map(game => [game.gamePk, getGameStatus(game.status.detailedState)]))
     const slateGameTimes = games.map(game => game.gameDate)
@@ -166,8 +165,8 @@ export async function GET(req: NextRequest) {
         const awayScheduleIds = game.lineups?.awayPlayers?.map(p => p.id) ?? []
 
         const [homeLineup, awayLineup] = await Promise.all([
-          getLineupPlayerIds(game.gamePk, home.team.id, gameStarted, homeScheduleIds, date),
-          getLineupPlayerIds(game.gamePk, away.team.id, gameStarted, awayScheduleIds, date),
+          getLineupPlayerIds(game.gamePk, home.team.id, gameStarted, homeScheduleIds, date, manualLineupExclusions),
+          getLineupPlayerIds(game.gamePk, away.team.id, gameStarted, awayScheduleIds, date, manualLineupExclusions),
         ])
 
         homeLineup.ids.forEach((batterId, i) => {

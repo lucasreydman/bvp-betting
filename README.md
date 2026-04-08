@@ -16,19 +16,20 @@ Built for the **Player Hits (1+)** prop and similar 1+ hit markets. Any single, 
 
 **Consistency is everything for EV.** The edge here is statistical. It compounds over time. The more consistently you take these plays, the higher your expected value will be. Treat it like a system, not a tip.
 
-**Confirmed lineups make the hit chance more accurate.** Hit chance is calculated using an expected at-bats number that adjusts based on where the batter sits in the order. Until lineups are official, the app projects a batting slot from recent lineup history when possible. Plays marked **confirmed** are stronger because that number is exact. Lineups usually drop 3–4 hours before first pitch.
+**Confirmed lineups make the hit chance more accurate.** Hit chance is calculated using an expected at-bats number that adjusts based on where the batter sits in the order. Until lineups are official, the app estimates likely starters from recent lineup history, preserves any partially posted lineup IDs it already has, and projects a batting slot from recent order history when possible. Plays marked **confirmed** are stronger because that number is exact. Lineups usually drop 3–4 hours before first pitch.
 
 ## How it works
 
 1. Loads the schedule and probable pitchers for the date. Postponed, cancelled, and suspended games are automatically excluded.
-2. Builds each lineup: official order from the schedule or boxscore when available, otherwise the top 9 active players by career plate appearances.
+2. Builds each lineup: official order from the schedule or boxscore when available; otherwise estimates likely starters from recent starts and recent batting-order history, using career plate appearances only as a last-resort tiebreaker.
 3. Fetches career BvP for each batter vs the opposing starter, then excludes rows below 15 AB or .300 AVG.
 4. Computes AVG, OPS, SLG, OBP, and XBH from the split.
 5. Before the slate's first scheduled pitch, the API returns the current Top 4 candidate board, which can include estimated-lineup plays. After first pitch, started plays stay tracked for in-progress and settled results, while the upcoming board continues to re-rank the best available options and can still fill to four as later lineups confirm.
 6. In-progress rows show whether each batter has gotten a hit yet (HIT / pending). Settled rows show the final result (HIT / NO HIT).
 7. Data refreshes silently in the background every 5 minutes, and faster while any upcoming lineup is still estimated, with no manual refresh needed.
-8. The matchups API includes a `debug` summary so the board can explain why it currently shows 0, 3, or 4 tracked plays.
-9. Sorts tables client-side (default: **Game time asc**, earliest first).
+8. A secret-protected admin API can manually exclude obvious non-starters from estimated lineups for a specific slate, team, or game without affecting later confirmed lineups.
+9. The matchups API includes a `debug` summary so the board can explain why it currently shows 0, 3, or 4 tracked plays.
+10. Sorts tables client-side (default: **Game time asc**, earliest first).
 
 **Why BvP for this prop:** Any hit (single through homer) wins. This app uses career hit stats vs that specific pitcher. Walks/HBP do not count as hits.
 
@@ -168,6 +169,39 @@ Optional notifier timing env:
 DISCORD_NOTIFICATION_LEAD_MINUTES=60
 ```
 
+To enable private manual exclusions for estimated lineups, add:
+
+```
+MANUAL_OVERRIDE_SECRET=choose-a-long-random-secret
+```
+
+This secret is only checked on the backend. There is no public UI for exclusions, so the secret never needs to be shipped to the browser.
+
+Example PowerShell commands:
+
+```powershell
+# List the current manual exclusions for a slate date
+Invoke-RestMethod -Method GET `
+  -Uri "http://localhost:3000/api/admin/lineup-exclusions?date=2026-04-08" `
+  -Headers @{ Authorization = "Bearer $env:MANUAL_OVERRIDE_SECRET" }
+
+# Exclude a player from estimated lineups for the slate date
+Invoke-RestMethod -Method POST `
+  -Uri "http://localhost:3000/api/admin/lineup-exclusions" `
+  -Headers @{ Authorization = "Bearer $env:MANUAL_OVERRIDE_SECRET" } `
+  -ContentType "application/json" `
+  -Body '{"date":"2026-04-08","playerId":621294,"teamId":116,"note":"No sportsbook line"}'
+
+# Remove that exclusion later
+Invoke-RestMethod -Method DELETE `
+  -Uri "http://localhost:3000/api/admin/lineup-exclusions" `
+  -Headers @{ Authorization = "Bearer $env:MANUAL_OVERRIDE_SECRET" } `
+  -ContentType "application/json" `
+  -Body '{"date":"2026-04-08","playerId":621294,"teamId":116}'
+```
+
+Manual exclusions apply only while a player is still on an estimated lineup. If MLB later confirms that player in the actual starting lineup, the confirmed lineup wins and the batter reappears automatically.
+
 Manual test URLs:
 
 ```bash
@@ -200,12 +234,15 @@ npm run build
 
 ```
 app/
+  api/admin/lineup-exclusions/  Secret-protected manual exclusions for estimated lineups
   api/matchups/    Schedule -> lineups -> BvP -> first-pitch Top 4 lock; short pre-lock KV cache
   api/bvp/         Single BvP lookup (debug)
   api/schedule/    Schedule JSON for a date
   scoring-logic/   Mobile scoring explainer page
   components/      UI
 lib/
+  lineup-estimation.ts  Estimated lineup ranking from recent starts, lineup history, and PA tiebreakers
+  manual-lineup-exclusions.ts  KV-backed manual exclusions for estimated lineups
   types.ts         Shared types (MatchupResult, FilterState, SortState, ...)
   stats.ts         calcStats, assignConfidence, parseSplit
   utils.ts         Filters, sort, CSV, scoring, recommended doubles logic
