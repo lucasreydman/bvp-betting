@@ -16,17 +16,20 @@ const TAG_TITLES: Record<RecommendationTag, string> = {
 
 interface Props {
   tags?: RecommendationTag[]
+  variant?: 'default' | 'compact'
 }
 
-export default function RecommendationTagBadge({ tags }: Props) {
+export default function RecommendationTagBadge({ tags, variant = 'default' }: Props) {
   if (!tags || tags.length === 0) return null
 
+  const isCompact = variant === 'compact'
+
   return (
-    <span className="inline-flex flex-wrap items-center gap-1">
+    <span className={`inline-flex items-center gap-1 ${isCompact ? 'max-w-full overflow-hidden whitespace-nowrap' : 'flex-wrap'}`}>
       {tags.map(tag => (
         <span
           key={tag}
-          className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] ${TAG_STYLES[tag]}`}
+          className={`inline-flex shrink-0 items-center rounded font-semibold uppercase ${isCompact ? 'px-1 py-0.5 text-[9px] tracking-[0.14em]' : 'px-1.5 py-0.5 text-[10px] tracking-[0.18em]'} ${TAG_STYLES[tag]}`}
           title={TAG_TITLES[tag]}
         >
           {tag}

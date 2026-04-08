@@ -19,17 +19,17 @@ interface Props {
 }
 
 const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> = [
-  { key: 'batterName', label: 'Batter', cls: 'w-[16rem]' },
-  { key: 'pitcherName', label: 'Pitcher', cls: 'w-[16rem]' },
-  { key: 'avg', label: 'AVG', cls: 'w-[4.5rem]' },
-  { key: 'h', label: 'H', cls: 'w-[3.5rem]' },
-  { key: 'ab', label: 'AB', cls: 'w-[3.5rem]' },
-  { key: 'ops', label: 'OPS', cls: 'hidden sm:table-cell w-[5rem]' },
-  { key: 'gameTime', label: 'Game', cls: 'w-[11rem]' },
-  { key: 'lineupSource', label: 'Lineup', cls: 'hidden sm:table-cell w-[9rem]' },
+  { key: 'batterName', label: 'Batter', cls: 'w-[17.5rem]' },
+  { key: 'pitcherName', label: 'Pitcher', cls: 'w-[16.5rem]' },
+  { key: 'avg', label: 'AVG', cls: 'w-[4.25rem]' },
+  { key: 'h', label: 'H', cls: 'w-[3.25rem]' },
+  { key: 'ab', label: 'AB', cls: 'w-[3.25rem]' },
+  { key: 'ops', label: 'OPS', cls: 'hidden sm:table-cell w-[4.75rem]' },
+  { key: 'gameTime', label: 'Game', cls: 'w-[11.5rem]' },
+  { key: 'lineupSource', label: 'Lineup', cls: 'hidden sm:table-cell w-[8rem]' },
 ]
 
-const RESULT_COLUMN_CLASS = 'hidden sm:table-column w-[5rem]'
+const RESULT_COLUMN_CLASS = 'hidden sm:table-column w-[4.5rem]'
 
 const MOBILE_SORT_COLS: Array<{ key: keyof MatchupResult; label: string }> = [
   { key: 'avg', label: 'AVG' },
@@ -199,7 +199,7 @@ export default function MatchupTable({
 
           {/* ── Desktop table view ── */}
           <div className="hidden sm:block overflow-x-auto scrollbar-styled">
-            <table className="w-full min-w-[1170px] text-sm table-fixed">
+            <table className="w-full min-w-[1168px] text-sm table-fixed">
               <colgroup>
                 {COLUMNS.map(col => (
                   <col key={col.key} className={col.cls} />
@@ -212,21 +212,21 @@ export default function MatchupTable({
                     <th
                       key={col.key}
                       {...(gameKind !== 'settled' ? { onClick: () => onSort(col.key) } : {})}
-                      className={`px-3 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider select-none whitespace-nowrap ${col.cls} ${gameKind !== 'settled' ? 'cursor-pointer hover:text-white' : ''}`}
+                      className={`px-3 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider select-none whitespace-nowrap ${col.key === 'gameTime' || col.key === 'lineupSource' ? 'px-2.5' : ''} ${col.cls} ${gameKind !== 'settled' ? 'cursor-pointer hover:text-white' : ''}`}
                     >
                       {col.label}{gameKind !== 'settled' && sortIcon(col.key)}
                     </th>
                   ))}
                   {gameKind === 'upcoming' && (
                     <th
-                      className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell text-transparent select-none"
+                      className="px-2 py-2 text-right text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell text-transparent select-none"
                       aria-hidden="true"
                     >
                       Result
                     </th>
                   )}
                   {gameKind !== 'upcoming' && (
-                    <th className="px-3 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
+                    <th className="px-2 py-2 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
                       Result
                     </th>
                   )}

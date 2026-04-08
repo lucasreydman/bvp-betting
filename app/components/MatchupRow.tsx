@@ -25,24 +25,24 @@ const fmt3 = (n: number) => n.toFixed(3)
 
 function ResultBadge({ hitResult }: { hitResult: MatchupResult['hitResult'] }) {
   if (hitResult === 'win')
-    return <span className="inline-flex text-xs px-2 py-0.5 rounded font-medium bg-green-900/40 text-green-400">HIT</span>
+    return <span className="inline-flex text-[11px] px-1.5 py-0.5 rounded font-medium whitespace-nowrap bg-green-900/40 text-green-400">HIT</span>
   if (hitResult === 'loss')
-    return <span className="inline-flex text-xs px-2 py-0.5 rounded font-medium bg-red-900/40 text-red-400">NO HIT</span>
-  return <span className="inline-flex text-xs px-2 py-0.5 rounded font-medium bg-gray-800 text-gray-500">–</span>
+    return <span className="inline-flex text-[11px] px-1.5 py-0.5 rounded font-medium whitespace-nowrap bg-red-900/40 text-red-400">NO HIT</span>
+  return <span className="inline-flex text-[11px] px-1.5 py-0.5 rounded font-medium whitespace-nowrap bg-gray-800 text-gray-500">–</span>
 }
 
 export default function MatchupRow({ matchup: m, gameKind }: Props) {
   return (
     <tr className={`border-t ${CONFIDENCE_ROW_COLORS[m.confidence]} hover:bg-gray-800/50 transition-colors`}>
       <td className="px-3 py-2 font-medium text-white whitespace-nowrap">
-        <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 overflow-hidden">
           <span className="truncate">{m.batterName}</span>
           <span className="shrink-0 text-gray-600 text-xs font-normal">[{teamAbbr(m.batterTeam)}]</span>
-          <RecommendationTagBadge tags={m.recommendationTags} />
+          <RecommendationTagBadge tags={m.recommendationTags} variant="compact" />
         </div>
       </td>
-      <td className="px-3 py-2 text-gray-400 text-sm min-w-[14rem] max-w-[22rem] break-words">
-        <span className="break-words">
+      <td className="px-3 py-2 text-gray-400 text-sm whitespace-nowrap">
+        <span className="block min-w-0 truncate">
           {m.pitcherName}{' '}
           <span className="text-gray-600 text-xs">[{teamAbbr(m.pitcherTeam)}]</span>
         </span>
@@ -53,11 +53,11 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
       <td className="px-3 py-2 font-mono text-sm text-gray-300">{m.h}</td>
       <td className="px-3 py-2 font-mono text-sm text-gray-400">{m.ab}</td>
       <td className="px-3 py-2 font-mono text-sm text-gray-500 hidden sm:table-cell">{fmt3(m.ops)}</td>
-      <td className="px-3 py-2 align-top">
-        <GameTimeCell gameTime={m.gameTime} variant={gameKind} />
+      <td className="px-2.5 py-2">
+        <GameTimeCell gameTime={m.gameTime} variant={gameKind} compact />
       </td>
-      <td className="px-3 py-2 hidden sm:table-cell">
-        <span className={`inline-flex text-xs px-2 py-0.5 rounded font-medium ${
+      <td className="px-2.5 py-2 hidden sm:table-cell">
+        <span className={`inline-flex whitespace-nowrap text-[11px] px-2 py-0.5 rounded font-medium ${
           m.lineupSource === 'confirmed'
             ? 'bg-gray-800 text-gray-400'
             : 'bg-amber-900/40 text-amber-400'
@@ -66,12 +66,12 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
         </span>
       </td>
       {gameKind === 'upcoming' && (
-        <td className="px-3 py-2 hidden sm:table-cell" aria-hidden="true">
+        <td className="px-2 py-2 hidden sm:table-cell" aria-hidden="true">
           <span className="invisible">—</span>
         </td>
       )}
       {gameKind !== 'upcoming' && (
-        <td className="px-3 py-2">
+        <td className="px-2 py-2 text-right">
           <ResultBadge hitResult={m.hitResult} />
         </td>
       )}
