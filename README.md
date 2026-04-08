@@ -160,6 +160,8 @@ The notifier route lives at `/api/notifications/discord`. On this repo it is sch
 
 Discord alerts now use their own pregame freeze window so bettors get the board before the site's official first-pitch lock. The site still freezes the official tracked Top 4 at first pitch, but Discord freezes a separate `discord-top4:{date}` snapshot from the best confirmed plays available a configurable number of minutes earlier and uses that same snapshot for the later leg-hit and double-hit posts. By default, that Discord snapshot locks 60 minutes before the slate's first pitch and only from confirmed plays.
 
+Once every tracked Discord play for the date is settled, the notifier also sends a day summary showing plays hit plus a simple $10-per-single / $10-per-double ROI recap based on the tracked snapshot's available odds.
+
 Optional notifier timing env:
 
 ```

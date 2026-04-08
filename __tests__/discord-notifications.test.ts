@@ -150,6 +150,38 @@ describe('buildDiscordNotificationEvents', () => {
 
     expect(events.some(event => event.id === `top4-fill:2026-04-08:2026-04-08T17:40:00.000Z:${added.gamePk}:${added.batterId}:${added.pitcherId}`)).toBe(true)
   })
+
+  it('builds a day summary once all tracked plays are settled', () => {
+    const winnerA = makeMatchup({ batterId: 1, pitcherId: 11, batterName: 'Juan Soto', hitResult: 'win', gameStatus: 'settled', consensusHitOddsAmerican: -120 })
+    const winnerB = makeMatchup({ batterId: 2, pitcherId: 22, batterName: 'Mookie Betts', hitResult: 'win', gameStatus: 'settled', consensusHitOddsAmerican: -120 })
+
+    const events = buildDiscordNotificationEvents({
+      date: '2026-04-08',
+      snapshot: makeSnapshot([winnerA, winnerB], 60),
+      results: [winnerA, winnerB],
+    })
+
+    const summary = events.find(event => event.id === 'day-summary:2026-04-08:2026-04-08T17:40:00.000Z')
+    expect(summary).toBeDefined()
+    expect(summary?.content).toContain('Day summary for 2026-04-08: 2/2 plays hit.')
+    expect(summary?.content).toContain('Singles ($10 each): 2/2 won')
+    expect(summary?.content).toContain('Doubles ($10 each): 1/1 won')
+    expect(summary?.content).toContain('Total risk $30.00')
+    expect(summary?.content).toContain('ROI')
+  })
+
+  it('does not build a day summary until all tracked plays are settled', () => {
+    const winner = makeMatchup({ batterId: 1, pitcherId: 11, hitResult: 'win', gameStatus: 'settled', consensusHitOddsAmerican: -120 })
+    const pending = makeMatchup({ batterId: 2, pitcherId: 22, hitResult: 'pending', gameStatus: 'inProgress', consensusHitOddsAmerican: -120 })
+
+    const events = buildDiscordNotificationEvents({
+      date: '2026-04-08',
+      snapshot: makeSnapshot([winner, pending], 60),
+      results: [winner, pending],
+    })
+
+    expect(events.some(event => event.id.startsWith('day-summary:'))).toBe(false)
+  })
 })
 
 describe('Discord snapshot cutoff', () => {

@@ -18,6 +18,14 @@ export interface DiscordNotificationSource {
   addedTopPlays?: MatchupResult[]
 }
 
+interface ReturnSummary {
+  betCount: number
+  settledCount: number
+  wins: number
+  staked: number
+  net: number
+}
+
 function getDoubleLabel(isSmash: boolean, index: number, total: number): string {
   if (isSmash) return 'Smash Double'
   if (total === 1) return 'Daily Double'
@@ -168,6 +176,115 @@ function buildDoubleHitEvents(snapshot: DiscordTopPlaysSnapshot, topPlays: Match
   })
 }
 
+function profitFromAmericanOdds(stake: number, american: number): number {
+  if (american > 0) return stake * american / 100
+  return stake * 100 / Math.abs(american)
+}
+
+function formatSignedCurrency(value: number): string {
+  const rounded = Math.round(value * 100) / 100
+  const sign = rounded > 0 ? '+' : rounded < 0 ? '-' : ''
+  return `${sign}$${Math.abs(rounded).toFixed(2)}`
+}
+
+function formatPercent(value: number): string {
+  const rounded = Math.round(value * 10) / 10
+  const sign = rounded > 0 ? '+' : rounded < 0 ? '-' : ''
+  return `${sign}${Math.abs(rounded).toFixed(1)}%`
+}
+
+function summarizeSingles(topPlays: MatchupResult[], stake = 10): ReturnSummary {
+  return topPlays.reduce<ReturnSummary>((summary, matchup) => {
+    if (matchup.consensusHitOddsAmerican == null || (matchup.hitResult !== 'win' && matchup.hitResult !== 'loss')) {
+      return summary
+    }
+
+    const win = matchup.hitResult === 'win'
+    return {
+      betCount: summary.betCount + 1,
+      settledCount: summary.settledCount + 1,
+      wins: summary.wins + (win ? 1 : 0),
+      staked: summary.staked + stake,
+      net: summary.net + (win ? profitFromAmericanOdds(stake, matchup.consensusHitOddsAmerican) : -stake),
+    }
+  }, {
+    betCount: 0,
+    settledCount: 0,
+    wins: 0,
+    staked: 0,
+    net: 0,
+  })
+}
+
+function summarizeDoubles(snapshot: DiscordTopPlaysSnapshot, topPlays: MatchupResult[], stake = 10): ReturnSummary {
+  const resultsByKey = new Map(topPlays.map(matchup => [matchupKey(matchup), matchup]))
+
+  return suggestRecommendedDoubles(snapshot.topPlays).reduce<ReturnSummary>((summary, double) => {
+    if (double.consensusParlayOddsAmerican == null) {
+      return summary
+    }
+
+    const first = resultsByKey.get(matchupKey(double.first))
+    const second = resultsByKey.get(matchupKey(double.second))
+    if (!first || !second || (first.hitResult !== 'win' && first.hitResult !== 'loss') || (second.hitResult !== 'win' && second.hitResult !== 'loss')) {
+      return summary
+    }
+
+    const win = first.hitResult === 'win' && second.hitResult === 'win'
+    return {
+      betCount: summary.betCount + 1,
+      settledCount: summary.settledCount + 1,
+      wins: summary.wins + (win ? 1 : 0),
+      staked: summary.staked + stake,
+      net: summary.net + (win ? profitFromAmericanOdds(stake, double.consensusParlayOddsAmerican) : -stake),
+    }
+  }, {
+    betCount: 0,
+    settledCount: 0,
+    wins: 0,
+    staked: 0,
+    net: 0,
+  })
+}
+
+function buildDaySummaryEvent(snapshot: DiscordTopPlaysSnapshot, topPlays: MatchupResult[]): DiscordNotificationEvent | null {
+  if (topPlays.length === 0 || topPlays.some(matchup => matchup.gameStatus !== 'settled')) {
+    return null
+  }
+
+  const playWins = topPlays.filter(matchup => matchup.hitResult === 'win').length
+  const singles = summarizeSingles(topPlays)
+  const doubles = summarizeDoubles(snapshot, topPlays)
+  const totalStaked = singles.staked + doubles.staked
+  const totalNet = singles.net + doubles.net
+  const totalRoi = totalStaked > 0 ? totalNet / totalStaked * 100 : 0
+
+  const lines = [
+    `Day summary for ${snapshot.date}: ${playWins}/${topPlays.length} plays hit.`,
+  ]
+
+  if (singles.betCount > 0) {
+    const singlesRoi = singles.staked > 0 ? singles.net / singles.staked * 100 : 0
+    lines.push(`Singles ($10 each): ${singles.wins}/${singles.betCount} won, net ${formatSignedCurrency(singles.net)}, ROI ${formatPercent(singlesRoi)}.`)
+  }
+
+  if (doubles.betCount > 0) {
+    const doublesRoi = doubles.staked > 0 ? doubles.net / doubles.staked * 100 : 0
+    lines.push(`Doubles ($10 each): ${doubles.wins}/${doubles.betCount} won, net ${formatSignedCurrency(doubles.net)}, ROI ${formatPercent(doublesRoi)}.`)
+  }
+
+  if (totalStaked > 0) {
+    lines.push(`Total risk ${formatSignedCurrency(totalStaked).replace('+', '')}, net ${formatSignedCurrency(totalNet)}, ROI ${formatPercent(totalRoi)}.`)
+  } else {
+    lines.push('No priced bets were available to calculate ROI.')
+  }
+
+  return {
+    id: `day-summary:${snapshot.date}:${snapshot.lockedAt}`,
+    content: lines.join('\n'),
+  }
+}
+
 export function buildDiscordNotificationEvents(source: DiscordNotificationSource): DiscordNotificationEvent[] {
   const trackedResults = source.results.filter(matchup => source.snapshot.topPlays.some(topPlay => matchupKey(topPlay) === matchupKey(matchup)))
 
@@ -177,6 +294,7 @@ export function buildDiscordNotificationEvents(source: DiscordNotificationSource
     ...buildDoubleLockEvents(source.snapshot),
     ...buildLegHitEvents(source.date, trackedResults),
     ...buildDoubleHitEvents(source.snapshot, trackedResults),
+    buildDaySummaryEvent(source.snapshot, trackedResults),
   ].filter((event): event is DiscordNotificationEvent => event !== null)
 }
 
