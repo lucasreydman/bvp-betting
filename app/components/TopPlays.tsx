@@ -8,7 +8,6 @@ import type { RecommendedDouble } from '@/lib/utils'
 import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
 import { fmtOdds } from '@/lib/odds'
 import InfoTooltip from './InfoTooltip'
-import { MATH_FONT_STACK } from './Formula'
 import ScoringLogicContent from './ScoringLogicContent'
 
 interface Props {
@@ -88,10 +87,7 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
         <span>Show Me the Math</span>
         <span aria-hidden="true">→</span>
       </Link>
-      <div
-        className="relative hidden overflow-hidden rounded-[1.75rem] border border-slate-700/90 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.14),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,197,94,0.10),_transparent_24%),linear-gradient(180deg,_rgba(2,6,23,0.98),_rgba(3,10,28,0.94))] p-5 text-slate-200 shadow-[0_20px_60px_rgba(2,6,23,0.32)] sm:block"
-        style={{ fontFamily: MATH_FONT_STACK }}
-      >
+      <div className="relative hidden overflow-hidden rounded-[1.75rem] border border-slate-700/90 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.14),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,197,94,0.10),_transparent_24%),linear-gradient(180deg,_rgba(2,6,23,0.98),_rgba(3,10,28,0.94))] p-5 text-slate-200 shadow-[0_20px_60px_rgba(2,6,23,0.32)] sm:block">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-center">
           <div />
           <div className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-200">

@@ -1,6 +1,26 @@
 import type { ReactNode } from 'react'
 import { Formula, Fraction, Sup } from './Formula'
 
+function SymbolCard({
+  label,
+  title,
+  description,
+  accent,
+}: {
+  label: string
+  title: string
+  description: string
+  accent: string
+}) {
+  return (
+    <div className="rounded-[1.15rem] border border-slate-700/70 bg-slate-950/80 px-3.5 py-3 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
+      <div className={`text-[0.95rem] font-semibold ${accent}`}>{label}</div>
+      <div className="mt-1 text-[0.82rem] font-semibold leading-5 text-slate-100">{title}</div>
+      <p className="mt-1.5 text-[0.77rem] leading-5 text-slate-400">{description}</p>
+    </div>
+  )
+}
+
 function FormulaBlock({
   title,
   accent,
@@ -11,7 +31,7 @@ function FormulaBlock({
   children: ReactNode
 }) {
   return (
-    <div className="flex h-full flex-col rounded-[1.25rem] border border-slate-700/60 bg-[linear-gradient(180deg,rgba(2,6,23,0.9),rgba(3,10,28,0.72))] p-4 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)] sm:rounded-[1.35rem]">
+    <div className="flex flex-col rounded-[1.25rem] border border-slate-700/60 bg-[linear-gradient(180deg,rgba(2,6,23,0.9),rgba(3,10,28,0.72))] p-4 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)] sm:rounded-[1.35rem]">
       <div className={`mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] sm:tracking-[0.28em] ${accent}`}>{title}</div>
       <div className="flex flex-1 flex-col gap-2.5 text-[0.92rem] leading-[1.6] text-slate-100 sm:text-[0.96rem] sm:leading-[1.55]">{children}</div>
     </div>
@@ -21,26 +41,39 @@ function FormulaBlock({
 export default function ScoringLogicContent() {
   return (
     <div className="pb-1">
-      <div className="mb-4 grid grid-cols-2 gap-2 text-left text-[11px] leading-5 text-slate-200 sm:flex sm:flex-nowrap sm:items-center sm:justify-center sm:gap-2">
-        <span className="flex min-w-0 flex-col justify-center gap-1 rounded-[1.1rem] border border-slate-700/70 bg-slate-950/80 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)] sm:inline-flex sm:flex-row sm:items-center sm:gap-1 sm:rounded-full sm:px-3 sm:py-1.5">
-          <span className="font-semibold text-sky-300">AVG</span>
-          <span className="text-slate-400">= career BvP batting average</span>
-        </span>
-        <span className="flex min-w-0 flex-col justify-center gap-1 rounded-[1.1rem] border border-slate-700/70 bg-slate-950/80 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)] sm:inline-flex sm:flex-row sm:items-center sm:gap-1 sm:rounded-full sm:px-3 sm:py-1.5">
-          <span className="font-semibold text-cyan-300">AB</span>
-          <span className="text-slate-400">= career at-bats vs this pitcher</span>
-        </span>
-        <span className="flex min-w-0 flex-col justify-center gap-1 rounded-[1.1rem] border border-slate-700/70 bg-slate-950/80 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)] sm:inline-flex sm:flex-row sm:items-center sm:gap-1 sm:rounded-full sm:px-3 sm:py-1.5">
-          <span className="font-semibold text-lime-300">P</span>
-          <span className="text-slate-400">= probability of at least one hit</span>
-        </span>
-        <span className="flex min-w-0 flex-col justify-center gap-1 rounded-[1.1rem] border border-slate-700/70 bg-slate-950/80 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)] sm:inline-flex sm:flex-row sm:items-center sm:gap-1 sm:rounded-full sm:px-3 sm:py-1.5">
-          <span className="font-semibold text-amber-300">E[AB]</span>
-          <span className="text-slate-400">= expected at-bats from batting slot</span>
-        </span>
+      <div className="mb-3">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Key Symbols</div>
+        <p className="mt-1 text-sm leading-6 text-slate-400">These are the inputs that appear throughout the formulas below.</p>
       </div>
 
-      <div className="grid auto-rows-fr gap-3 lg:grid-cols-2 xl:grid-cols-3">
+      <div className="mb-4 grid grid-cols-2 items-start gap-2.5 lg:grid-cols-4">
+        <SymbolCard
+          label="AVG"
+          title="Career BvP batting average"
+          description="The batter's historical batting average against today's pitcher. Higher is better."
+          accent="text-sky-300"
+        />
+        <SymbolCard
+          label="AB"
+          title="Career sample size"
+          description="Official at-bats against this pitcher. More AB means the matchup history is more trustworthy."
+          accent="text-cyan-300"
+        />
+        <SymbolCard
+          label="P"
+          title="Hit probability"
+          description="Estimated chance the batter records at least one hit after regression and lineup-based opportunity adjustments."
+          accent="text-lime-300"
+        />
+        <SymbolCard
+          label="E[AB]"
+          title="Expected at-bats"
+          description="Projected opportunities based on confirmed lineup spot, or an estimate when the lineup is not official yet."
+          accent="text-amber-300"
+        />
+      </div>
+
+      <div className="grid items-start gap-3 lg:grid-cols-2 xl:grid-cols-3">
         <FormulaBlock title="Ranking" accent="text-sky-300">
           <Formula className="text-slate-50 leading-6">
             <span>score</span>
@@ -61,6 +94,7 @@ export default function ScoringLogicContent() {
             <span>=</span>
             <span>score ↓, AVG ↓, AB ↓</span>
           </Formula>
+          <p className="text-[0.8rem] leading-5 text-slate-400">The ranking score rewards both a strong AVG and enough AB to trust the matchup.</p>
         </FormulaBlock>
 
         <FormulaBlock title="Regression" accent="text-emerald-300">
@@ -85,6 +119,7 @@ export default function ScoringLogicContent() {
             <span>=</span>
             <span>w × AVG + (1 − w) × 0.320</span>
           </Formula>
+          <p className="text-[0.8rem] leading-5 text-slate-400">Small samples get pulled toward .320 so a hot but tiny BvP line does not overpower the board.</p>
         </FormulaBlock>
 
         <FormulaBlock title="Expected At-Bats" accent="text-amber-300">
@@ -98,6 +133,7 @@ export default function ScoringLogicContent() {
             <div>E[AB] = 4.05, 5 ≤ slot ≤ 6</div>
             <div>E[AB] = 3.85, slot ≥ 7</div>
           </div>
+          <p className="text-[0.8rem] leading-5 text-slate-400">Batters near the top of the order are projected for more trips to the plate, which lifts hit probability.</p>
         </FormulaBlock>
 
         <FormulaBlock title="Hit Chance" accent="text-lime-300">
@@ -112,6 +148,7 @@ export default function ScoringLogicContent() {
             <span>=</span>
             <span>100 × P(≥1 hit)</span>
           </Formula>
+          <p className="text-[0.8rem] leading-5 text-slate-400">This is the probability-style view of the matchup, which is why it is useful for building doubles.</p>
         </FormulaBlock>
 
         <FormulaBlock title="Double Selection" accent="text-yellow-300">
@@ -130,6 +167,7 @@ export default function ScoringLogicContent() {
             <span>=</span>
             <span>best single pair only</span>
           </Formula>
+          <p className="text-[0.8rem] leading-5 text-slate-400">When four plays qualify, the board compares the possible pairings and promotes the strongest lead double.</p>
         </FormulaBlock>
 
         <FormulaBlock title="Smash Priority" accent="text-orange-300">
@@ -143,6 +181,7 @@ export default function ScoringLogicContent() {
             <span>=</span>
             <span>smash first, leftovers second</span>
           </Formula>
+          <p className="text-[0.8rem] leading-5 text-slate-400">A Smash Double overrides the normal ordering because both legs clear the stronger OPS and hit-history thresholds.</p>
         </FormulaBlock>
       </div>
     </div>

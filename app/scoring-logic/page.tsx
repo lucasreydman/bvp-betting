@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import ScoringLogicContent from '@/app/components/ScoringLogicContent'
-import { MATH_FONT_STACK } from '@/app/components/Formula'
 
 export default function ScoringLogicPage() {
   return (
@@ -20,10 +19,7 @@ export default function ScoringLogicPage() {
         </Link>
       </div>
 
-      <div
-        className="overflow-hidden rounded-[1.5rem] border border-slate-700/90 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.12),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,197,94,0.08),_transparent_24%),linear-gradient(180deg,_rgba(2,6,23,0.98),_rgba(3,10,28,0.94))] p-4 text-slate-200 shadow-[0_20px_60px_rgba(2,6,23,0.32)] sm:rounded-[1.75rem] sm:p-5"
-        style={{ fontFamily: MATH_FONT_STACK }}
-      >
+      <div className="overflow-hidden rounded-[1.5rem] border border-slate-700/90 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.12),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,197,94,0.08),_transparent_24%),linear-gradient(180deg,_rgba(2,6,23,0.98),_rgba(3,10,28,0.94))] p-4 text-slate-200 shadow-[0_20px_60px_rgba(2,6,23,0.32)] sm:rounded-[1.75rem] sm:p-5">
         <ScoringLogicContent />
       </div>
     </main>
