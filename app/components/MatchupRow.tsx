@@ -47,32 +47,38 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
           <span className="shrink-0 text-gray-600 text-[11px]">[{teamAbbr(m.pitcherTeam)}]</span>
         </div>
       </td>
-      <td className={`px-3 py-2 font-mono text-sm font-bold ${CONFIDENCE_TEXT_COLORS[m.confidence]}`}>
+      <td className={`px-2.5 py-2 text-center font-mono text-sm font-bold ${CONFIDENCE_TEXT_COLORS[m.confidence]}`}>
         {fmt3(m.avg)}
       </td>
-      <td className="px-3 py-2 font-mono text-sm text-gray-300">{m.h}</td>
-      <td className="px-3 py-2 font-mono text-sm text-gray-400">{m.ab}</td>
-      <td className="px-3 py-2 font-mono text-sm text-gray-500 hidden sm:table-cell text-left">{fmt3(m.ops)}</td>
+      <td className="px-2.5 py-2 text-center font-mono text-sm text-gray-300">{m.h}</td>
+      <td className="px-2.5 py-2 text-center font-mono text-sm text-gray-400">{m.ab}</td>
+      <td className="hidden px-2.5 py-2 text-center font-mono text-sm text-gray-500 sm:table-cell">{fmt3(m.ops)}</td>
       <td className="px-4 py-2">
         <GameTimeCell gameTime={m.gameTime} variant={gameKind} compact />
       </td>
-      <td className="px-4 py-2 hidden sm:table-cell text-center">
-        <span className={`inline-flex whitespace-nowrap text-[11px] px-2 py-0.5 rounded font-medium ${
-          m.lineupSource === 'confirmed'
-            ? 'bg-gray-800 text-gray-400'
-            : 'bg-amber-900/40 text-amber-400'
-        }`} title={getLineupBadgeTitle(m)}>
-          {getLineupBadgeText(m)}
-        </span>
+      <td className="hidden px-4 py-2 sm:table-cell">
+        <div className="flex justify-center">
+          <span className={`inline-flex whitespace-nowrap text-[11px] px-2 py-0.5 rounded font-medium ${
+            m.lineupSource === 'confirmed'
+              ? 'bg-gray-800 text-gray-400'
+              : 'bg-amber-900/40 text-amber-400'
+          }`} title={getLineupBadgeTitle(m)}>
+            {getLineupBadgeText(m)}
+          </span>
+        </div>
       </td>
       {gameKind === 'upcoming' && (
-        <td className="px-4 py-2 hidden sm:table-cell text-center" aria-hidden="true">
-          <span className="invisible">—</span>
+        <td className="hidden px-4 py-2 sm:table-cell" aria-hidden="true">
+          <div className="flex justify-center">
+            <span className="invisible">—</span>
+          </div>
         </td>
       )}
       {gameKind !== 'upcoming' && (
-        <td className="px-4 py-2 text-center">
-          <ResultBadge hitResult={m.hitResult} />
+        <td className="px-4 py-2">
+          <div className="flex justify-center">
+            <ResultBadge hitResult={m.hitResult} />
+          </div>
         </td>
       )}
     </tr>

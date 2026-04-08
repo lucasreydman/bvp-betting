@@ -19,17 +19,17 @@ interface Props {
 }
 
 const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> = [
-  { key: 'batterName', label: 'Batter', cls: 'w-[17.5rem]' },
-  { key: 'pitcherName', label: 'Pitcher', cls: 'w-[13rem]' },
-  { key: 'avg', label: 'AVG', cls: 'w-[4rem]' },
-  { key: 'h', label: 'H', cls: 'w-[3rem]' },
-  { key: 'ab', label: 'AB', cls: 'w-[3rem]' },
-  { key: 'ops', label: 'OPS', cls: 'hidden sm:table-cell w-[4.75rem]' },
-  { key: 'gameTime', label: 'Game', cls: 'w-[10rem]' },
-  { key: 'lineupSource', label: 'Lineup', cls: 'hidden sm:table-cell w-[9.25rem]' },
+  { key: 'batterName', label: 'Batter', cls: 'w-[17.25rem]' },
+  { key: 'pitcherName', label: 'Pitcher', cls: 'w-[13.25rem]' },
+  { key: 'avg', label: 'AVG', cls: 'w-[3.75rem]' },
+  { key: 'h', label: 'H', cls: 'w-[2.75rem]' },
+  { key: 'ab', label: 'AB', cls: 'w-[2.75rem]' },
+  { key: 'ops', label: 'OPS', cls: 'hidden sm:table-cell w-[4.5rem]' },
+  { key: 'gameTime', label: 'Game', cls: 'w-[10.75rem]' },
+  { key: 'lineupSource', label: 'Lineup', cls: 'hidden sm:table-cell w-[9.75rem]' },
 ]
 
-const RESULT_COLUMN_CLASS = 'hidden sm:table-column w-[6rem]'
+const RESULT_COLUMN_CLASS = 'hidden sm:table-column w-[5.75rem]'
 
 const MOBILE_SORT_COLS: Array<{ key: keyof MatchupResult; label: string }> = [
   { key: 'avg', label: 'AVG' },
@@ -70,9 +70,10 @@ export default function MatchupTable({
   gameKind = 'upcoming',
 }: Props) {
   const headerCellClass = (key: keyof MatchupResult) => {
+    if (key === 'avg' || key === 'h' || key === 'ab' || key === 'ops') return 'px-2.5 text-center'
     if (key === 'gameTime') return 'px-4 text-left'
     if (key === 'lineupSource') return 'px-4 text-center'
-    return 'px-3'
+    return 'px-3 text-left'
   }
 
   const sortIcon = (key: keyof MatchupResult) => {
