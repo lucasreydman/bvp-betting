@@ -53,10 +53,10 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
       <td className="px-3 py-2 font-mono text-sm text-gray-300">{m.h}</td>
       <td className="px-3 py-2 font-mono text-sm text-gray-400">{m.ab}</td>
       <td className="px-3 py-2 font-mono text-sm text-gray-500 hidden sm:table-cell">{fmt3(m.ops)}</td>
-      <td className="px-3 py-2">
+      <td className="pl-3 pr-4 py-2">
         <GameTimeCell gameTime={m.gameTime} variant={gameKind} compact />
       </td>
-      <td className="px-3 py-2 hidden sm:table-cell">
+      <td className="pl-5 pr-3 py-2 hidden sm:table-cell">
         <span className={`inline-flex whitespace-nowrap text-[11px] px-2 py-0.5 rounded font-medium ${
           m.lineupSource === 'confirmed'
             ? 'bg-gray-800 text-gray-400'
@@ -66,12 +66,12 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
         </span>
       </td>
       {gameKind === 'upcoming' && (
-        <td className="px-3 py-2 hidden sm:table-cell" aria-hidden="true">
+        <td className="pl-5 pr-3 py-2 hidden sm:table-cell" aria-hidden="true">
           <span className="invisible">—</span>
         </td>
       )}
       {gameKind !== 'upcoming' && (
-        <td className="px-3 py-2">
+        <td className="pl-5 pr-3 py-2">
           <ResultBadge hitResult={m.hitResult} />
         </td>
       )}
