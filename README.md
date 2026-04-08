@@ -46,13 +46,13 @@ hit chance   = 1 − (1 − adjusted AVG) ^ (expected AB)
 
 ## Recommended Doubles and Smash Double
 
-When **four** locked plays populate the Top 4 card, the app recommends **two doubles**. If any pair qualifies as a **Smash Double**, that pair is forced into the first slot and the other two legs become the second double. If no smash pair exists, the app evaluates the possible Top 4 splits and orders the two doubles by pair strength.
+When **four** locked plays populate the Top 4 card, the app recommends **two doubles**. If any pair qualifies as a **Smash Double**, that pair is forced into the first slot and the other two legs become the second double. If no smash pair exists, the app evaluates the possible Top 4 splits and orders the two doubles by pair strength. After the slate locks, those labels stay fixed to the locked Top 4 tags even as some legs move to **In progress**, so a started Smash or Daily Double does not cause the remaining upcoming pair to be relabeled.
 
 When only **two or three** plays qualify, the app shows just the single best available 2-leg parlay.
 
 The **Smash Double** requires both legs to carry a career OPS above .950 and at least 7 hits against their pitcher. The hit floor ensures the high OPS reflects genuine contact rather than a small-sample fluke.
 
-If one or more legs are already in progress, the recommended doubles section remains visible so you can track the bet or export it. In-progress legs are marked and dimmed.
+If one or more legs are already in progress, the recommended doubles section remains visible so you can track the bet or export it. In-progress legs are marked and dimmed, but the original **Smash / Daily / Secondary** hierarchy is preserved.
 
 ## Recommendation tags
 
