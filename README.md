@@ -61,7 +61,7 @@ Recommendation tags now live in the matchup tables so tagged players stay identi
 
 ## Date navigation
 
-One day back and the next two days are available. The arrows move one day at a time within that range.
+Today and the next two days are available. The arrows move one day at a time within that range.
 
 The active slate day rolls over on the **Pacific** calendar day, not at the viewer's local midnight. Game times still render in the viewer's local browser time zone.
 

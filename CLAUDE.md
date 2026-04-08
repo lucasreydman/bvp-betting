@@ -19,7 +19,7 @@ app/
     schedule/route.ts    # Schedule for a date
   components/
     ClientShell.tsx      # Root client component; owns state; auto-refreshes every 5 min (silent) + re-renders every 60s
-    DatePicker.tsx       # Yesterday through +2 day nav, UTC-safe date arithmetic
+    DatePicker.tsx       # Today through +2 day nav, UTC-safe date arithmetic
     StatusBar.tsx        # Last updated, games scanned, refresh; stacks vertically on mobile
     Filters.tsx          # Min AB + Min AVG + optional OPS filter; Apply / Reset / Export CSV (CSV hidden on mobile)
     TopPlays.tsx         # Top 4 by AVG×confidence (AB-scaled); upcoming only; 2-row card layout on mobile; recommended doubles + Smash Double cards
@@ -70,7 +70,7 @@ lib/
 - **KV TTLs:** Response cache uses 5-min TTL. `kvSet` accepts an optional third argument `ttlSeconds`.
 - **PPD/cancelled games:** Filtered in `fetchSchedule` before any lineup or BvP work. Status checked via `g.status.detailedState`.
 - **Lineup sources (priority order):** 1) Schedule hydration (`lineups.homePlayers/awayPlayers`, ≥8), 2) Boxscore `batters` array (always `cache: 'no-store'`), 3) Estimated top-9 roster by career PA — **only pre-game**. Once a game has started, if no confirmed batters exist, return empty rather than estimated.
-- **Date range:** One day back through two days ahead. `DatePicker` enforces `minDate = today - 1`, `maxDate = today + 2` using the Pacific slate date. Yesterday shows settled results only (reads `game-qualifying` KV snapshots; rows won't appear if the snapshot TTL expired).
+- **Date range:** Today through two days ahead. `DatePicker` enforces `minDate = today`, `maxDate = today + 2` using the Pacific slate date.
 
 ## KV Schema
 
