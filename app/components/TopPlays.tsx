@@ -183,29 +183,30 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
           <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-300">
             Scoring and Selection Logic
           </div>
-          <div className="mt-4 flex flex-nowrap items-center justify-center gap-2 text-left text-[11px] leading-5 text-slate-200">
-            <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
-              <span className="font-semibold text-sky-300">AVG</span>
-              <span className="text-slate-400">= career BvP batting average</span>
-            </span>
-            <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
-              <span className="font-semibold text-cyan-300">AB</span>
-              <span className="text-slate-400">= career at-bats vs this pitcher</span>
-            </span>
-            <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
-              <span className="font-semibold text-lime-300">P</span>
-              <span className="text-slate-400">= probability of at least one hit</span>
-            </span>
-            <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
-              <span className="font-semibold text-amber-300">E[AB]</span>
-              <span className="text-slate-400">= expected at-bats from batting slot</span>
-            </span>
-          </div>
         </div>
 
         <div className={`grid transition-all duration-500 ease-out ${isDesktopLogicOpen ? 'mt-4 grid-rows-[1fr] opacity-100' : 'mt-0 grid-rows-[0fr] opacity-0'}`}>
           <div className="overflow-hidden">
-            <div className="grid auto-rows-fr gap-3 pb-1 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="pb-1">
+              <div className="mb-4 flex flex-nowrap items-center justify-center gap-2 text-left text-[11px] leading-5 text-slate-200">
+                <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
+                  <span className="font-semibold text-sky-300">AVG</span>
+                  <span className="text-slate-400">= career BvP batting average</span>
+                </span>
+                <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
+                  <span className="font-semibold text-cyan-300">AB</span>
+                  <span className="text-slate-400">= career at-bats vs this pitcher</span>
+                </span>
+                <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
+                  <span className="font-semibold text-lime-300">P</span>
+                  <span className="text-slate-400">= probability of at least one hit</span>
+                </span>
+                <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
+                  <span className="font-semibold text-amber-300">E[AB]</span>
+                  <span className="text-slate-400">= expected at-bats from batting slot</span>
+                </span>
+              </div>
+              <div className="grid auto-rows-fr gap-3 lg:grid-cols-2 xl:grid-cols-3">
             <FormulaBlock title="Ranking" accent="text-sky-300">
             <Formula className="text-slate-50 leading-6">
               <span>score</span>
@@ -309,6 +310,7 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
               <span>smash first, leftovers second</span>
             </Formula>
             </FormulaBlock>
+              </div>
             </div>
           </div>
         </div>
