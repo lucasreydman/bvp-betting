@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Formula, Sup } from '@/app/components/Formula'
+import { Sup } from '@/app/components/Formula'
 
 export default function Footer() {
   const year = new Date().getFullYear()
@@ -13,12 +13,12 @@ export default function Footer() {
           <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Why AVG?</h3>
           <p className="leading-relaxed">
             This prop cashes on any hit, so batting average is the clearest starting point. A simple approximation is{' '}
-            <Formula inline className="text-gray-400 text-[0.82rem]">
+            <span className="inline-flex items-center flex-wrap gap-1 align-middle whitespace-nowrap text-gray-400 text-[0.82rem]">
               <span>P(≥1 hit)</span>
               <span>=</span>
               <span>1 − (1 − AVG)</span>
               <Sup>n</Sup>
-            </Formula>.
+            </span>.
             {' '}Here, n is expected at-bats based on lineup slot. A strong BvP AVG does not guarantee anything, but it gives a clean baseline for comparing which hitters have the best chance to record one hit. It is the fastest way to scan the board without mixing in stats that do not cash the prop.
           </p>
         </div>
