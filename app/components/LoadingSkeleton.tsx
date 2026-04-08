@@ -8,9 +8,7 @@ interface Props {
 
 function dateLabel(date: string): string {
   const tomorrow = formatSlateDate(new Date(Date.now() + 86400000))
-  const dayAfter = formatSlateDate(new Date(Date.now() + 2 * 86400000))
   if (date === tomorrow) return "tomorrow's"
-  if (date === dayAfter) return "day after tomorrow's"
   return "today's"
 }
 
