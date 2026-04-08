@@ -49,7 +49,7 @@ export default function ScoringLogicContent() {
       <div className="mb-4 grid grid-cols-2 items-start gap-2.5 lg:grid-cols-4">
         <SymbolCard
           label="AVG"
-          title="Career BvP batting average"
+          title="Career BvP batting"
           description="The batter's historical batting average against today's pitcher. Higher is better."
           accent="text-sky-300"
         />
@@ -62,7 +62,7 @@ export default function ScoringLogicContent() {
         <SymbolCard
           label="P"
           title="Hit probability"
-          description="Estimated chance the batter records at least one hit after regression and lineup-based opportunity adjustments."
+          description="Estimated chance the batter records at least one hit after regression and batting order adjustments."
           accent="text-lime-300"
         />
         <SymbolCard
