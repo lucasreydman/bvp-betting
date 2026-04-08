@@ -34,29 +34,29 @@ function ResultBadge({ hitResult }: { hitResult: MatchupResult['hitResult'] }) {
 export default function MatchupRow({ matchup: m, gameKind }: Props) {
   return (
     <tr className={`border-t ${CONFIDENCE_ROW_COLORS[m.confidence]} hover:bg-gray-800/50 transition-colors`}>
-      <td className="px-3 py-2 font-medium text-white whitespace-nowrap">
+      <td className="px-4 py-2.5 font-medium text-white whitespace-nowrap">
         <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 overflow-hidden">
           <span className="truncate">{m.batterName}</span>
           <span className="shrink-0 text-gray-600 text-xs font-normal">[{teamAbbr(m.batterTeam)}]</span>
           <RecommendationTagBadge tags={m.recommendationTags} variant="compact" />
         </div>
       </td>
-      <td className="px-3 py-2 text-gray-400 text-sm whitespace-nowrap">
-        <span className="block min-w-0 truncate">
-          {m.pitcherName}{' '}
-          <span className="text-gray-600 text-xs">[{teamAbbr(m.pitcherTeam)}]</span>
-        </span>
+      <td className="px-4 py-2.5 text-gray-400 text-sm whitespace-nowrap">
+        <div className="flex min-w-0 items-center gap-1.5 overflow-hidden">
+          <span className="truncate">{m.pitcherName}</span>
+          <span className="shrink-0 text-gray-600 text-xs">[{teamAbbr(m.pitcherTeam)}]</span>
+        </div>
       </td>
-      <td className={`px-3 py-2 font-mono text-sm font-bold ${CONFIDENCE_TEXT_COLORS[m.confidence]}`}>
+      <td className={`px-4 py-2.5 font-mono text-sm font-bold ${CONFIDENCE_TEXT_COLORS[m.confidence]}`}>
         {fmt3(m.avg)}
       </td>
-      <td className="px-3 py-2 font-mono text-sm text-gray-300">{m.h}</td>
-      <td className="px-3 py-2 font-mono text-sm text-gray-400">{m.ab}</td>
-      <td className="px-3 py-2 font-mono text-sm text-gray-500 hidden sm:table-cell">{fmt3(m.ops)}</td>
-      <td className="px-2.5 py-2">
+      <td className="px-4 py-2.5 font-mono text-sm text-gray-300">{m.h}</td>
+      <td className="px-4 py-2.5 font-mono text-sm text-gray-400">{m.ab}</td>
+      <td className="px-4 py-2.5 font-mono text-sm text-gray-500 hidden sm:table-cell">{fmt3(m.ops)}</td>
+      <td className="px-4 py-2.5">
         <GameTimeCell gameTime={m.gameTime} variant={gameKind} compact />
       </td>
-      <td className="px-2.5 py-2 hidden sm:table-cell">
+      <td className="px-4 py-2.5 hidden sm:table-cell">
         <span className={`inline-flex whitespace-nowrap text-[11px] px-2 py-0.5 rounded font-medium ${
           m.lineupSource === 'confirmed'
             ? 'bg-gray-800 text-gray-400'
@@ -66,12 +66,12 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
         </span>
       </td>
       {gameKind === 'upcoming' && (
-        <td className="px-2 py-2 hidden sm:table-cell" aria-hidden="true">
+        <td className="px-4 py-2.5 hidden sm:table-cell" aria-hidden="true">
           <span className="invisible">—</span>
         </td>
       )}
       {gameKind !== 'upcoming' && (
-        <td className="px-2 py-2 text-right">
+        <td className="px-4 py-2.5">
           <ResultBadge hitResult={m.hitResult} />
         </td>
       )}
