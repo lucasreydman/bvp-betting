@@ -11,9 +11,9 @@ function FormulaBlock({
   children: ReactNode
 }) {
   return (
-    <div className="flex h-full flex-col rounded-[1.35rem] border border-slate-700/60 bg-[linear-gradient(180deg,rgba(2,6,23,0.9),rgba(3,10,28,0.72))] p-4 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
-      <div className={`mb-3 text-[10px] font-semibold uppercase tracking-[0.28em] ${accent}`}>{title}</div>
-      <div className="flex flex-1 flex-col gap-2.5 text-[0.96rem] text-slate-100 leading-[1.55]">{children}</div>
+    <div className="flex h-full flex-col rounded-[1.25rem] border border-slate-700/60 bg-[linear-gradient(180deg,rgba(2,6,23,0.9),rgba(3,10,28,0.72))] p-4 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)] sm:rounded-[1.35rem]">
+      <div className={`mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] sm:tracking-[0.28em] ${accent}`}>{title}</div>
+      <div className="flex flex-1 flex-col gap-2.5 text-[0.92rem] leading-[1.6] text-slate-100 sm:text-[0.96rem] sm:leading-[1.55]">{children}</div>
     </div>
   )
 }
@@ -21,20 +21,20 @@ function FormulaBlock({
 export default function ScoringLogicContent() {
   return (
     <div className="pb-1">
-      <div className="mb-4 flex flex-nowrap items-center justify-center gap-2 text-left text-[11px] leading-5 text-slate-200">
-        <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
+      <div className="mb-4 grid grid-cols-2 gap-2 text-left text-[11px] leading-5 text-slate-200 sm:flex sm:flex-nowrap sm:items-center sm:justify-center sm:gap-2">
+        <span className="flex min-w-0 flex-col justify-center gap-1 rounded-[1.1rem] border border-slate-700/70 bg-slate-950/80 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)] sm:inline-flex sm:flex-row sm:items-center sm:gap-1 sm:rounded-full sm:px-3 sm:py-1.5">
           <span className="font-semibold text-sky-300">AVG</span>
           <span className="text-slate-400">= career BvP batting average</span>
         </span>
-        <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
+        <span className="flex min-w-0 flex-col justify-center gap-1 rounded-[1.1rem] border border-slate-700/70 bg-slate-950/80 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)] sm:inline-flex sm:flex-row sm:items-center sm:gap-1 sm:rounded-full sm:px-3 sm:py-1.5">
           <span className="font-semibold text-cyan-300">AB</span>
           <span className="text-slate-400">= career at-bats vs this pitcher</span>
         </span>
-        <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
+        <span className="flex min-w-0 flex-col justify-center gap-1 rounded-[1.1rem] border border-slate-700/70 bg-slate-950/80 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)] sm:inline-flex sm:flex-row sm:items-center sm:gap-1 sm:rounded-full sm:px-3 sm:py-1.5">
           <span className="font-semibold text-lime-300">P</span>
           <span className="text-slate-400">= probability of at least one hit</span>
         </span>
-        <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
+        <span className="flex min-w-0 flex-col justify-center gap-1 rounded-[1.1rem] border border-slate-700/70 bg-slate-950/80 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)] sm:inline-flex sm:flex-row sm:items-center sm:gap-1 sm:rounded-full sm:px-3 sm:py-1.5">
           <span className="font-semibold text-amber-300">E[AB]</span>
           <span className="text-slate-400">= expected at-bats from batting slot</span>
         </span>
@@ -88,11 +88,11 @@ export default function ScoringLogicContent() {
         </FormulaBlock>
 
         <FormulaBlock title="Expected At-Bats" accent="text-amber-300">
-          <div className="text-[0.95rem] leading-6 text-slate-50">
+          <div className="text-[0.92rem] leading-6 text-slate-50 sm:text-[0.95rem]">
             <div>slot = confirmed slot</div>
             <div>or estimated slot</div>
           </div>
-          <div className="grid content-start grid-cols-2 gap-x-5 gap-y-1.5 text-[0.88rem] leading-5 text-slate-200">
+          <div className="grid content-start grid-cols-1 gap-x-5 gap-y-1.5 text-[0.88rem] leading-5 text-slate-200 sm:grid-cols-2">
             <div>E[AB] = 4.45, slot ≤ 3</div>
             <div>E[AB] = 4.25, slot = 4</div>
             <div>E[AB] = 4.05, 5 ≤ slot ≤ 6</div>
@@ -133,10 +133,10 @@ export default function ScoringLogicContent() {
         </FormulaBlock>
 
         <FormulaBlock title="Smash Priority" accent="text-orange-300">
-          <div className="space-y-0.5 text-[0.95rem] leading-6 text-slate-50">
+          <div className="space-y-0.5 text-[0.92rem] leading-6 text-slate-50 sm:text-[0.95rem]">
             <div>smash = (OPS₁ &gt; .950 ∧ H₁ ≥ 7)</div>
-            <div className="pl-16 text-slate-300">and</div>
-            <div className="pl-14">(OPS₂ &gt; .950 ∧ H₂ ≥ 7)</div>
+            <div className="pl-6 text-slate-300 sm:pl-16">and</div>
+            <div className="pl-4 sm:pl-14">(OPS₂ &gt; .950 ∧ H₂ ≥ 7)</div>
           </div>
           <Formula className="text-slate-400 text-[0.82rem] leading-5">
             <span>if smash exists</span>

@@ -11,7 +11,7 @@ interface FormulaProps {
 export function Formula({ children, inline = false, className }: FormulaProps) {
   const baseClass = inline
     ? 'inline-flex items-center flex-wrap gap-1 align-middle whitespace-nowrap'
-    : 'flex items-center gap-1 whitespace-nowrap overflow-x-auto max-w-full text-[0.88rem] sm:text-[0.95rem]'
+    : 'flex max-w-full flex-wrap items-center gap-x-1.5 gap-y-1 text-[0.88rem] leading-6 sm:flex-nowrap sm:gap-1 sm:whitespace-nowrap sm:overflow-x-auto sm:text-[0.95rem]'
 
   return (
     <span
