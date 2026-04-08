@@ -1,35 +1,61 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { getSiteUrl, SITE_NAME } from '@/lib/site'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL
-  ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000')
+const SITE_URL = getSiteUrl()
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'MLB BvP Betting',
+  title: {
+    default: 'MLB BvP Betting | Batter vs Pitcher Stats for MLB Hit Props',
+    template: '%s | MLB BvP Betting',
+  },
   description:
-    'Career batter vs pitcher stats for the Player to Record a Hit prop, with consensus odds from major US books. Ranked by BvP batting average weighted by sample size. Daily Double, Secondary Double, and Smash Double pairings updated daily.',
+    'Daily MLB batter versus pitcher stats for hit props and BvP betting. Track career BVP stats, MLB hit props, and Top 4 batter vs pitcher matchups ranked by batting average weighted by sample size.',
+  keywords: [
+    'batter versus pitcher stats',
+    'batter versus pitcher betting',
+    'BVP stats',
+    'BVP betting',
+    'MLB BVP',
+    'MLB BVP betting',
+    'MLB hit props',
+    'MLB batter vs pitcher stats',
+    'baseball hit props',
+  ],
+  alternates: {
+    canonical: '/',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
+  category: 'sports',
   openGraph: {
-    title: 'MLB BvP Betting: Daily Hit Prop Picks',
+    title: 'MLB BvP Betting: Batter vs Pitcher Stats for MLB Hit Props',
     description:
-      "Today's best batter vs pitcher matchups ranked by career batting average. Daily Double, Secondary Double, and Smash Double pairings for all major sportsbooks.",
+      'Daily MLB batter versus pitcher stats, BvP betting angles, and hit prop picks ranked by career batting average and sample size.',
     type: 'website',
-    url: SITE_URL,
+    url: '/',
+    siteName: SITE_NAME,
     images: [{ url: '/opengraph-image' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MLB BvP Betting: Daily Hit Prop Picks',
+    title: 'MLB BvP Betting: Batter vs Pitcher Stats for MLB Hit Props',
     description:
-      "Today's best batter vs pitcher matchups ranked by career batting average. Daily Double, Secondary Double, and Smash Double pairings.",
+      'Daily MLB batter versus pitcher stats, BvP betting angles, and hit prop picks ranked by career batting average and sample size.',
     images: ['/opengraph-image'],
   },
 }
