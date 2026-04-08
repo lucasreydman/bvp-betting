@@ -27,7 +27,7 @@ export default function Home() {
           <span className="text-slate-300"> A Smash Double is the lead card whenever both legs have a career OPS above .950 and at least 7 hits against their pitcher. The hit floor ensures the high OPS reflects real contact, not a small-sample fluke. When one exists, it takes priority over the Daily Double and the remaining two top plays form the Secondary Double.</span>
         </p>
         <p>
-          <span className="text-sky-300 font-semibold">Want more action? Take the Secondary Double if available.</span>
+          <span className="text-slate-300 font-semibold">Want more action? Take the Secondary Double!</span>
           <span className="text-slate-300"> When four plays qualify, the board can show a second 2-leg parlay alongside the lead card. It is the next-best split of the Top 4 and is optional, not the main recommendation.</span>
         </p>
         <p>
