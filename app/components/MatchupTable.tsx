@@ -25,11 +25,11 @@ const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> =
   { key: 'h', label: 'H', cls: 'w-[2.75rem]' },
   { key: 'ab', label: 'AB', cls: 'w-[2.75rem]' },
   { key: 'ops', label: 'OPS', cls: 'hidden sm:table-cell w-[4.25rem]' },
-  { key: 'gameTime', label: 'Game', cls: 'w-[12.5rem]' },
-  { key: 'lineupSource', label: 'Lineup', cls: 'hidden sm:table-cell w-[10.5rem]' },
+  { key: 'gameTime', label: 'Game', cls: 'w-[11.5rem]' },
+  { key: 'lineupSource', label: 'Lineup', cls: 'hidden sm:table-cell w-[11rem]' },
 ]
 
-const RESULT_COLUMN_CLASS = 'hidden sm:table-column w-[6.75rem]'
+const RESULT_COLUMN_CLASS = 'hidden sm:table-column w-[7rem]'
 
 const MOBILE_SORT_COLS: Array<{ key: keyof MatchupResult; label: string }> = [
   { key: 'avg', label: 'AVG' },
@@ -69,9 +69,9 @@ export default function MatchupTable({
   hasActiveOptionalFilters = false,
   gameKind = 'upcoming',
 }: Props) {
-  const headerPaddingClass = (key: keyof MatchupResult) => {
-    if (key === 'gameTime') return 'px-4'
-    if (key === 'lineupSource') return 'px-4'
+  const headerCellClass = (key: keyof MatchupResult) => {
+    if (key === 'gameTime') return 'px-4 text-left'
+    if (key === 'lineupSource') return 'px-4 text-center'
     return 'px-3'
   }
 
@@ -218,21 +218,21 @@ export default function MatchupTable({
                     <th
                       key={col.key}
                       {...(gameKind !== 'settled' ? { onClick: () => onSort(col.key) } : {})}
-                      className={`${headerPaddingClass(col.key)} py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider select-none whitespace-nowrap ${col.cls} ${gameKind !== 'settled' ? 'cursor-pointer hover:text-white' : ''}`}
+                      className={`${headerCellClass(col.key)} py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider select-none whitespace-nowrap ${col.cls} ${gameKind !== 'settled' ? 'cursor-pointer hover:text-white' : ''}`}
                     >
                       {col.label}{gameKind !== 'settled' && sortIcon(col.key)}
                     </th>
                   ))}
                   {gameKind === 'upcoming' && (
                     <th
-                      className="pl-4 pr-5 py-2 text-right text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell text-transparent select-none"
+                      className="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell text-transparent select-none"
                       aria-hidden="true"
                     >
                       Result
                     </th>
                   )}
                   {gameKind !== 'upcoming' && (
-                    <th className="pl-4 pr-5 py-2 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
+                    <th className="px-4 py-2 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
                       Result
                     </th>
                   )}
