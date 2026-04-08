@@ -18,6 +18,18 @@ interface Props {
 const DEFAULT_OPS_VALUE = 0.950
 const DEFAULT_H_VALUE = 7
 
+function LockedFilterChip({ label }: { label: string }) {
+  return (
+    <div className="inline-flex min-w-0 items-center justify-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-medium text-gray-300">
+      <svg className="h-3.5 w-3.5 shrink-0 text-gray-500" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M5.333 6.667V5.333a2.667 2.667 0 1 1 5.334 0v1.334" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="3.333" y="6.667" width="9.334" height="6" rx="1.333" stroke="currentColor" strokeWidth="1.5" />
+      </svg>
+      <span className="font-mono">{label}</span>
+    </div>
+  )
+}
+
 export default function Filters({ date, filters, onApply, matchups, topPlays, recommendedDoubles = [] }: Props) {
   const minOpsId = useId()
   const minHId = useId()
@@ -95,25 +107,23 @@ export default function Filters({ date, filters, onApply, matchups, topPlays, re
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 mb-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:hidden">
+          <LockedFilterChip label="15 AB" />
+          <LockedFilterChip label=".300 AVG" />
+        </div>
 
-        {/* ── Fixed requirement chips ───────────────────────── */}
-        <div className="flex flex-wrap items-center gap-1.5 justify-center sm:justify-start">
+        <div className="hidden flex-wrap items-center gap-1.5 justify-center sm:flex sm:justify-start">
           <span className="text-xs uppercase tracking-wider text-gray-600 font-semibold mr-0.5 hidden sm:inline">
             Filters
           </span>
-
-          {/* 15 AB chip */}
           <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-800 border border-gray-700 text-xs font-mono text-gray-300">
             15 AB
           </span>
-
-          {/* .300 AVG chip */}
           <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-800 border border-gray-700 text-xs font-mono text-gray-300">
             .300 AVG
           </span>
         </div>
 
-        {/* ── Divider ───────────────────────────────────────── */}
         <div className="w-px h-5 bg-gray-800 mx-0.5 hidden sm:block" />
 
         <div className="grid grid-cols-2 gap-2 sm:contents">

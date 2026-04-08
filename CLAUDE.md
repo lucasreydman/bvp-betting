@@ -11,6 +11,8 @@ app/
   page.tsx               # Server component
   layout.tsx             # Root layout, metadata, OG tags, Vercel Analytics
   opengraph-image.tsx    # Dynamic 1200x630 OG image (edge runtime)
+  scoring-logic/
+    page.tsx             # Dedicated scoring explainer page for mobile CTA
   disclaimer/
     page.tsx             # Disclaimer + responsible gambling page
   api/
@@ -21,8 +23,9 @@ app/
     ClientShell.tsx      # Root client component; owns state; auto-refreshes every 5 min (silent) + re-renders every 60s
     DatePicker.tsx       # Today through +1 day nav, UTC-safe date arithmetic
     StatusBar.tsx        # Last updated, games scanned, refresh; stacks vertically on mobile
-    Filters.tsx          # Min AB + Min AVG + optional OPS filter; Apply / Reset / Export CSV (CSV hidden on mobile)
-    TopPlays.tsx         # Top 4 by AVG×confidence (AB-scaled); upcoming only; 2-row card layout on mobile; recommended doubles + Smash Double cards
+    Filters.tsx          # Locked mobile chips for Min AB/AVG + optional OPS/H filters; Apply / Reset / Export CSV (CSV hidden on mobile)
+    TopPlays.tsx         # Top 4 by AVG×confidence (AB-scaled); upcoming only; 2-row card layout on mobile; Show Me the Math mobile CTA; daily/secondary/smash double cards
+    ScoringLogicContent.tsx # Shared scoring explainer used by desktop Top Plays and /scoring-logic
     MatchupTable.tsx     # Sortable table (sm+) + card list (mobile); sort chips on mobile; TEAM_ABBR map for mobile cards; recommendation tags render beside batter names
     MatchupRow.tsx       # Single <tr> row; used only in the sm+ table path; renders recommendation tags in desktop rows
     RecommendationTagBadge.tsx # Shared badge for SMASH / DD / SD / T4 table tags
@@ -64,7 +67,7 @@ lib/
 - **Aggregate dedup:** Drop rows where `keyCounts(statKey) >= 3` for identical raw lines (same team vs same pitcher). 3+ identical BvP lines from the same team is impossible in real data.
 - **`formatTime()`:** Uses `Intl.DateTimeFormat().resolvedOptions().timeZone` (browser local time, not hardcoded ET).
 - **Slate date cutoff:** Use the Pacific calendar day (`America/Los_Angeles`) for the active slate date. Do not advance the selected board at local midnight in other time zones.
-- **Mobile layout:** `MatchupTable` renders a card list (`sm:hidden`) and a full table (`hidden sm:block`). Cards show batter, AVG, team abbreviation vs pitcher, H/AB, lineup badge, and `GameTimeCell`. Sort chips (AVG / AB / Time) replace column-header sorting on mobile. `TopPlays` uses `sm:hidden` / `hidden sm:flex` to switch between a 2-row card and the single-row desktop layout. Recommended doubles / Smash Double legs use a 2-row card on all screen sizes (name+AVG row 1, pitcher+OPS+AB+hit% row 2). `StatusBar` stacks clock + "Updated" on the left with the refresh button on the right on mobile; "games scanned" text is `hidden sm:inline`.
+- **Mobile layout:** `MatchupTable` renders a card list (`sm:hidden`) and a full table (`hidden sm:block`). Cards show batter, AVG, team abbreviation vs pitcher, H/AB, lineup badge, and `GameTimeCell`. Sort chips (AVG / AB / Time) replace column-header sorting on mobile. `TopPlays` uses `sm:hidden` / `hidden sm:flex` to switch between a 2-row card and the single-row desktop layout. Recommended doubles / Smash Double legs use a 2-row card on all screen sizes (name+AVG row 1, pitcher+OPS+AB+hit% row 2). Mobile Top Plays links to `/scoring-logic` via a Show Me the Math CTA instead of rendering the formula block inline. `Filters` shows locked `15 AB` and `.300 AVG` chips only on mobile, sized like the other mobile controls. `StatusBar` stacks clock + "Updated" on the left with the refresh button on the right on mobile; "games scanned" text is `hidden sm:inline`.
 - **Recommendation tags:** Top 4 itself does not render recommendation badges. Tags render in the matchup tables and card list so a tagged player remains trackable as they move Upcoming → In progress → Settled during the session. `T4` remains present for every current Top 4 play, even when it also carries `SMASH`, `DD`, or `SD`.
 - **Team abbreviations:** `TEAM_ABBR` map in `MatchupTable.tsx` covers all 30 MLB teams; `abbr()` falls back to initials for unknown names.
 - **KV TTLs:** Response cache uses 5-min TTL. `kvSet` accepts an optional third argument `ttlSeconds`.

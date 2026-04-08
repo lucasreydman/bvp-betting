@@ -1,13 +1,15 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import Link from 'next/link'
+import { useState } from 'react'
 import type { MatchupResult } from '@/lib/types'
 import { formatTime, expectedAtBats, hitProbability, regressedAvg, resolveLineupPosition, suggestRecommendedDoubles } from '@/lib/utils'
 import type { RecommendedDouble } from '@/lib/utils'
 import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
 import { fmtOdds } from '@/lib/odds'
 import InfoTooltip from './InfoTooltip'
-import { Formula, Fraction, MATH_FONT_STACK, Sup } from './Formula'
+import { MATH_FONT_STACK } from './Formula'
+import ScoringLogicContent from './ScoringLogicContent'
 
 interface Props {
   matchups: MatchupResult[]
@@ -27,23 +29,6 @@ const LINEUP_BADGE_STYLES = {
   confirmed: 'bg-gray-800 text-gray-300',
   estimated: 'bg-amber-900/40 text-amber-400',
 } as const
-
-function FormulaBlock({
-  title,
-  accent,
-  children,
-}: {
-  title: string
-  accent: string
-  children: ReactNode
-}) {
-  return (
-    <div className="flex h-full flex-col rounded-[1.35rem] border border-slate-700/60 bg-[linear-gradient(180deg,rgba(2,6,23,0.9),rgba(3,10,28,0.72))] p-4 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
-      <div className={`mb-3 text-[10px] font-semibold uppercase tracking-[0.28em] ${accent}`}>{title}</div>
-      <div className="flex flex-1 flex-col gap-2.5 text-[0.96rem] text-slate-100 leading-[1.55]">{children}</div>
-    </div>
-  )
-}
 
 export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: Props) {
   const [isDesktopLogicOpen, setIsDesktopLogicOpen] = useState(true)
@@ -96,222 +81,47 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now }: 
           <p className="mt-1 text-xs leading-5 text-gray-500">Capped at four to keep the board concentrated on the strongest historical edges and avoid padding the slate with lower-conviction plays.</p>
         </div>
       </div>
-      <div className="rounded-2xl border border-slate-700 bg-slate-950 p-4 text-xs text-slate-300 sm:hidden">
-        <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-400">How Top Plays are ranked</div>
-        <div className="space-y-3 leading-5">
-          <p>
-            <span className="font-semibold text-sky-400">Primary score:</span>
-            <span className="text-sky-400"> career batting average against this pitcher, weighted by how many at-bats back it up. More at-bats = more trust in the number.</span>
-            <InfoTooltip width="w-64" align="left" text="For singles bets, go by primary score. It directly rewards both a strong average and a large sample. The higher the score, the more reliable the historical edge. Hit chance % is better for parlay legs, where raw probability matters more than sample confidence." />
-          </p>
-          <Formula className="pl-3 text-slate-300">
-            <span>score</span>
-            <span>=</span>
-            <span>AVG</span>
-            <span>×</span>
-            <span>confidence</span>
-          </Formula>
-          <Formula className="pl-3 text-slate-300">
-            <span>confidence</span>
-            <span>=</span>
-            <span>min(</span>
-            <Fraction top={<span>AB</span>} bottom={<span>30</span>} />
-            <span>, 1)</span>
-          </Formula>
-          <p>
-            <span className="font-semibold text-green-300">Hit chance %:</span>
-            <span className="text-green-300"> estimated chance of ≥1 hit using a regressed AVG and expected at-bats.</span>
-            <InfoTooltip width="w-72" text="Hit chance uses a regressed AVG that pulls toward .320 based on sample size. Smaller samples get pulled more. A higher raw AVG matters more here than ABs, which is the opposite of the ranking score. That is why a lower-ranked play can still land in the Daily Double or Smash Double." />
-          </p>
-          <div className="pl-3 text-slate-300 sm:hidden" style={{ fontFamily: '"Cambria Math", "STIX Two Text", "Times New Roman", serif' }}>
-            <div className="text-[0.88rem] leading-5">adjusted AVG =</div>
-            <Formula className="mt-1 text-slate-300">
-              <Fraction top={<span>AB</span>} bottom={<span>AB + 50</span>} />
-              <span>×</span>
-              <span>AVG</span>
-              <span>+</span>
-              <Fraction top={<span>50</span>} bottom={<span>AB + 50</span>} />
-              <span>×</span>
-              <span>0.320</span>
-            </Formula>
-          </div>
-          <Formula className="hidden pl-3 text-slate-300 sm:flex">
-            <span>adjusted AVG</span>
-            <span>=</span>
-            <Fraction top={<span>AB</span>} bottom={<span>AB + 50</span>} />
-            <span>×</span>
-            <span>AVG</span>
-            <span>+</span>
-            <Fraction top={<span>50</span>} bottom={<span>AB + 50</span>} />
-            <span>×</span>
-            <span>0.320</span>
-          </Formula>
-          <Formula className="pl-3 text-slate-300">
-            <span>P(≥1 hit)</span>
-            <span>=</span>
-            <span>1 − (1 − adjusted AVG)</span>
-            <Sup>expected at-bats</Sup>
-          </Formula>
-        </div>
-      </div>
+      <Link
+        href="/scoring-logic"
+        className="sm:hidden inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-700 bg-slate-950/90 px-4 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-slate-500 hover:text-white"
+      >
+        <span>Show Me the Math</span>
+        <span aria-hidden="true">→</span>
+      </Link>
       <div
         className="relative hidden overflow-hidden rounded-[1.75rem] border border-slate-700/90 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.14),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,197,94,0.10),_transparent_24%),linear-gradient(180deg,_rgba(2,6,23,0.98),_rgba(3,10,28,0.94))] p-5 text-slate-200 shadow-[0_20px_60px_rgba(2,6,23,0.32)] sm:block"
         style={{ fontFamily: MATH_FONT_STACK }}
       >
-        <button
-          type="button"
-          onClick={() => setIsDesktopLogicOpen(open => !open)}
-          aria-label={isDesktopLogicOpen ? 'Collapse scoring and selection logic' : 'Expand scoring and selection logic'}
-          className="group absolute right-4 top-4 inline-flex items-center gap-2 rounded-full border border-slate-600/70 bg-slate-950/75 px-2 py-2 text-slate-300 shadow-[0_10px_30px_rgba(2,6,23,0.28)] backdrop-blur-sm transition-all duration-300 hover:border-sky-400/50 hover:bg-slate-900/95 hover:text-white"
-        >
-          <span className="pl-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-300 transition-colors duration-300 group-hover:text-white">
-            {isDesktopLogicOpen ? 'Collapse' : 'Expand'}
-          </span>
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-600/60 bg-slate-900/90 text-slate-200 transition-all duration-300 group-hover:border-sky-400/40 group-hover:bg-slate-800 group-hover:text-white">
-            <svg
-              viewBox="0 0 20 20"
-              fill="none"
-              className={`h-4 w-4 shrink-0 transition-transform duration-300 ease-out ${isDesktopLogicOpen ? 'rotate-180' : 'rotate-0'}`}
-              aria-hidden="true"
-            >
-              <path d="M5 8l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-        </button>
-
-        <div className="border-b border-slate-800/80 pb-5 text-center">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-300">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-center">
+          <div />
+          <div className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-200">
             Scoring and Selection Logic
+          </div>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setIsDesktopLogicOpen(open => !open)}
+              aria-label={isDesktopLogicOpen ? 'Collapse scoring and selection logic' : 'Expand scoring and selection logic'}
+              className="group inline-flex items-center gap-2 rounded-full border border-slate-600/70 bg-slate-950/75 px-3 py-2 text-slate-300 shadow-[0_10px_30px_rgba(2,6,23,0.28)] backdrop-blur-sm transition-all duration-300 hover:border-sky-400/50 hover:bg-slate-900/95 hover:text-white"
+            >
+              <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-300 transition-colors duration-300 group-hover:text-white">
+                {isDesktopLogicOpen ? 'Collapse' : 'Expand'}
+              </span>
+              <svg
+                viewBox="0 0 20 20"
+                fill="none"
+                className={`h-4 w-4 shrink-0 transition-transform duration-300 ease-out ${isDesktopLogicOpen ? 'rotate-180' : 'rotate-0'}`}
+                aria-hidden="true"
+              >
+                <path d="M5 8l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
           </div>
         </div>
 
         <div className={`grid transition-all duration-500 ease-out ${isDesktopLogicOpen ? 'mt-4 grid-rows-[1fr] opacity-100' : 'mt-0 grid-rows-[0fr] opacity-0'}`}>
           <div className="overflow-hidden">
-            <div className="pb-1">
-              <div className="mb-4 flex flex-nowrap items-center justify-center gap-2 text-left text-[11px] leading-5 text-slate-200">
-                <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
-                  <span className="font-semibold text-sky-300">AVG</span>
-                  <span className="text-slate-400">= career BvP batting average</span>
-                </span>
-                <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
-                  <span className="font-semibold text-cyan-300">AB</span>
-                  <span className="text-slate-400">= career at-bats vs this pitcher</span>
-                </span>
-                <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
-                  <span className="font-semibold text-lime-300">P</span>
-                  <span className="text-slate-400">= probability of at least one hit</span>
-                </span>
-                <span className="inline-flex min-w-0 items-center gap-1 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(148,163,184,0.06)]">
-                  <span className="font-semibold text-amber-300">E[AB]</span>
-                  <span className="text-slate-400">= expected at-bats from batting slot</span>
-                </span>
-              </div>
-              <div className="grid auto-rows-fr gap-3 lg:grid-cols-2 xl:grid-cols-3">
-            <FormulaBlock title="Ranking" accent="text-sky-300">
-            <Formula className="text-slate-50 leading-6">
-              <span>score</span>
-              <span>=</span>
-              <span>AVG</span>
-              <span>×</span>
-              <span>confidence</span>
-            </Formula>
-            <Formula className="text-slate-200 leading-6">
-              <span>confidence</span>
-              <span>=</span>
-              <span>min(</span>
-              <Fraction top={<span>AB</span>} bottom={<span>30</span>} />
-              <span>, 1)</span>
-            </Formula>
-            <Formula className="text-slate-400 text-[0.82rem] leading-5">
-              <span>sort</span>
-              <span>=</span>
-              <span>score ↓, AVG ↓, AB ↓</span>
-            </Formula>
-            </FormulaBlock>
-
-            <FormulaBlock title="Regression" accent="text-emerald-300">
-            <Formula className="text-slate-50 leading-6">
-              <span>adjusted AVG</span>
-              <span>=</span>
-              <Fraction top={<span>AB</span>} bottom={<span>AB + 50</span>} />
-              <span>×</span>
-              <span>AVG</span>
-              <span>+</span>
-              <Fraction top={<span>50</span>} bottom={<span>AB + 50</span>} />
-              <span>×</span>
-              <span>0.320</span>
-            </Formula>
-            <Formula className="text-slate-400 text-[0.82rem] leading-5">
-              <span>w</span>
-              <span>=</span>
-              <Fraction top={<span>AB</span>} bottom={<span>AB + 50</span>} />
-            </Formula>
-            <Formula className="text-slate-400 text-[0.82rem] leading-5">
-              <span>adjusted AVG</span>
-              <span>=</span>
-              <span>w × AVG + (1 − w) × 0.320</span>
-            </Formula>
-            </FormulaBlock>
-
-            <FormulaBlock title="Expected At-Bats" accent="text-amber-300">
-            <div className="text-[0.95rem] leading-6 text-slate-50">
-              <div>slot = confirmed slot</div>
-              <div>or estimated slot</div>
-            </div>
-            <div className="grid content-start grid-cols-2 gap-x-5 gap-y-1.5 text-[0.88rem] leading-5 text-slate-200">
-              <div>E[AB] = 4.45, slot ≤ 3</div>
-              <div>E[AB] = 4.25, slot = 4</div>
-              <div>E[AB] = 4.05, 5 ≤ slot ≤ 6</div>
-              <div>E[AB] = 3.85, slot ≥ 7</div>
-            </div>
-            </FormulaBlock>
-
-            <FormulaBlock title="Hit Chance" accent="text-lime-300">
-            <Formula className="text-slate-50 leading-6">
-              <span>P(≥1 hit)</span>
-              <span>=</span>
-              <span>1 − (1 − adjusted AVG)</span>
-              <Sup>E[AB]</Sup>
-            </Formula>
-            <Formula className="text-slate-400 text-[0.82rem] leading-5">
-              <span>Top 4 hit %</span>
-              <span>=</span>
-              <span>100 × P(≥1 hit)</span>
-            </Formula>
-            </FormulaBlock>
-
-            <FormulaBlock title="Double Selection" accent="text-yellow-300">
-            <Formula className="text-slate-50 leading-6">
-              <span>P(double)</span>
-              <span>=</span>
-              <span>P₁ × P₂</span>
-            </Formula>
-            <Formula className="text-slate-200 leading-6">
-              <span>with 4 plays</span>
-              <span>=</span>
-              <span>best Top 4 split</span>
-            </Formula>
-            <Formula className="text-slate-400 text-[0.82rem] leading-5">
-              <span>with 2-3 plays</span>
-              <span>=</span>
-              <span>best single pair only</span>
-            </Formula>
-            </FormulaBlock>
-
-            <FormulaBlock title="Smash Priority" accent="text-orange-300">
-            <div className="space-y-0.5 text-[0.95rem] leading-6 text-slate-50">
-              <div>smash = (OPS₁ &gt; .950 ∧ H₁ ≥ 7)</div>
-              <div className="pl-16 text-slate-300">and</div>
-              <div className="pl-14">(OPS₂ &gt; .950 ∧ H₂ ≥ 7)</div>
-            </div>
-            <Formula className="text-slate-400 text-[0.82rem] leading-5">
-              <span>if smash exists</span>
-              <span>=</span>
-              <span>smash first, leftovers second</span>
-            </Formula>
-            </FormulaBlock>
-              </div>
-            </div>
+            <ScoringLogicContent />
           </div>
         </div>
       </div>

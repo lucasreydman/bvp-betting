@@ -16,11 +16,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: 'MLB BvP Betting',
   description:
-    'Career batter vs pitcher stats for the Player to Record a Hit prop, with consensus odds from major US books. Ranked by BvP batting average weighted by sample size. Recommended doubles and smash-double pairings daily.',
+    'Career batter vs pitcher stats for the Player to Record a Hit prop, with consensus odds from major US books. Ranked by BvP batting average weighted by sample size. Daily Double, Secondary Double, and Smash Double pairings updated daily.',
   openGraph: {
     title: 'MLB BvP Betting: Daily Hit Prop Picks',
     description:
-      "Today's best batter vs pitcher matchups ranked by career batting average. Recommended doubles and smash-double pairings for all major sportsbooks.",
+      "Today's best batter vs pitcher matchups ranked by career batting average. Daily Double, Secondary Double, and Smash Double pairings for all major sportsbooks.",
     type: 'website',
     url: SITE_URL,
     images: [{ url: '/opengraph-image' }],
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'MLB BvP Betting: Daily Hit Prop Picks',
     description:
-      "Today's best batter vs pitcher matchups ranked by career batting average. Recommended doubles and smash-double pairings.",
+      "Today's best batter vs pitcher matchups ranked by career batting average. Daily Double, Secondary Double, and Smash Double pairings.",
     images: ['/opengraph-image'],
   },
 }

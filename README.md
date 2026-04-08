@@ -59,7 +59,7 @@ Recommendation tags now live in the matchup tables so tagged players stay identi
 - **SMASH**: leg of the Smash Double
 - **DD**: leg of the Daily Double, or the only non-smash double when there is just one
 - **SD**: leg of the secondary double when two doubles are shown
-- **T4**: current Top 4 play, including ones that also belong to SMASH, RD, or SD
+- **T4**: current Top 4 play, including ones that also belong to SMASH, DD, or SD
 
 ## Date navigation
 
@@ -75,13 +75,15 @@ The active slate day rolls over on the **Pacific** calendar day, not at the view
 | Min AVG | .300 | Batting average |
 | Min OPS | Off | Optional OPS filter (toggle on/off) |
 
+The 15 AB and .300 AVG minimums are hard floors. On mobile they render as locked chips above the optional controls; on desktop they are implied rather than shown as separate pills.
+
 All active filters apply at once (AND logic). Filters apply to the Upcoming, In progress, and Settled tables.
 
 ## Export CSV
 
 The Export CSV button (desktop only) offers three options:
 
-- **Recommended Doubles / Smash Double**: one or two 2-leg parlay recommendations
+- **Daily / Secondary / Smash Double**: one or two 2-leg parlay recommendations
 - **Top 4 Plays**: top 4 upcoming plays by primary score
 - **Full List**: all upcoming and in-progress rows that pass the current filters
 
@@ -105,8 +107,10 @@ Sample size (career AB vs this pitcher):
 The site is fully responsive. On small screens:
 
 - **Top 4 Plays** renders each entry as a two-row card.
-- **Recommended Doubles / Smash Double** shows each leg as a clean two-row card (name + AVG on top, pitcher + OPS + AB + hit % below).
+- **Daily / Secondary / Smash Double** shows each leg as a clean two-row card (name + AVG on top, pitcher + OPS + AB + hit % below).
+- **Scoring logic** moves to a dedicated Show Me the Math page linked from Top 4 instead of rendering the full explainer inline.
 - **Tables** switch to a vertical card list with sort chips for AVG, AB, and Time.
+- **Min AB** and **Min AVG** show as locked full-width chips above the optional mobile filters.
 - **Export CSV** is hidden on mobile. Use desktop for CSV export.
 - Team names are shown as abbreviations (NYY, LAD, SF, etc.).
 - **Tooltips** are tap-to-open on touch devices and close when tapping outside.
@@ -153,6 +157,7 @@ app/
   api/matchups/    Schedule -> lineups -> BvP; 5-min KV response cache
   api/bvp/         Single BvP lookup (debug)
   api/schedule/    Schedule JSON for a date
+  scoring-logic/   Mobile scoring explainer page
   components/      UI
 lib/
   types.ts         Shared types (MatchupResult, FilterState, SortState, ...)
