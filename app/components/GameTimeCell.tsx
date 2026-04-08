@@ -25,7 +25,7 @@ export default function GameTimeCell({ gameTime, variant, compact = false }: Pro
 
     if (variant === 'settled') {
       return (
-        <div className="min-w-0 truncate text-xs leading-none whitespace-nowrap text-gray-500">
+        <div className="text-[11px] leading-none whitespace-nowrap text-gray-500">
           <span className="font-medium text-gray-400">Final</span>
           <span className="mx-1 text-gray-700">•</span>
           <span>{timeLabel}</span>
@@ -35,7 +35,7 @@ export default function GameTimeCell({ gameTime, variant, compact = false }: Pro
 
     if (variant === 'inProgress') {
       return (
-        <div className="min-w-0 truncate text-xs leading-none whitespace-nowrap text-gray-500">
+        <div className="text-[11px] leading-none whitespace-nowrap text-gray-500">
           <span className="font-medium text-amber-400">Live</span>
           <span className="mx-1 text-gray-700">•</span>
           <span>{timeLabel}</span>
@@ -43,17 +43,9 @@ export default function GameTimeCell({ gameTime, variant, compact = false }: Pro
       )
     }
 
-    const countdown = formatCountdownToStart(gameTime, now)
-
     return (
-      <div className="min-w-0 truncate text-xs leading-none whitespace-nowrap text-gray-500">
+      <div className="text-[11px] leading-none whitespace-nowrap text-gray-500">
         <span className="text-sky-300/90">{timeLabel}</span>
-        {countdown && (
-          <>
-            <span className="mx-1 text-gray-700">•</span>
-            <span>{countdown}</span>
-          </>
-        )}
       </div>
     )
   }
