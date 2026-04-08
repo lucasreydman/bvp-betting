@@ -64,16 +64,16 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
     if (hasTwoDoubles) {
       return isSlateLocked
         ? canBackfillLockedSlots
-          ? 'Locked plays stay on the board after the slate\'s first scheduled pitch, but any open Top 4 slots can still fill as later lineups confirm. Recommended doubles update when those new confirmed plays enter.'
-          : 'Recommended doubles are locked from the official Top 4 frozen at the slate\'s first scheduled pitch. If a Smash Double exists, it takes the lead slot and the remaining two legs become the Secondary Double. If no smash pair exists, the app chooses the strongest overall split of the locked Top 4 and shows the best pair first as the Daily Double.'
-        : 'Before first pitch, the board shows the current Top 4 candidates, including estimated-lineup plays when lineups are not posted yet. At the slate\'s first scheduled pitch, the official Top 4 locks and recommended doubles stop changing.'
+          ? 'Started plays stay tracked after the slate\'s first scheduled pitch, but the upcoming board still re-ranks the best available options and can fill open slots as later lineups confirm. Recommended doubles update with that live upcoming board.'
+          : 'Started plays stay tracked after the slate\'s first scheduled pitch, while the upcoming board keeps preferring the best available confirmed or estimated options. If a Smash Double exists on that live board, it takes the lead slot and the remaining two legs become the Secondary Double.'
+        : 'Before first pitch, the board shows the current Top 4 candidates, including estimated-lineup plays when lineups are not posted yet. The board keeps preferring the best available options as lineups firm up.'
     }
 
     return isSlateLocked
       ? canBackfillLockedSlots
-        ? 'Locked plays stay on the board after first pitch, but open Top 4 slots can still fill as later lineups confirm. Until then, the board shows the strongest available 2-leg parlay from the locked plays already in.'
-        : 'Recommended doubles are locked from the official Top 4 frozen at the slate\'s first scheduled pitch. When fewer than four tracked plays qualify by lock time, the app shows the strongest available 2-leg parlay only.'
-      : 'Before first pitch, the board shows the current Top 4 candidates, including estimated-lineup plays when lineups are not posted yet. At the slate\'s first scheduled pitch, the locked plays stay in and any open slots can keep filling as later lineups confirm.'
+        ? 'Started plays stay tracked after first pitch, but the upcoming board still re-ranks the best available options and can fill open slots as later lineups confirm. Until then, the board shows the strongest available 2-leg parlay from the live upcoming board.'
+        : 'Started plays stay tracked after first pitch, while the upcoming board keeps preferring the best available options. When fewer than four live upcoming plays qualify, the board shows the strongest available 2-leg parlay only.'
+      : 'Before first pitch, the board shows the current Top 4 candidates, including estimated-lineup plays when lineups are not posted yet. The board keeps preferring the best available options as lineups firm up.'
   }
 
   const getDoubleSubcopy = (double: RecommendedDouble, index: number) => {
@@ -93,9 +93,9 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
           <p className="mt-1 text-xs leading-5 text-gray-500">
             {isSlateLocked
               ? canBackfillLockedSlots
-                ? 'The slate is locked at first pitch, but the locked plays stay in and any empty Top 4 slots can still fill as later lineups confirm.'
-                : 'The official Top 4 locked at the slate\'s first scheduled pitch. Only those plays keep tags and move through the board.'
-              : 'Before first pitch, the board shows the current Top 4 candidates. Estimated-lineup plays can appear until official lineups post. At first pitch, the locked plays stay in and any open slots can keep filling as later lineups confirm.'}
+                ? 'Started plays stay tracked after first pitch, but the upcoming board still keeps the best available four options and can fill open slots as later lineups confirm.'
+                : 'Started plays stay tracked after first pitch while the upcoming board keeps preferring the best available options.'
+              : 'Before first pitch, the board shows the current Top 4 candidates. Estimated-lineup plays can appear until official lineups post, and the board keeps preferring the best available options as confirmations come in.'}
           </p>
           {boardDebug && (
             <div className="mt-2 rounded-xl border border-slate-700/80 bg-slate-950/80 px-3 py-2 text-xs leading-5 text-slate-300">

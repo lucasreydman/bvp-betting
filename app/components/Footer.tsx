@@ -47,7 +47,7 @@ export default function Footer() {
               <Fraction top={<span>AB</span>} bottom={<span>30</span>} />
               <span>, 1)</span>
             </Formula>, so a .350 in 30 AB
-            scores higher than a .500 in 15 AB. Larger samples carry less variance and are generally more reliable at the same AVG. Before first pitch the board shows the current candidates, and at first pitch the confirmed part of the official Top 4 locks for tracking while any empty slots can still fill later as lineups confirm.
+            scores higher than a .500 in 15 AB. Larger samples carry less variance and are generally more reliable at the same AVG. Before first pitch the board shows the current candidates, and after first pitch the upcoming board still keeps preferring the best available options while started plays stay tracked separately.
           </p>
         </div>
         <div>

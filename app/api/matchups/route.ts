@@ -116,6 +116,7 @@ export async function GET(req: NextRequest) {
 
     const games = await fetchSchedule(date)
     const nowMs = Date.now()
+    const gameStatusByPk = new Map(games.map(game => [game.gamePk, getGameStatus(game.status.detailedState)]))
     const slateGameTimes = games.map(game => game.gameDate)
     const slateLockReached = isSlateLockReached(slateGameTimes, nowMs)
     const earliestGameTimeMs = getEarliestGameTimeMs(slateGameTimes)
@@ -306,6 +307,7 @@ export async function GET(req: NextRequest) {
     let slateTopPlaysSnapshot = await kvGet<SlateTopPlaysSnapshot>(slateTopPlaysKey)
     const currentCandidateTopPlays = selectTopPlays(upcomingResults)
     const currentConfirmedTopPlays = selectTopPlays(confirmedSlatePool)
+    const currentConfirmedUpcomingResults = upcomingResults.filter(matchup => matchup.lineupSource === 'confirmed')
 
     if (!slateTopPlaysSnapshot && slateLockReached) {
       slateTopPlaysSnapshot = {
@@ -319,12 +321,18 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    if (slateTopPlaysSnapshot && slateTopPlaysSnapshot.topPlays.length < TOP_PLAYS_LIMIT) {
-      const filledTopPlays = fillOpenTopPlaySlots(slateTopPlaysSnapshot.topPlays, confirmedSlatePool)
-      if (filledTopPlays.length > slateTopPlaysSnapshot.topPlays.length) {
+    if (slateTopPlaysSnapshot) {
+      const preservedStartedTopPlays = slateTopPlaysSnapshot.topPlays.filter(
+        matchup => gameStatusByPk.get(matchup.gamePk) && gameStatusByPk.get(matchup.gamePk) !== 'upcoming'
+      )
+      const refreshedTrackedTopPlays = fillOpenTopPlaySlots(preservedStartedTopPlays, currentConfirmedUpcomingResults)
+      const previousKeys = slateTopPlaysSnapshot.topPlays.map(matchup => matchupKey(matchup)).sort().join('|')
+      const refreshedKeys = refreshedTrackedTopPlays.map(matchup => matchupKey(matchup)).sort().join('|')
+
+      if (refreshedKeys !== previousKeys) {
         slateTopPlaysSnapshot = {
           ...slateTopPlaysSnapshot,
-          topPlays: filledTopPlays,
+          topPlays: refreshedTrackedTopPlays,
         }
 
         kvSet(slateTopPlaysKey, slateTopPlaysSnapshot, SNAPSHOT_TTL_SECONDS).catch(err =>
@@ -335,10 +343,11 @@ export async function GET(req: NextRequest) {
 
     const trackedTopPlays = slateTopPlaysSnapshot?.topPlays ?? currentCandidateTopPlays
     const trackedKeys = new Set(trackedTopPlays.map(matchup => matchupKey(matchup)))
-    const recommendationTags = buildRecommendationTags(trackedTopPlays, suggestRecommendedDoubles(trackedTopPlays))
+    const trackedRecommendationTags = buildRecommendationTags(trackedTopPlays, suggestRecommendedDoubles(trackedTopPlays))
+    const currentCandidateRecommendationTags = buildRecommendationTags(currentCandidateTopPlays, suggestRecommendedDoubles(currentCandidateTopPlays))
 
-    const attachRecommendationTags = (matchups: MatchupResult[]) => matchups.map(matchup => {
-      const tags = recommendationTags[matchupKey(matchup)]
+    const attachRecommendationTags = (matchups: MatchupResult[], tagsByMatchup: Record<string, MatchupResult['recommendationTags']>) => matchups.map(matchup => {
+      const tags = tagsByMatchup[matchupKey(matchup)]
       return tags ? { ...matchup, recommendationTags: tags } : matchup
     })
 
@@ -362,10 +371,8 @@ export async function GET(req: NextRequest) {
     }
 
     // ── Build and cache response ─────────────────────────────────────────────
-    const trackedUpcomingResults = attachRecommendationTags(
-      upcomingResults.filter(matchup => trackedKeys.has(matchupKey(matchup)))
-    )
-    const results = [...trackedUpcomingResults, ...attachRecommendationTags(nonUpcomingResults)]
+    const currentUpcomingResults = attachRecommendationTags(currentCandidateTopPlays, currentCandidateRecommendationTags)
+    const results = [...currentUpcomingResults, ...attachRecommendationTags(nonUpcomingResults, trackedRecommendationTags)]
     const debug = buildMatchupsDebugInfo({
       slateLockedAt: slateTopPlaysSnapshot?.lockedAt ?? null,
       trackedCount: trackedTopPlays.length,

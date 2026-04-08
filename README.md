@@ -6,7 +6,7 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 
 ## How to use it for best results
 
-**Best bet: take the recommended double.** Before first pitch, the board shows the current Top 4 candidates, including estimated-lineup plays when official lineups are not posted yet. At the slate's first scheduled pitch, the confirmed portion of the official Top 4 locks in place, and if it locked with fewer than four, any open slots can still fill later as additional lineups confirm. If all four tracked plays qualify, the board can show two 2-leg parlays, but the first non-smash card is the Daily Double and is the main recommendation. If only two or three tracked plays qualify, it falls back to the single strongest double on the slate.
+**Best bet: take the recommended double.** Before first pitch, the board shows the current Top 4 candidates, including estimated-lineup plays when official lineups are not posted yet. After first pitch, plays whose games have already started stay tracked for history, but the upcoming board still keeps preferring the best available options and can swap in better late plays or estimated fillers as lineups firm up. If all four live upcoming plays qualify, the board can show two 2-leg parlays, but the first non-smash card is the Daily Double and is the main recommendation. If only two or three live upcoming plays qualify, it falls back to the single strongest double on the slate.
 
 **If it says Smash Double, even better.** A Smash Double is the lead card whenever both legs have a career OPS above .950 and at least 7 hits against their pitcher. When one exists, it takes priority over the Daily Double and the remaining two Top 4 plays become the Secondary Double.
 
@@ -24,7 +24,7 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 2. Builds each lineup: official order from the schedule or boxscore when available, otherwise the top 9 active players by career plate appearances.
 3. Fetches career BvP for each batter vs the opposing starter, then excludes rows below 15 AB or .300 AVG.
 4. Computes AVG, OPS, SLG, OBP, and XBH from the split.
-5. Before the slate's first scheduled pitch, the API returns the current Top 4 candidate board, which can include estimated-lineup plays. At first pitch, it freezes the confirmed portion of the slate-wide official Top 4, then backfills any open slots up to four as later lineups confirm. Locked plays never leave the tracked board once first pitch hits.
+5. Before the slate's first scheduled pitch, the API returns the current Top 4 candidate board, which can include estimated-lineup plays. After first pitch, started plays stay tracked for in-progress and settled results, while the upcoming board continues to re-rank the best available options and can still fill to four as later lineups confirm.
 6. In-progress rows show whether each batter has gotten a hit yet (HIT / pending). Settled rows show the final result (HIT / NO HIT).
 7. Data refreshes silently in the background every 5 minutes, and faster while any upcoming lineup is still estimated, with no manual refresh needed.
 8. The matchups API includes a `debug` summary so the board can explain why it currently shows 0, 3, or 4 tracked plays.
