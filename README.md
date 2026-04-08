@@ -27,7 +27,8 @@ Built for the FanDuel **Player Hits (1+)** prop, and for **Total Bases (1+)** or
 5. Before the slate's first scheduled pitch, the API returns the current Top 4 candidate board, which can include estimated-lineup plays. At first pitch, it freezes a slate-wide official Top 4 snapshot from the confirmed qualifying plays available at that cutoff. Only those tracked plays continue into **Upcoming**, **In progress**, and **Settled**.
 6. In-progress rows show whether each batter has gotten a hit yet (HIT / pending). Settled rows show the final result (HIT / NO HIT).
 7. Data refreshes silently in the background every 5 minutes, and faster while any upcoming lineup is still estimated, with no manual refresh needed.
-7. Sorts tables client-side (default: **AVG desc**).
+8. The matchups API includes a `debug` summary so the board can explain why it currently shows 0, 3, or 4 tracked plays.
+9. Sorts tables client-side (default: **AVG desc**).
 
 **Why BvP for this prop:** Any hit (single through homer) wins. This app uses career hit stats vs that specific pitcher. Walks/HBP do not count as hits.
 
@@ -157,12 +158,12 @@ CRON_SECRET=use-the-same-secret-here
 
 The notifier route lives at `/api/notifications/discord`. On this repo it is scheduled by GitHub Actions every 5 minutes, because Vercel Hobby does not support sub-daily cron jobs. Keep `CRON_SECRET` and `DISCORD_NOTIFIER_SECRET` set to the same value in Vercel so both scheduled and manual requests use the same bearer secret. If `DISCORD_WEBHOOK_URL` is missing, the route falls back to a dry-run preview mode so you can inspect the messages without posting anything.
 
-Discord alerts now use their own pregame freeze window so bettors get the board before the site's official first-pitch lock. The site still freezes the official tracked Top 4 at first pitch, but Discord freezes a separate `discord-top4:{date}` snapshot from the best confirmed plays available a configurable number of minutes earlier and uses that same snapshot for the later leg-hit and double-hit posts.
+Discord alerts now use their own pregame freeze window so bettors get the board before the site's official first-pitch lock. The site still freezes the official tracked Top 4 at first pitch, but Discord freezes a separate `discord-top4:{date}` snapshot from the best confirmed plays available a configurable number of minutes earlier and uses that same snapshot for the later leg-hit and double-hit posts. By default, that Discord snapshot locks 60 minutes before the slate's first pitch and only from confirmed plays.
 
 Optional notifier timing env:
 
 ```
-DISCORD_NOTIFICATION_LEAD_MINUTES=25
+DISCORD_NOTIFICATION_LEAD_MINUTES=60
 ```
 
 Manual test URLs:

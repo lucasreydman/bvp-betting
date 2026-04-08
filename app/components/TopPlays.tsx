@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import type { MatchupResult } from '@/lib/types'
+import type { MatchupResult, MatchupsDebugInfo } from '@/lib/types'
 import { formatTime, expectedAtBats, hitProbability, regressedAvg, resolveLineupPosition, suggestRecommendedDoubles, TOP_PLAYS_LIMIT } from '@/lib/utils'
 import type { RecommendedDouble } from '@/lib/utils'
 import { getLineupBadgeText, getLineupBadgeTitle } from '@/app/components/lineupBadge'
@@ -15,6 +15,7 @@ interface Props {
   overrideRecommendedDoubles?: RecommendedDouble[]
   now: number
   slateLockedAt?: string | null
+  boardDebug?: MatchupsDebugInfo | null
 }
 const CONFIDENCE_COLORS = {
   high: 'text-green-400',
@@ -27,7 +28,7 @@ const LINEUP_BADGE_STYLES = {
   estimated: 'bg-amber-900/40 text-amber-400',
 } as const
 
-export default function TopPlays({ matchups, overrideRecommendedDoubles, now, slateLockedAt = null }: Props) {
+export default function TopPlays({ matchups, overrideRecommendedDoubles, now, slateLockedAt = null, boardDebug = null }: Props) {
   const [isDesktopLogicOpen, setIsDesktopLogicOpen] = useState(true)
   const score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
   const isSlateLocked = slateLockedAt !== null
@@ -85,6 +86,18 @@ export default function TopPlays({ matchups, overrideRecommendedDoubles, now, sl
               ? 'The official Top 4 locked at the slate\'s first scheduled pitch. Only those plays keep tags and move through the board.'
               : 'Before first pitch, the board shows the current Top 4 candidates. Estimated-lineup plays can appear until official lineups post. At first pitch, the official Top 4 locks and nothing new can enter.'}
           </p>
+          {boardDebug && (
+            <div className="mt-2 rounded-xl border border-slate-700/80 bg-slate-950/80 px-3 py-2 text-xs leading-5 text-slate-300">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span className="font-semibold text-white">{boardDebug.explanation}</span>
+                <span className="text-slate-500">Tracked: {boardDebug.trackedCount}</span>
+                <span className="text-slate-500">Upcoming qualifiers: {boardDebug.qualifyingUpcomingCount}</span>
+                <span className="text-slate-500">Confirmed: {boardDebug.confirmedQualifyingUpcomingCount}</span>
+                {boardDebug.estimatedQualifyingUpcomingCount > 0 && <span className="text-amber-400/90">Estimated: {boardDebug.estimatedQualifyingUpcomingCount}</span>}
+                {boardDebug.gamesSkippedMissingProbable > 0 && <span className="text-orange-400/90">Missing probable pitchers: {boardDebug.gamesSkippedMissingProbable}</span>}
+              </div>
+            </div>
+          )}
         </div>
       </div>
       <Link

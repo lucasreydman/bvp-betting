@@ -11,7 +11,7 @@ import TopPlays from './TopPlays'
 import Filters from './Filters'
 import MatchupTable from './MatchupTable'
 
-type MatchupsMeta = Pick<MatchupsResponse, 'date' | 'fetchedAt' | 'slateLockedAt' | 'gamesScanned' | 'gamesSkipped' | 'matchupsFound'>
+type MatchupsMeta = Pick<MatchupsResponse, 'date' | 'fetchedAt' | 'slateLockedAt' | 'gamesScanned' | 'gamesSkipped' | 'matchupsFound' | 'debug'>
 
 export default function ClientShell() {
   const [date, setDate] = useState(formatSlateDate)
@@ -33,7 +33,7 @@ export default function ClientShell() {
       if (!res.ok) throw new Error(`Server error: ${res.status}`)
       const data: MatchupsResponse = await res.json()
       setAllMatchups(data.results)
-      setMeta({ date: data.date, fetchedAt: data.fetchedAt, slateLockedAt: data.slateLockedAt, gamesScanned: data.gamesScanned, gamesSkipped: data.gamesSkipped, matchupsFound: data.matchupsFound })
+      setMeta({ date: data.date, fetchedAt: data.fetchedAt, slateLockedAt: data.slateLockedAt, gamesScanned: data.gamesScanned, gamesSkipped: data.gamesSkipped, matchupsFound: data.matchupsFound, debug: data.debug })
     } catch {
       setError('Could not load MLB data. Try again in a moment.')
     } finally {
@@ -61,7 +61,7 @@ export default function ClientShell() {
         if (!res.ok) return
         const data: MatchupsResponse = await res.json()
         setAllMatchups(data.results)
-        setMeta({ date: data.date, fetchedAt: data.fetchedAt, slateLockedAt: data.slateLockedAt, gamesScanned: data.gamesScanned, gamesSkipped: data.gamesSkipped, matchupsFound: data.matchupsFound })
+        setMeta({ date: data.date, fetchedAt: data.fetchedAt, slateLockedAt: data.slateLockedAt, gamesScanned: data.gamesScanned, gamesSkipped: data.gamesSkipped, matchupsFound: data.matchupsFound, debug: data.debug })
       } catch {
         // silent — don't disrupt the user for a background refresh failure
       }
@@ -122,7 +122,7 @@ export default function ClientShell() {
         <LoadingSkeleton date={date} />
       ) : (
         <>
-          <TopPlays matchups={trackedUpcoming} overrideRecommendedDoubles={recommendedDoubles} now={now} slateLockedAt={meta?.slateLockedAt ?? null} />
+          <TopPlays matchups={trackedUpcoming} overrideRecommendedDoubles={recommendedDoubles} now={now} slateLockedAt={meta?.slateLockedAt ?? null} boardDebug={meta?.debug ?? null} />
           <Filters
             key={filtersKey}
             date={date}

@@ -62,8 +62,21 @@ export interface MatchupsResponse {
   gamesScanned: number      // each game in a doubleheader counted separately
   gamesSkipped: number      // games skipped due to missing probable pitcher
   matchupsFound: number     // count after server-side AB < 15 / AVG < .300 exclusion
+  debug: MatchupsDebugInfo
   confirmedTopPlaysPreview?: MatchupResult[]
   results: MatchupResult[]
+}
+
+export interface MatchupsDebugInfo {
+  lockState: 'preLock' | 'locked'
+  trackedCount: number
+  qualifyingUpcomingCount: number
+  confirmedQualifyingUpcomingCount: number
+  estimatedQualifyingUpcomingCount: number
+  confirmedSlatePoolCount: number
+  gamesWithProbablePitchers: number
+  gamesSkippedMissingProbable: number
+  explanation: string
 }
 
 export interface SlateTopPlaysSnapshot {

@@ -49,6 +49,17 @@ const makeResponse = (results: MatchupResult[], slateLockedAt: string | null = '
   gamesScanned: 10,
   gamesSkipped: 0,
   matchupsFound: results.length,
+  debug: {
+    lockState: slateLockedAt ? 'locked' : 'preLock',
+    trackedCount: results.length,
+    qualifyingUpcomingCount: results.length,
+    confirmedQualifyingUpcomingCount: results.filter(matchup => matchup.lineupSource === 'confirmed').length,
+    estimatedQualifyingUpcomingCount: results.filter(matchup => matchup.lineupSource === 'estimated').length,
+    confirmedSlatePoolCount: results.filter(matchup => matchup.lineupSource === 'confirmed').length,
+    gamesWithProbablePitchers: 10,
+    gamesSkippedMissingProbable: 0,
+    explanation: 'Test debug summary.',
+  },
   confirmedTopPlaysPreview: results.filter(matchup => matchup.lineupSource === 'confirmed').slice(0, 4),
   results,
 })
@@ -110,12 +121,26 @@ describe('buildDiscordNotificationEvents', () => {
     expect(events.some(event => event.content.includes('Juan Soto'))).toBe(true)
     expect(events.some(event => event.content.includes('Extra Batter'))).toBe(false)
   })
+
+  it('omits missing odds text from lock and hit messages', () => {
+    const topPlayA = makeMatchup({ batterId: 1, pitcherId: 11, batterName: 'Juan Soto', consensusHitOddsAmerican: null, hitResult: 'win', gameStatus: 'inProgress' })
+    const topPlayB = makeMatchup({ batterId: 2, pitcherId: 22, batterName: 'Mookie Betts', consensusHitOddsAmerican: null, hitResult: 'win', gameStatus: 'inProgress' })
+
+    const events = buildDiscordNotificationEvents({
+      date: '2026-04-08',
+      snapshot: makeSnapshot([topPlayA, topPlayB]),
+      results: [topPlayA, topPlayB],
+    })
+
+    expect(events.every(event => !event.content.includes('N/A'))).toBe(true)
+    expect(events.every(event => !event.content.includes('Parlay odds'))).toBe(true)
+  })
 })
 
 describe('Discord snapshot cutoff', () => {
   it('locks once the configured lead time before first pitch is reached', () => {
-    expect(shouldLockDiscordSnapshot('2026-04-08T18:05:00.000Z', new Date('2026-04-08T17:39:59.000Z').getTime(), 25)).toBe(false)
-    expect(shouldLockDiscordSnapshot('2026-04-08T18:05:00.000Z', new Date('2026-04-08T17:40:00.000Z').getTime(), 25)).toBe(true)
+    expect(shouldLockDiscordSnapshot('2026-04-08T18:05:00.000Z', new Date('2026-04-08T17:04:59.000Z').getTime(), 60)).toBe(false)
+    expect(shouldLockDiscordSnapshot('2026-04-08T18:05:00.000Z', new Date('2026-04-08T17:05:00.000Z').getTime(), 60)).toBe(true)
   })
 
   it('builds the Discord snapshot from confirmed preview rows only', () => {
@@ -124,11 +149,14 @@ describe('Discord snapshot cutoff', () => {
     const response = makeResponse([confirmed, estimated])
     response.confirmedTopPlaysPreview = [confirmed]
 
-    expect(buildDiscordTopPlaysSnapshot(response, '2026-04-08T17:40:00.000Z', 25)).toEqual(makeSnapshot([confirmed]))
+    expect(buildDiscordTopPlaysSnapshot(response, '2026-04-08T17:05:00.000Z', 60)).toEqual({
+      ...makeSnapshot([confirmed], 60),
+      lockedAt: '2026-04-08T17:05:00.000Z',
+    })
   })
 
-  it('defaults the lead time to 25 minutes when env input is invalid', () => {
-    expect(getNotificationLeadMinutes('abc')).toBe(25)
-    expect(getNotificationLeadMinutes('-5')).toBe(25)
+  it('defaults the lead time to 60 minutes when env input is invalid', () => {
+    expect(getNotificationLeadMinutes('abc')).toBe(60)
+    expect(getNotificationLeadMinutes('-5')).toBe(60)
   })
 })

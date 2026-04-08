@@ -4,7 +4,7 @@ import { getGameStatus, computeHitResult } from '@/lib/game-status'
 import { parseSplit } from '@/lib/stats'
 import { createCache } from '@/lib/cache'
 import { kvDel, kvGet, kvSet } from '@/lib/kv'
-import { buildRecommendationTags, formatSlateDate, getEarliestGameTimeMs, isSlateLockReached, matchupKey, medianLineupPosition, selectTopPlays, suggestRecommendedDoubles } from '@/lib/utils'
+import { buildMatchupsDebugInfo, buildRecommendationTags, formatSlateDate, getEarliestGameTimeMs, isSlateLockReached, matchupKey, medianLineupPosition, selectTopPlays, suggestRecommendedDoubles } from '@/lib/utils'
 import type { MatchupResult, MatchupsResponse, SlateTopPlaysSnapshot } from '@/lib/types'
 import { fetchDayOdds, buildOddsMap, normalizePlayerName } from '@/lib/odds'
 
@@ -121,6 +121,7 @@ export async function GET(req: NextRequest) {
     const earliestGameTimeMs = getEarliestGameTimeMs(slateGameTimes)
     let gamesScanned = 0
     let gamesSkipped = 0
+    let gamesWithProbablePitchers = 0
 
     // ── Separate upcoming from in-progress/settled ──────────────────────────
     const upcomingPairs: Array<{
@@ -151,6 +152,7 @@ export async function GET(req: NextRequest) {
         gamesSkipped++
         continue
       }
+      gamesWithProbablePitchers++
 
       const gameStatus = getGameStatus(game.status.detailedState)
 
@@ -350,6 +352,16 @@ export async function GET(req: NextRequest) {
       upcomingResults.filter(matchup => trackedKeys.has(matchupKey(matchup)))
     )
     const results = [...trackedUpcomingResults, ...attachRecommendationTags(nonUpcomingResults)]
+    const debug = buildMatchupsDebugInfo({
+      slateLockedAt: slateTopPlaysSnapshot?.lockedAt ?? null,
+      trackedCount: trackedTopPlays.length,
+      qualifyingUpcomingCount: upcomingResults.length,
+      confirmedQualifyingUpcomingCount: upcomingResults.filter(matchup => matchup.lineupSource === 'confirmed').length,
+      estimatedQualifyingUpcomingCount: upcomingResults.filter(matchup => matchup.lineupSource === 'estimated').length,
+      confirmedSlatePoolCount: confirmedSlatePool.length,
+      gamesWithProbablePitchers,
+      gamesSkippedMissingProbable: gamesSkipped,
+    })
     const response: MatchupsResponse = {
       date,
       fetchedAt: new Date().toISOString(),
@@ -358,6 +370,7 @@ export async function GET(req: NextRequest) {
       gamesScanned,
       gamesSkipped,
       matchupsFound: results.length,
+      debug,
       confirmedTopPlaysPreview: currentConfirmedTopPlays,
       results,
     }

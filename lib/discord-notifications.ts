@@ -4,7 +4,7 @@ import { matchupKey, selectTopPlays, suggestRecommendedDoubles, teamAbbr } from 
 
 const DISCORD_SENT_TTL_SECONDS = 259200
 const DISCORD_SNAPSHOT_TTL_SECONDS = 259200
-const DEFAULT_NOTIFICATION_LEAD_MINUTES = 25
+const DEFAULT_NOTIFICATION_LEAD_MINUTES = 60
 
 export interface DiscordNotificationEvent {
   id: string
@@ -24,8 +24,10 @@ function getDoubleLabel(isSmash: boolean, index: number, total: number): string 
 }
 
 function formatLeg(matchup: MatchupResult): string {
-  const odds = matchup.consensusHitOddsAmerican == null ? 'odds N/A' : fmtOdds(matchup.consensusHitOddsAmerican)
-  return `${matchup.batterName} (${teamAbbr(matchup.batterTeam)}) vs ${matchup.pitcherName} ${odds}`
+  const odds = matchup.consensusHitOddsAmerican == null ? null : fmtOdds(matchup.consensusHitOddsAmerican)
+  return odds == null
+    ? `${matchup.batterName} (${teamAbbr(matchup.batterTeam)}) vs ${matchup.pitcherName}`
+    : `${matchup.batterName} (${teamAbbr(matchup.batterTeam)}) vs ${matchup.pitcherName} ${odds}`
 }
 
 export function getDiscordSnapshotKey(date: string): string {
@@ -87,7 +89,7 @@ function buildDoubleLockEvents(snapshot: DiscordTopPlaysSnapshot): DiscordNotifi
   const recommendedDoubles = suggestRecommendedDoubles(snapshot.topPlays)
   return recommendedDoubles.map((double, index) => {
     const label = getDoubleLabel(double.isSmash, index, recommendedDoubles.length)
-    const parlayOdds = double.consensusParlayOddsAmerican == null ? 'Parlay odds N/A' : `Parlay ${fmtOdds(double.consensusParlayOddsAmerican)}`
+    const parlayOdds = double.consensusParlayOddsAmerican == null ? null : `Parlay ${fmtOdds(double.consensusParlayOddsAmerican)}`
     const legsKey = [matchupKey(double.first), matchupKey(double.second)].sort().join(':')
 
     return {
@@ -97,7 +99,7 @@ function buildDoubleLockEvents(snapshot: DiscordTopPlaysSnapshot): DiscordNotifi
         `Leg 1: ${formatLeg(double.first)}`,
         `Leg 2: ${formatLeg(double.second)}`,
         parlayOdds,
-      ].join('\n'),
+      ].filter((line): line is string => line !== null).join('\n'),
     }
   })
 }
@@ -124,12 +126,15 @@ function buildDoubleHitEvents(snapshot: DiscordTopPlaysSnapshot, topPlays: Match
     }
 
     const label = getDoubleLabel(double.isSmash, index, recommendedDoubles.length)
-    const parlayOdds = double.consensusParlayOddsAmerican == null ? 'Parlay odds N/A' : `Parlay ${fmtOdds(double.consensusParlayOddsAmerican)}`
+    const parlayOdds = double.consensusParlayOddsAmerican == null ? null : `Parlay ${fmtOdds(double.consensusParlayOddsAmerican)}`
     const legsKey = [matchupKey(double.first), matchupKey(double.second)].sort().join(':')
 
     return [{
       id: `double-hit:${snapshot.date}:${label}:${legsKey}`,
-      content: `${label} hit: ${first.batterName} and ${second.batterName} both recorded a hit. ${parlayOdds}.`,
+      content: [
+        `${label} hit: ${first.batterName} and ${second.batterName} both recorded a hit.`,
+        parlayOdds,
+      ].filter((line): line is string => line !== null).join(' '),
     }]
   })
 }

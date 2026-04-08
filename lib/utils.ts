@@ -1,7 +1,110 @@
 import { parlayOddsFromLines } from './odds'
-import type { FilterState, MatchupResult, RecommendationTag, SortState } from './types'
+import type { FilterState, MatchupResult, MatchupsDebugInfo, RecommendationTag, SortState } from './types'
 
 export const TOP_PLAYS_LIMIT = 4
+
+function pluralize(count: number, singular: string, plural = `${singular}s`): string {
+  return `${count} ${count === 1 ? singular : plural}`
+}
+
+interface BuildMatchupsDebugInfoInput {
+  slateLockedAt: string | null
+  trackedCount: number
+  qualifyingUpcomingCount: number
+  confirmedQualifyingUpcomingCount: number
+  estimatedQualifyingUpcomingCount: number
+  confirmedSlatePoolCount: number
+  gamesWithProbablePitchers: number
+  gamesSkippedMissingProbable: number
+}
+
+export function buildMatchupsDebugInfo({
+  slateLockedAt,
+  trackedCount,
+  qualifyingUpcomingCount,
+  confirmedQualifyingUpcomingCount,
+  estimatedQualifyingUpcomingCount,
+  confirmedSlatePoolCount,
+  gamesWithProbablePitchers,
+  gamesSkippedMissingProbable,
+}: BuildMatchupsDebugInfoInput): MatchupsDebugInfo {
+  const lockState = slateLockedAt ? 'locked' : 'preLock'
+  const skippedClause = gamesSkippedMissingProbable > 0
+    ? ` ${pluralize(gamesSkippedMissingProbable, 'game')} ${gamesSkippedMissingProbable === 1 ? 'was' : 'were'} skipped for missing probable pitchers.`
+    : ''
+  const missingProbablesPressureClause = gamesSkippedMissingProbable > 0 && trackedCount < TOP_PLAYS_LIMIT
+    ? ' Missing probable pitchers are also shrinking the candidate pool.'
+    : ''
+
+  if (lockState === 'locked') {
+    if (trackedCount === 0) {
+      return {
+        lockState,
+        trackedCount,
+        qualifyingUpcomingCount,
+        confirmedQualifyingUpcomingCount,
+        estimatedQualifyingUpcomingCount,
+        confirmedSlatePoolCount,
+        gamesWithProbablePitchers,
+        gamesSkippedMissingProbable,
+        explanation: `The official Top 4 locked at first pitch with no confirmed qualifying plays.${skippedClause}`,
+      }
+    }
+
+    const qualifierClause = trackedCount < TOP_PLAYS_LIMIT
+      ? ` Only ${pluralize(confirmedSlatePoolCount, 'confirmed qualifier')} were available at lock time.`
+      : ''
+
+    return {
+      lockState,
+      trackedCount,
+      qualifyingUpcomingCount,
+      confirmedQualifyingUpcomingCount,
+      estimatedQualifyingUpcomingCount,
+      confirmedSlatePoolCount,
+      gamesWithProbablePitchers,
+      gamesSkippedMissingProbable,
+      explanation: `The official Top 4 locked at first pitch with ${pluralize(trackedCount, 'play')}.${qualifierClause}${missingProbablesPressureClause}${skippedClause}`,
+    }
+  }
+
+  if (qualifyingUpcomingCount === 0) {
+    const probablePitcherClause = gamesWithProbablePitchers === 0
+      ? 'No games are usable yet because probable pitchers have not been posted.'
+      : `${pluralize(gamesWithProbablePitchers, 'game')} currently ${gamesWithProbablePitchers === 1 ? 'has' : 'have'} probable pitchers, but nothing meets the 15 AB / .300 AVG cutoff.`
+
+    return {
+      lockState,
+      trackedCount,
+      qualifyingUpcomingCount,
+      confirmedQualifyingUpcomingCount,
+      estimatedQualifyingUpcomingCount,
+      confirmedSlatePoolCount,
+      gamesWithProbablePitchers,
+      gamesSkippedMissingProbable,
+      explanation: `No qualifying upcoming plays yet. ${probablePitcherClause}${skippedClause}`,
+    }
+  }
+
+  const refillClause = trackedCount < TOP_PLAYS_LIMIT
+    ? ' Another qualifying play can still move in before first pitch.'
+    : ''
+  const estimatedClause = estimatedQualifyingUpcomingCount > 0
+    ? `, ${pluralize(estimatedQualifyingUpcomingCount, 'estimated qualifier')}`
+    : ''
+
+  return {
+    lockState,
+    trackedCount,
+    qualifyingUpcomingCount,
+    confirmedQualifyingUpcomingCount,
+    estimatedQualifyingUpcomingCount,
+    confirmedSlatePoolCount,
+    gamesWithProbablePitchers,
+    gamesSkippedMissingProbable,
+    explanation: `Showing ${pluralize(trackedCount, 'current candidate')} from ${pluralize(qualifyingUpcomingCount, 'qualifying upcoming play')} so far: ${pluralize(confirmedQualifyingUpcomingCount, 'confirmed qualifier')}${estimatedClause}.${refillClause}${missingProbablesPressureClause}${skippedClause}`,
+  }
+}
 
 const TEAM_ABBR: Record<string, string> = {
   'Arizona Diamondbacks': 'ARI',

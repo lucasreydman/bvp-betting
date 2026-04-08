@@ -1,4 +1,4 @@
-import { buildRecommendationTags, formatTime, formatLocalDate, formatSlateDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, getEarliestGameTimeMs, hitProbability, isSlateLockReached, selectTopPlays, suggestDailyDouble, suggestRecommendedDoubles, generateRecommendedDoublesCSV, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
+import { buildMatchupsDebugInfo, buildRecommendationTags, formatTime, formatLocalDate, formatSlateDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, getEarliestGameTimeMs, hitProbability, isSlateLockReached, selectTopPlays, suggestDailyDouble, suggestRecommendedDoubles, generateRecommendedDoublesCSV, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
 import { DEFAULT_FILTERS, type MatchupResult } from '@/lib/types'
 
 const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => ({
@@ -83,6 +83,76 @@ describe('slate lock timing', () => {
 
     expect(isSlateLockReached(gameTimes, new Date('2026-04-08T17:04:59Z').getTime())).toBe(false)
     expect(isSlateLockReached(gameTimes, new Date('2026-04-08T17:05:00Z').getTime())).toBe(true)
+  })
+})
+
+describe('buildMatchupsDebugInfo', () => {
+  it('explains thin pre-lock boards and confirms they can refill', () => {
+    const debug = buildMatchupsDebugInfo({
+      slateLockedAt: null,
+      trackedCount: 3,
+      qualifyingUpcomingCount: 3,
+      confirmedQualifyingUpcomingCount: 3,
+      estimatedQualifyingUpcomingCount: 0,
+      confirmedSlatePoolCount: 3,
+      gamesWithProbablePitchers: 5,
+      gamesSkippedMissingProbable: 1,
+    })
+
+    expect(debug.lockState).toBe('preLock')
+    expect(debug.explanation).toContain('Showing 3 current candidates')
+    expect(debug.explanation).toContain('Another qualifying play can still move in before first pitch')
+    expect(debug.explanation).toContain('Missing probable pitchers are also shrinking the candidate pool')
+    expect(debug.explanation).toContain('1 game was skipped for missing probable pitchers')
+  })
+
+  it('explains locked boards with fewer than four confirmed plays', () => {
+    const debug = buildMatchupsDebugInfo({
+      slateLockedAt: '2026-04-08T17:05:00.000Z',
+      trackedCount: 3,
+      qualifyingUpcomingCount: 0,
+      confirmedQualifyingUpcomingCount: 0,
+      estimatedQualifyingUpcomingCount: 0,
+      confirmedSlatePoolCount: 3,
+      gamesWithProbablePitchers: 6,
+      gamesSkippedMissingProbable: 0,
+    })
+
+    expect(debug.lockState).toBe('locked')
+    expect(debug.explanation).toContain('locked at first pitch with 3 plays')
+    expect(debug.explanation).toContain('Only 3 confirmed qualifiers were available at lock time')
+  })
+
+  it('explains empty pre-lock boards when nothing qualifies yet', () => {
+    const debug = buildMatchupsDebugInfo({
+      slateLockedAt: null,
+      trackedCount: 0,
+      qualifyingUpcomingCount: 0,
+      confirmedQualifyingUpcomingCount: 0,
+      estimatedQualifyingUpcomingCount: 0,
+      confirmedSlatePoolCount: 0,
+      gamesWithProbablePitchers: 5,
+      gamesSkippedMissingProbable: 1,
+    })
+
+    expect(debug.explanation).toContain('No qualifying upcoming plays yet')
+    expect(debug.explanation).toContain('5 games currently have probable pitchers')
+  })
+
+  it('explains when no games are usable yet because probable pitchers are missing', () => {
+    const debug = buildMatchupsDebugInfo({
+      slateLockedAt: null,
+      trackedCount: 0,
+      qualifyingUpcomingCount: 0,
+      confirmedQualifyingUpcomingCount: 0,
+      estimatedQualifyingUpcomingCount: 0,
+      confirmedSlatePoolCount: 0,
+      gamesWithProbablePitchers: 0,
+      gamesSkippedMissingProbable: 4,
+    })
+
+    expect(debug.explanation).toContain('No games are usable yet because probable pitchers have not been posted')
+    expect(debug.explanation).toContain('4 games were skipped for missing probable pitchers')
   })
 })
 
