@@ -21,7 +21,7 @@ function formatDisplay(dateStr: string): string {
 export default function DatePicker({ date, onChange }: Props) {
   const today = formatSlateDate()
   const minDate = today
-  const maxDate = addDays(today, 1)
+  const maxDate = addDays(today, 2)
 
   return (
     <div className="flex w-full items-center justify-between gap-3 rounded-xl border border-gray-800 bg-gray-900/70 px-3 py-2 sm:w-auto sm:justify-start sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0">
