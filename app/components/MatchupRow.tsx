@@ -52,7 +52,7 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
       </td>
       <td className="px-3 py-2 font-mono text-sm text-gray-300">{m.h}</td>
       <td className="px-3 py-2 font-mono text-sm text-gray-400">{m.ab}</td>
-      <td className="px-3 py-2 font-mono text-sm text-gray-500 hidden sm:table-cell">{fmt3(m.ops)}</td>
+      <td className="px-3 py-2 font-mono text-sm text-gray-500 hidden sm:table-cell text-left">{fmt3(m.ops)}</td>
       <td className="px-4 py-2">
         <GameTimeCell gameTime={m.gameTime} variant={gameKind} compact />
       </td>

@@ -19,17 +19,17 @@ interface Props {
 }
 
 const COLUMNS: Array<{ key: keyof MatchupResult; label: string; cls: string }> = [
-  { key: 'batterName', label: 'Batter', cls: 'w-[15.25rem]' },
-  { key: 'pitcherName', label: 'Pitcher', cls: 'w-[11.25rem]' },
-  { key: 'avg', label: 'AVG', cls: 'w-[3.75rem]' },
-  { key: 'h', label: 'H', cls: 'w-[2.75rem]' },
-  { key: 'ab', label: 'AB', cls: 'w-[2.75rem]' },
-  { key: 'ops', label: 'OPS', cls: 'hidden sm:table-cell w-[4.25rem]' },
-  { key: 'gameTime', label: 'Game', cls: 'w-[11.5rem]' },
-  { key: 'lineupSource', label: 'Lineup', cls: 'hidden sm:table-cell w-[11rem]' },
+  { key: 'batterName', label: 'Batter', cls: 'w-[17.5rem]' },
+  { key: 'pitcherName', label: 'Pitcher', cls: 'w-[13rem]' },
+  { key: 'avg', label: 'AVG', cls: 'w-[4rem]' },
+  { key: 'h', label: 'H', cls: 'w-[3rem]' },
+  { key: 'ab', label: 'AB', cls: 'w-[3rem]' },
+  { key: 'ops', label: 'OPS', cls: 'hidden sm:table-cell w-[4.75rem]' },
+  { key: 'gameTime', label: 'Game', cls: 'w-[10rem]' },
+  { key: 'lineupSource', label: 'Lineup', cls: 'hidden sm:table-cell w-[9.25rem]' },
 ]
 
-const RESULT_COLUMN_CLASS = 'hidden sm:table-column w-[7rem]'
+const RESULT_COLUMN_CLASS = 'hidden sm:table-column w-[6rem]'
 
 const MOBILE_SORT_COLS: Array<{ key: keyof MatchupResult; label: string }> = [
   { key: 'avg', label: 'AVG' },
