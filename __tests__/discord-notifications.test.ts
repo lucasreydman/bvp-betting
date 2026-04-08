@@ -1,5 +1,10 @@
-import { buildDiscordNotificationEvents } from '@/lib/discord-notifications'
-import type { MatchupResult, MatchupsResponse } from '@/lib/types'
+import {
+  buildDiscordNotificationEvents,
+  buildDiscordTopPlaysSnapshot,
+  getNotificationLeadMinutes,
+  shouldLockDiscordSnapshot,
+} from '@/lib/discord-notifications'
+import type { DiscordTopPlaysSnapshot, MatchupResult, MatchupsResponse } from '@/lib/types'
 
 const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => ({
   batterId: 1,
@@ -40,26 +45,39 @@ const makeResponse = (results: MatchupResult[], slateLockedAt: string | null = '
   date: '2026-04-08',
   fetchedAt: '2026-04-08T17:06:00.000Z',
   slateLockedAt,
+  earliestGameTime: '2026-04-08T18:05:00.000Z',
   gamesScanned: 10,
   gamesSkipped: 0,
   matchupsFound: results.length,
+  confirmedTopPlaysPreview: results.filter(matchup => matchup.lineupSource === 'confirmed').slice(0, 4),
   results,
 })
 
+const makeSnapshot = (topPlays: MatchupResult[], leadMinutes = 25): DiscordTopPlaysSnapshot => ({
+  date: '2026-04-08',
+  lockedAt: '2026-04-08T17:40:00.000Z',
+  leadMinutes,
+  topPlays,
+})
+
 describe('buildDiscordNotificationEvents', () => {
-  it('builds top-4 and double lock events once the slate is locked', () => {
-    const results = [
+  it('builds top-4 and double lock events from the Discord snapshot', () => {
+    const topPlays = [
       makeMatchup({ batterId: 1, pitcherId: 11, batterName: 'Juan Soto', consensusHitOddsAmerican: -135 }),
       makeMatchup({ batterId: 2, pitcherId: 22, batterName: 'Mookie Betts', consensusHitOddsAmerican: -125 }),
       makeMatchup({ batterId: 3, pitcherId: 33, batterName: 'Freddie Freeman', consensusHitOddsAmerican: -110, ops: 0.91, h: 6 }),
       makeMatchup({ batterId: 4, pitcherId: 44, batterName: 'Rafael Devers', consensusHitOddsAmerican: 105, ops: 0.9, h: 5 }),
     ]
 
-    const events = buildDiscordNotificationEvents(makeResponse(results))
+    const events = buildDiscordNotificationEvents({
+      date: '2026-04-08',
+      snapshot: makeSnapshot(topPlays),
+      results: topPlays,
+    })
 
     expect(events.some(event => event.id.startsWith('top4-lock:2026-04-08'))).toBe(true)
-    expect(events.some(event => event.id.startsWith('double-lock:2026-04-08:Smash Double'))).toBe(true)
-    expect(events.some(event => event.id.startsWith('double-lock:2026-04-08:Secondary Double'))).toBe(true)
+    expect(events.some(event => event.id.includes(':Smash Double:'))).toBe(true)
+    expect(events.some(event => event.id.includes(':Secondary Double:'))).toBe(true)
   })
 
   it('builds leg-hit and double-hit events for winning tracked plays', () => {
@@ -68,20 +86,49 @@ describe('buildDiscordNotificationEvents', () => {
     const pendingC = makeMatchup({ batterId: 3, pitcherId: 33, batterName: 'Freddie Freeman', hitResult: 'pending', gameStatus: 'inProgress', ops: 0.91, h: 6 })
     const pendingD = makeMatchup({ batterId: 4, pitcherId: 44, batterName: 'Rafael Devers', hitResult: 'pending', gameStatus: 'inProgress', ops: 0.9, h: 5 })
 
-    const events = buildDiscordNotificationEvents(makeResponse([winnerA, winnerB, pendingC, pendingD]))
+    const events = buildDiscordNotificationEvents({
+      date: '2026-04-08',
+      snapshot: makeSnapshot([winnerA, winnerB, pendingC, pendingD]),
+      results: [winnerA, winnerB, pendingC, pendingD],
+    })
 
     expect(events.some(event => event.id === `leg-hit:2026-04-08:${winnerA.gamePk}:${winnerA.batterId}:${winnerA.pitcherId}`)).toBe(true)
     expect(events.some(event => event.id === `leg-hit:2026-04-08:${winnerB.gamePk}:${winnerB.batterId}:${winnerB.pitcherId}`)).toBe(true)
     expect(events.some(event => event.id.startsWith('double-hit:2026-04-08:Smash Double'))).toBe(true)
   })
 
-  it('does not emit lock events before the slate lock', () => {
-    const events = buildDiscordNotificationEvents(makeResponse([
-      makeMatchup({ batterId: 1, pitcherId: 11 }),
-      makeMatchup({ batterId: 2, pitcherId: 22 }),
-    ], null))
+  it('uses only snapshot rows for hit events even when extra rows are present', () => {
+    const tracked = makeMatchup({ batterId: 1, pitcherId: 11, batterName: 'Juan Soto', hitResult: 'win', gameStatus: 'inProgress' })
+    const extra = makeMatchup({ batterId: 99, pitcherId: 88, batterName: 'Extra Batter', hitResult: 'win', gameStatus: 'inProgress' })
 
-    expect(events.some(event => event.id.startsWith('top4-lock:'))).toBe(false)
-    expect(events.some(event => event.id.startsWith('double-lock:'))).toBe(false)
+    const events = buildDiscordNotificationEvents({
+      date: '2026-04-08',
+      snapshot: makeSnapshot([tracked]),
+      results: [tracked, extra],
+    })
+
+    expect(events.some(event => event.content.includes('Juan Soto'))).toBe(true)
+    expect(events.some(event => event.content.includes('Extra Batter'))).toBe(false)
+  })
+})
+
+describe('Discord snapshot cutoff', () => {
+  it('locks once the configured lead time before first pitch is reached', () => {
+    expect(shouldLockDiscordSnapshot('2026-04-08T18:05:00.000Z', new Date('2026-04-08T17:39:59.000Z').getTime(), 25)).toBe(false)
+    expect(shouldLockDiscordSnapshot('2026-04-08T18:05:00.000Z', new Date('2026-04-08T17:40:00.000Z').getTime(), 25)).toBe(true)
+  })
+
+  it('builds the Discord snapshot from confirmed preview rows only', () => {
+    const confirmed = makeMatchup({ batterId: 1, pitcherId: 11, lineupSource: 'confirmed' })
+    const estimated = makeMatchup({ batterId: 2, pitcherId: 22, lineupSource: 'estimated' })
+    const response = makeResponse([confirmed, estimated])
+    response.confirmedTopPlaysPreview = [confirmed]
+
+    expect(buildDiscordTopPlaysSnapshot(response, '2026-04-08T17:40:00.000Z', 25)).toEqual(makeSnapshot([confirmed]))
+  })
+
+  it('defaults the lead time to 25 minutes when env input is invalid', () => {
+    expect(getNotificationLeadMinutes('abc')).toBe(25)
+    expect(getNotificationLeadMinutes('-5')).toBe(25)
   })
 })

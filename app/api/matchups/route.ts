@@ -354,9 +354,11 @@ export async function GET(req: NextRequest) {
       date,
       fetchedAt: new Date().toISOString(),
       slateLockedAt: slateTopPlaysSnapshot?.lockedAt ?? null,
+      earliestGameTime: earliestGameTimeMs == null ? null : new Date(earliestGameTimeMs).toISOString(),
       gamesScanned,
       gamesSkipped,
       matchupsFound: results.length,
+      confirmedTopPlaysPreview: currentConfirmedTopPlays,
       results,
     }
 

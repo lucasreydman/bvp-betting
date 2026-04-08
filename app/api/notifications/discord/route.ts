@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { buildDiscordNotificationEvents, getDiscordSentKey, getDiscordSentTtlSeconds } from '@/lib/discord-notifications'
+import { fetchBoxscoreHitting, fetchSchedule } from '@/lib/mlb-api'
+import { computeHitResult, getGameStatus } from '@/lib/game-status'
+import {
+  buildDiscordNotificationEvents,
+  buildDiscordTopPlaysSnapshot,
+  getDiscordSentKey,
+  getDiscordSentTtlSeconds,
+  getDiscordSnapshotKey,
+  getDiscordSnapshotTtlSeconds,
+  getNotificationLeadMinutes,
+  shouldLockDiscordSnapshot,
+} from '@/lib/discord-notifications'
 import { kvDel, kvGet, kvSet } from '@/lib/kv'
-import type { MatchupsResponse } from '@/lib/types'
+import type { DiscordTopPlaysSnapshot, MatchupResult, MatchupsResponse } from '@/lib/types'
 import { formatSlateDate } from '@/lib/utils'
 
 const NO_STORE_HEADERS = { 'Cache-Control': 'no-store' }
@@ -46,6 +57,40 @@ async function fetchMatchups(req: NextRequest, date: string): Promise<MatchupsRe
   return response.json() as Promise<MatchupsResponse>
 }
 
+async function hydrateSnapshotResults(date: string, snapshot: DiscordTopPlaysSnapshot): Promise<MatchupResult[]> {
+  const games = await fetchSchedule(date)
+  const gameStatusByPk = new Map(games.map(game => [game.gamePk, getGameStatus(game.status.detailedState)]))
+  const nonUpcomingGamePks = [...new Set(
+    snapshot.topPlays
+      .map(matchup => matchup.gamePk)
+      .filter(gamePk => gameStatusByPk.get(gamePk) && gameStatusByPk.get(gamePk) !== 'upcoming')
+  )]
+
+  const hitsByGame = new Map<number, Map<number, { h: number }>>()
+  await Promise.all(nonUpcomingGamePks.map(async gamePk => {
+    hitsByGame.set(gamePk, await fetchBoxscoreHitting(gamePk))
+  }))
+
+  return snapshot.topPlays.map(matchup => {
+    const gameStatus = gameStatusByPk.get(matchup.gamePk) ?? matchup.gameStatus
+    if (gameStatus === 'upcoming') {
+      return {
+        ...matchup,
+        gameStatus,
+        hitResult: undefined,
+      }
+    }
+
+    const hitsMap = hitsByGame.get(matchup.gamePk)
+    const h = hitsMap?.get(matchup.batterId)?.h ?? 0
+    return {
+      ...matchup,
+      gameStatus,
+      hitResult: computeHitResult(h, gameStatus),
+    }
+  })
+}
+
 export async function GET(req: NextRequest) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: NO_STORE_HEADERS })
@@ -54,16 +99,40 @@ export async function GET(req: NextRequest) {
   const date = req.nextUrl.searchParams.get('date') ?? formatSlateDate()
   const isDryRun = req.nextUrl.searchParams.get('dryRun') === '1'
   const shouldReset = req.nextUrl.searchParams.get('reset') === '1'
+  const leadMinutes = getNotificationLeadMinutes(req.nextUrl.searchParams.get('leadMinutes') ?? undefined)
   const sentKey = getDiscordSentKey(date)
+  const snapshotKey = getDiscordSnapshotKey(date)
 
   try {
     if (shouldReset) {
       await kvDel(sentKey)
+      await kvDel(snapshotKey)
       return NextResponse.json({ ok: true, date, reset: true }, { headers: NO_STORE_HEADERS })
     }
 
     const matchups = await fetchMatchups(req, date)
-    const events = buildDiscordNotificationEvents(matchups)
+    const nowMs = Date.now()
+    const cutoffReached = shouldLockDiscordSnapshot(matchups.earliestGameTime, nowMs, leadMinutes)
+    let snapshot = await kvGet<DiscordTopPlaysSnapshot>(snapshotKey)
+
+    if (!snapshot && cutoffReached) {
+      const nextSnapshot = buildDiscordTopPlaysSnapshot(matchups, new Date(nowMs).toISOString(), leadMinutes)
+      if (nextSnapshot) {
+        snapshot = nextSnapshot
+        if (!isDryRun) {
+          await kvSet(snapshotKey, snapshot, getDiscordSnapshotTtlSeconds())
+        }
+      }
+    }
+
+    const snapshotResults = snapshot ? await hydrateSnapshotResults(date, snapshot) : []
+    const events = snapshot
+      ? buildDiscordNotificationEvents({
+        date,
+        snapshot,
+        results: snapshotResults,
+      })
+      : []
     const sentIds = new Set(await kvGet<string[]>(sentKey) ?? [])
     const unsentEvents = events.filter(event => !sentIds.has(event.id))
 
@@ -73,6 +142,9 @@ export async function GET(req: NextRequest) {
         date,
         dryRun: true,
         webhookConfigured: Boolean(process.env.DISCORD_WEBHOOK_URL),
+        leadMinutes,
+        cutoffReached,
+        snapshotLockedAt: snapshot?.lockedAt ?? null,
         totalEvents: events.length,
         unsentEvents: unsentEvents.map(event => ({ id: event.id, content: event.content })),
       }, { headers: NO_STORE_HEADERS })

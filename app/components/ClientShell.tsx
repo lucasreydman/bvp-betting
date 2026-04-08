@@ -11,10 +11,12 @@ import TopPlays from './TopPlays'
 import Filters from './Filters'
 import MatchupTable from './MatchupTable'
 
+type MatchupsMeta = Pick<MatchupsResponse, 'date' | 'fetchedAt' | 'slateLockedAt' | 'gamesScanned' | 'gamesSkipped' | 'matchupsFound'>
+
 export default function ClientShell() {
   const [date, setDate] = useState(formatSlateDate)
   const [allMatchups, setAllMatchups] = useState<MatchupResult[]>([])
-  const [meta, setMeta] = useState<Omit<MatchupsResponse, 'results'> | null>(null)
+  const [meta, setMeta] = useState<MatchupsMeta | null>(null)
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)
   const [sort, setSort] = useState<SortState>({ column: 'avg', direction: 'desc' })
   const [isLoading, setIsLoading] = useState(true)

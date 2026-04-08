@@ -1,16 +1,20 @@
 import { fmtOdds } from './odds'
-import type { MatchupResult, MatchupsResponse } from './types'
+import type { DiscordTopPlaysSnapshot, MatchupResult, MatchupsResponse } from './types'
 import { matchupKey, selectTopPlays, suggestRecommendedDoubles, teamAbbr } from './utils'
 
 const DISCORD_SENT_TTL_SECONDS = 259200
+const DISCORD_SNAPSHOT_TTL_SECONDS = 259200
+const DEFAULT_NOTIFICATION_LEAD_MINUTES = 25
 
 export interface DiscordNotificationEvent {
   id: string
   content: string
 }
 
-function getTrackedTopPlays(results: MatchupResult[]): MatchupResult[] {
-  return selectTopPlays(results.filter(matchup => matchup.recommendationTags?.includes('T4')))
+export interface DiscordNotificationSource {
+  date: string
+  snapshot: DiscordTopPlaysSnapshot
+  results: MatchupResult[]
 }
 
 function getDoubleLabel(isSmash: boolean, index: number, total: number): string {
@@ -24,29 +28,72 @@ function formatLeg(matchup: MatchupResult): string {
   return `${matchup.batterName} (${teamAbbr(matchup.batterTeam)}) vs ${matchup.pitcherName} ${odds}`
 }
 
-function buildTop4LockEvent(response: MatchupsResponse, topPlays: MatchupResult[]): DiscordNotificationEvent | null {
-  if (!response.slateLockedAt || topPlays.length === 0) return null
+export function getDiscordSnapshotKey(date: string): string {
+  return `discord-top4:${date}`
+}
 
-  const lines = topPlays.map((matchup, index) => `${index + 1}. ${formatLeg(matchup)}`)
+export function getDiscordSnapshotTtlSeconds(): number {
+  return DISCORD_SNAPSHOT_TTL_SECONDS
+}
+
+export function getNotificationLeadMinutes(rawValue = process.env.DISCORD_NOTIFICATION_LEAD_MINUTES): number {
+  const parsed = Number(rawValue)
+  if (!Number.isFinite(parsed) || parsed < 0) return DEFAULT_NOTIFICATION_LEAD_MINUTES
+  return Math.floor(parsed)
+}
+
+export function shouldLockDiscordSnapshot(
+  earliestGameTime: string | null,
+  nowMs: number,
+  leadMinutes: number,
+): boolean {
+  if (!earliestGameTime) return false
+
+  const firstPitchMs = new Date(earliestGameTime).getTime()
+  if (Number.isNaN(firstPitchMs)) return false
+
+  return nowMs >= firstPitchMs - leadMinutes * 60_000
+}
+
+export function buildDiscordTopPlaysSnapshot(
+  response: MatchupsResponse,
+  lockedAt: string,
+  leadMinutes: number,
+): DiscordTopPlaysSnapshot | null {
+  const topPlays = selectTopPlays(response.confirmedTopPlaysPreview ?? [])
+  if (topPlays.length === 0) return null
+
   return {
-    id: `top4-lock:${response.date}:${response.slateLockedAt}`,
-    content: [`Top 4 locked for ${response.date}.`, ...lines].join('\n'),
+    date: response.date,
+    lockedAt,
+    leadMinutes,
+    topPlays,
   }
 }
 
-function buildDoubleLockEvents(response: MatchupsResponse, topPlays: MatchupResult[]): DiscordNotificationEvent[] {
-  if (!response.slateLockedAt || topPlays.length < 2) return []
+function buildTop4LockEvent(snapshot: DiscordTopPlaysSnapshot): DiscordNotificationEvent | null {
+  if (snapshot.topPlays.length === 0) return null
 
-  const recommendedDoubles = suggestRecommendedDoubles(topPlays)
+  const lines = snapshot.topPlays.map((matchup, index) => `${index + 1}. ${formatLeg(matchup)}`)
+  return {
+    id: `top4-lock:${snapshot.date}:${snapshot.lockedAt}`,
+    content: [`Top 4 alert board locked for ${snapshot.date} (${snapshot.leadMinutes}m before first pitch).`, ...lines].join('\n'),
+  }
+}
+
+function buildDoubleLockEvents(snapshot: DiscordTopPlaysSnapshot): DiscordNotificationEvent[] {
+  if (snapshot.topPlays.length < 2) return []
+
+  const recommendedDoubles = suggestRecommendedDoubles(snapshot.topPlays)
   return recommendedDoubles.map((double, index) => {
     const label = getDoubleLabel(double.isSmash, index, recommendedDoubles.length)
     const parlayOdds = double.consensusParlayOddsAmerican == null ? 'Parlay odds N/A' : `Parlay ${fmtOdds(double.consensusParlayOddsAmerican)}`
     const legsKey = [matchupKey(double.first), matchupKey(double.second)].sort().join(':')
 
     return {
-      id: `double-lock:${response.date}:${label}:${legsKey}`,
+      id: `double-lock:${snapshot.date}:${snapshot.lockedAt}:${label}:${legsKey}`,
       content: [
-        `${label} locked for ${response.date}.`,
+        `${label} locked for ${snapshot.date} (${snapshot.leadMinutes}m before first pitch).`,
         `Leg 1: ${formatLeg(double.first)}`,
         `Leg 2: ${formatLeg(double.second)}`,
         parlayOdds,
@@ -55,18 +102,18 @@ function buildDoubleLockEvents(response: MatchupsResponse, topPlays: MatchupResu
   })
 }
 
-function buildLegHitEvents(response: MatchupsResponse, results: MatchupResult[]): DiscordNotificationEvent[] {
+function buildLegHitEvents(date: string, results: MatchupResult[]): DiscordNotificationEvent[] {
   return results
     .filter(matchup => matchup.hitResult === 'win')
     .map(matchup => ({
-      id: `leg-hit:${response.date}:${matchupKey(matchup)}`,
+      id: `leg-hit:${date}:${matchupKey(matchup)}`,
       content: `Hit: ${matchup.batterName} recorded a hit vs ${matchup.pitcherName}.`,
     }))
 }
 
-function buildDoubleHitEvents(response: MatchupsResponse, topPlays: MatchupResult[]): DiscordNotificationEvent[] {
+function buildDoubleHitEvents(snapshot: DiscordTopPlaysSnapshot, topPlays: MatchupResult[]): DiscordNotificationEvent[] {
   const resultsByKey = new Map(topPlays.map(matchup => [matchupKey(matchup), matchup]))
-  const recommendedDoubles = suggestRecommendedDoubles(topPlays)
+  const recommendedDoubles = suggestRecommendedDoubles(snapshot.topPlays)
 
   return recommendedDoubles.flatMap((double, index) => {
     const first = resultsByKey.get(matchupKey(double.first))
@@ -81,20 +128,20 @@ function buildDoubleHitEvents(response: MatchupsResponse, topPlays: MatchupResul
     const legsKey = [matchupKey(double.first), matchupKey(double.second)].sort().join(':')
 
     return [{
-      id: `double-hit:${response.date}:${label}:${legsKey}`,
+      id: `double-hit:${snapshot.date}:${label}:${legsKey}`,
       content: `${label} hit: ${first.batterName} and ${second.batterName} both recorded a hit. ${parlayOdds}.`,
     }]
   })
 }
 
-export function buildDiscordNotificationEvents(response: MatchupsResponse): DiscordNotificationEvent[] {
-  const topPlays = getTrackedTopPlays(response.results)
+export function buildDiscordNotificationEvents(source: DiscordNotificationSource): DiscordNotificationEvent[] {
+  const trackedResults = source.results.filter(matchup => source.snapshot.topPlays.some(topPlay => matchupKey(topPlay) === matchupKey(matchup)))
 
   return [
-    buildTop4LockEvent(response, topPlays),
-    ...buildDoubleLockEvents(response, topPlays),
-    ...buildLegHitEvents(response, response.results),
-    ...buildDoubleHitEvents(response, response.results.filter(matchup => matchup.recommendationTags?.includes('T4'))),
+    buildTop4LockEvent(source.snapshot),
+    ...buildDoubleLockEvents(source.snapshot),
+    ...buildLegHitEvents(source.date, trackedResults),
+    ...buildDoubleHitEvents(source.snapshot, trackedResults),
   ].filter((event): event is DiscordNotificationEvent => event !== null)
 }
 

@@ -157,6 +157,14 @@ CRON_SECRET=use-the-same-secret-here
 
 The notifier route lives at `/api/notifications/discord`. On this repo it is scheduled by GitHub Actions every 5 minutes, because Vercel Hobby does not support sub-daily cron jobs. Keep `CRON_SECRET` and `DISCORD_NOTIFIER_SECRET` set to the same value in Vercel so both scheduled and manual requests use the same bearer secret. If `DISCORD_WEBHOOK_URL` is missing, the route falls back to a dry-run preview mode so you can inspect the messages without posting anything.
 
+Discord alerts now use their own pregame freeze window so bettors get the board before the site's official first-pitch lock. The site still freezes the official tracked Top 4 at first pitch, but Discord freezes a separate `discord-top4:{date}` snapshot from the best confirmed plays available a configurable number of minutes earlier and uses that same snapshot for the later leg-hit and double-hit posts.
+
+Optional notifier timing env:
+
+```
+DISCORD_NOTIFICATION_LEAD_MINUTES=25
+```
+
 Manual test URLs:
 
 ```bash
@@ -167,9 +175,9 @@ http://localhost:3000/api/notifications/discord?dryRun=1
 http://localhost:3000/api/notifications/discord?reset=1&secret=your-secret
 ```
 
-The notifier currently posts four simple event types:
+The notifier currently posts four simple event types from the Discord-specific frozen snapshot:
 
-- official Top 4 lock
+- pregame Top 4 alert board lock
 - locked Daily / Secondary / Smash Double cards
 - individual leg hit
 - double hit once both legs have recorded a hit
@@ -209,6 +217,7 @@ lib/
 |-----|-------|-----|---------|
 | `matchups-response:{date}` | `MatchupsResponse` | 30 sec pre-lock, 5 min post-lock | Full compiled matchups response; short-lived before first pitch so confirmed lineups can refresh into the candidate board |
 | `slate-top4:{date}` | `SlateTopPlaysSnapshot` | 36 hr | Official Top 4 snapshot frozen at the slate's first scheduled pitch |
+| `discord-top4:{date}` | `DiscordTopPlaysSnapshot` | 72 hr | Discord-only alert snapshot frozen before first pitch from confirmed plays available at the earlier cutoff |
 | `game-qualifying:{gamePk}` | `MatchupResult[]` | 36 hr | Pre-game snapshot of qualifying matchups for tracked-player carryover into in-progress/settled display |
 
 ## Disclaimer
