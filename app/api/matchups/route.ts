@@ -329,7 +329,7 @@ export async function GET(req: NextRequest) {
     const nonUpcomingResults: MatchupResult[] = []
     for (const { game, gameStatus } of nonUpcomingGames) {
       const confirmedSnapshot = nonUpcomingSnapshots.get(game.gamePk)
-      if (confirmedSnapshot.length === 0) continue
+      if (!confirmedSnapshot || confirmedSnapshot.length === 0) continue
 
       const hitsMap = await fetchBoxscoreHitting(game.gamePk)
       for (const m of confirmedSnapshot) {
