@@ -400,6 +400,31 @@ export function suggestDailyDouble(matchups: MatchupResult[]): RecommendedDouble
   return suggestRecommendedDoubles(matchups)[0] ?? null
 }
 
+export function buildTaggedRecommendedDoubles(matchups: MatchupResult[]): RecommendedDouble[] {
+  const buildTaggedDouble = (tag: RecommendationTag): RecommendedDouble | null => {
+    const taggedMatchups = matchups.filter(matchup => matchup.recommendationTags?.includes(tag))
+    if (taggedMatchups.length !== 2) return null
+
+    const [first, second] = taggedMatchups.map(buildRecommendationLeg)
+    return buildRecommendedDouble(first, second)
+  }
+
+  const recommendedDoubles = [
+    buildTaggedDouble('SMASH'),
+    buildTaggedDouble('DD'),
+    buildTaggedDouble('SD'),
+  ].filter((double): double is RecommendedDouble => double !== null)
+
+  if (recommendedDoubles.length === 0) return []
+  if (recommendedDoubles.length === 1) return recommendedDoubles
+
+  if (recommendedDoubles[0].isSmash) {
+    return recommendedDoubles.filter((double, index) => index === 0 || !double.isSmash)
+  }
+
+  return recommendedDoubles
+}
+
 export function buildRecommendationTags(
   topPlays: MatchupResult[],
   recommendedDoubles: RecommendedDouble[],

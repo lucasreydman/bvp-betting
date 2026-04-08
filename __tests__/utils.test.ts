@@ -1,4 +1,4 @@
-import { buildMatchupsDebugInfo, buildRecommendationTags, fillOpenTopPlaySlots, formatTime, formatLocalDate, formatSlateDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, getEarliestGameTimeMs, hitProbability, isSlateLockReached, selectTopPlays, suggestDailyDouble, suggestRecommendedDoubles, generateRecommendedDoublesCSV, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
+import { buildMatchupsDebugInfo, buildRecommendationTags, buildTaggedRecommendedDoubles, fillOpenTopPlaySlots, formatTime, formatLocalDate, formatSlateDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, getEarliestGameTimeMs, hitProbability, isSlateLockReached, selectTopPlays, suggestDailyDouble, suggestRecommendedDoubles, generateRecommendedDoublesCSV, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
 import { DEFAULT_FILTERS, type MatchupResult } from '@/lib/types'
 
 const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => ({
@@ -397,6 +397,34 @@ describe('buildRecommendationTags', () => {
     expect(tags['123456:2:22']).toEqual(['SMASH', 'T4'])
     expect(tags['123456:3:33']).toEqual(['SD', 'T4'])
     expect(tags['123456:4:44']).toEqual(['SD', 'T4'])
+  })
+})
+
+describe('buildTaggedRecommendedDoubles', () => {
+  it('preserves smash and secondary-double labels after the smash legs have started', () => {
+    const smashA = makeMatchup({ batterId: 1, pitcherId: 11, gameStatus: 'inProgress', recommendationTags: ['SMASH', 'T4'], ops: 0.980, h: 8, avg: 0.310, ab: 18 })
+    const smashB = makeMatchup({ batterId: 2, pitcherId: 22, gameStatus: 'inProgress', recommendationTags: ['SMASH', 'T4'], ops: 0.970, h: 7, avg: 0.305, ab: 18 })
+    const secondaryA = makeMatchup({ batterId: 3, pitcherId: 33, gameStatus: 'upcoming', recommendationTags: ['SD', 'T4'], avg: 0.420, ab: 45, ops: 0.910, h: 10 })
+    const secondaryB = makeMatchup({ batterId: 4, pitcherId: 44, gameStatus: 'upcoming', recommendationTags: ['SD', 'T4'], avg: 0.410, ab: 42, ops: 0.900, h: 9 })
+
+    const doubles = buildTaggedRecommendedDoubles([secondaryA, secondaryB, smashA, smashB])
+
+    expect(doubles).toHaveLength(2)
+    expect(doubles[0].isSmash).toBe(true)
+    expect([doubles[0].first.batterId, doubles[0].second.batterId].sort()).toEqual([1, 2])
+    expect(doubles[1].isSmash).toBe(false)
+    expect([doubles[1].first.batterId, doubles[1].second.batterId].sort()).toEqual([3, 4])
+  })
+
+  it('returns a locked daily double when that is the only tagged pair', () => {
+    const a = makeMatchup({ batterId: 1, pitcherId: 11, recommendationTags: ['DD', 'T4'], avg: 0.360, ab: 26, ops: 0.910, h: 6 })
+    const b = makeMatchup({ batterId: 2, pitcherId: 22, recommendationTags: ['DD', 'T4'], avg: 0.385, ab: 24, ops: 0.900, h: 5 })
+    const leftover = makeMatchup({ batterId: 3, pitcherId: 33, recommendationTags: ['T4'], avg: 0.305, ab: 18, ops: 0.840, h: 4 })
+
+    const doubles = buildTaggedRecommendedDoubles([leftover, b, a])
+
+    expect(doubles).toHaveLength(1)
+    expect([doubles[0].first.batterId, doubles[0].second.batterId].sort()).toEqual([1, 2])
   })
 })
 

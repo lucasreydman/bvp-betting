@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { MatchupResult, FilterState, MatchupsResponse, SortState } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
-import { TOP_PLAYS_LIMIT, applyFilters, formatSlateDate, selectTopPlays, sortMatchups, suggestRecommendedDoubles } from '@/lib/utils'
+import { TOP_PLAYS_LIMIT, applyFilters, buildTaggedRecommendedDoubles, formatSlateDate, selectTopPlays, sortMatchups, suggestRecommendedDoubles } from '@/lib/utils'
 import type { RecommendedDouble } from '@/lib/utils'
 import StatusBar from './StatusBar'
 import DatePicker from './DatePicker'
@@ -101,7 +101,10 @@ export default function ClientShell() {
   const trackedInProgress = inProgress
   const trackedSettled = settled
   const topPlaysMatchups = selectTopPlays(allUpcoming)
-  const recommendedDoubles: RecommendedDouble[] = suggestRecommendedDoubles(trackedUpcoming)
+  const lockedRecommendedDoubles = meta?.slateLockedAt ? buildTaggedRecommendedDoubles(allMatchups) : []
+  const recommendedDoubles: RecommendedDouble[] = lockedRecommendedDoubles.length > 0
+    ? lockedRecommendedDoubles
+    : suggestRecommendedDoubles(trackedUpcoming)
 
   return (
     <div>
