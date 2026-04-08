@@ -3,7 +3,7 @@ import { fetchSchedule, fetchConfirmedLineup, fetchActiveRoster, fetchCareerPA, 
 import { getGameStatus, computeHitResult } from '@/lib/game-status'
 import { parseSplit } from '@/lib/stats'
 import { createCache } from '@/lib/cache'
-import { kvGet, kvSet } from '@/lib/kv'
+import { kvDel, kvGet, kvSet } from '@/lib/kv'
 import { medianLineupPosition } from '@/lib/utils'
 import type { MatchupResult, MatchupsResponse } from '@/lib/types'
 import { fetchDayOdds, buildOddsMap, normalizePlayerName } from '@/lib/odds'
@@ -26,6 +26,10 @@ async function getPlayerName(id: number): Promise<string> {
 
 const BATCH_SIZE = 20
 const BATCH_DELAY_MS = 200
+const DEFAULT_RESPONSE_TTL_SECONDS = 300
+const FAST_LINEUP_RESPONSE_TTL_SECONDS = 30
+const SNAPSHOT_TTL_SECONDS = 129600
+const NO_STORE_HEADERS = { 'Cache-Control': 'no-store' }
 
 async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -105,7 +109,7 @@ export async function GET(req: NextRequest) {
     const responseCacheKey = `matchups-response:${date}`
     const cached = await kvGet<MatchupsResponse>(responseCacheKey)
     if (cached) {
-      return NextResponse.json(cached)
+      return NextResponse.json(cached, { headers: NO_STORE_HEADERS })
     }
 
     const games = await fetchSchedule(date)
@@ -133,6 +137,7 @@ export async function GET(req: NextRequest) {
       game: typeof games[number]
       gameStatus: 'inProgress' | 'settled'
     }> = []
+    const upcomingGameIds = new Set<number>()
 
     for (const game of games) {
       gamesScanned++
@@ -145,6 +150,8 @@ export async function GET(req: NextRequest) {
       const gameStatus = getGameStatus(game.status.detailedState)
 
       if (gameStatus === 'upcoming') {
+        upcomingGameIds.add(game.gamePk)
+
         // gameStarted is used only by getLineupPlayerIds to decide lineup source.
         // It is NOT used for routing to upcoming vs non-upcoming — that is gameStatus's job.
         const gameStarted = new Date(game.gameDate).getTime() <= nowMs
@@ -251,12 +258,25 @@ export async function GET(req: NextRequest) {
     // ── Write per-game KV snapshots for upcoming games (fire-and-forget) ─────
     const byGame = new Map<number, MatchupResult[]>()
     for (const m of upcomingResults) {
+      if (m.lineupSource !== 'confirmed') continue
+
       const arr = byGame.get(m.gamePk) ?? []
       arr.push(m)
       byGame.set(m.gamePk, arr)
     }
-    for (const [gamePk, matchups] of byGame) {
-      kvSet(`game-qualifying:${gamePk}`, matchups, 129600).catch(err =>
+
+    for (const gamePk of upcomingGameIds) {
+      const snapshotKey = `game-qualifying:${gamePk}`
+      const matchups = byGame.get(gamePk) ?? []
+
+      if (matchups.length === 0) {
+        kvDel(snapshotKey).catch(err =>
+          console.error(`Failed to delete snapshot for game ${gamePk}:`, err)
+        )
+        continue
+      }
+
+      kvSet(snapshotKey, matchups, SNAPSHOT_TTL_SECONDS).catch(err =>
         console.error(`Failed to write snapshot for game ${gamePk}:`, err)
       )
     }
@@ -267,8 +287,11 @@ export async function GET(req: NextRequest) {
       const snapshot = await kvGet<MatchupResult[]>(`game-qualifying:${game.gamePk}`)
       if (!snapshot) continue   // no pre-game snapshot — cannot verify qualification
 
+      const confirmedSnapshot = snapshot.filter(matchup => matchup.lineupSource === 'confirmed')
+      if (confirmedSnapshot.length === 0) continue
+
       const hitsMap = await fetchBoxscoreHitting(game.gamePk)
-      for (const m of snapshot) {
+      for (const m of confirmedSnapshot) {
         const h = hitsMap.get(m.batterId)?.h ?? 0
         nonUpcomingResults.push({
           ...m,
@@ -289,13 +312,17 @@ export async function GET(req: NextRequest) {
       results,
     }
 
-    kvSet(responseCacheKey, response, 300).catch(err =>
+    const responseTtlSeconds = upcomingResults.some(matchup => matchup.lineupSource === 'estimated')
+      ? FAST_LINEUP_RESPONSE_TTL_SECONDS
+      : DEFAULT_RESPONSE_TTL_SECONDS
+
+    kvSet(responseCacheKey, response, responseTtlSeconds).catch(err =>
       console.error('Failed to cache matchups response:', err)
     )
 
-    return NextResponse.json(response)
+    return NextResponse.json(response, { headers: NO_STORE_HEADERS })
   } catch (err) {
     console.error('Matchups error:', err)
-    return NextResponse.json({ error: 'Failed to fetch matchup data' }, { status: 502 })
+    return NextResponse.json({ error: 'Failed to fetch matchup data' }, { status: 502, headers: NO_STORE_HEADERS })
   }
 }

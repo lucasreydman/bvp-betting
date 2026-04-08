@@ -4,6 +4,7 @@ import {
   consensusFromLines,
   normalizePlayerName,
   fmtOdds,
+  parlayOddsFromLines,
   buildOddsMap,
 } from '@/lib/odds'
 
@@ -102,6 +103,18 @@ describe('fmtOdds', () => {
 
   it('handles zero (even money)', () => {
     expect(fmtOdds(0)).toBe('+0')
+  })
+})
+
+describe('parlayOddsFromLines', () => {
+  it('returns null when either leg is missing odds', () => {
+    expect(parlayOddsFromLines(-110, null)).toBeNull()
+    expect(parlayOddsFromLines(undefined, 120)).toBeNull()
+  })
+
+  it('combines two American prices into parlay American odds', () => {
+    expect(parlayOddsFromLines(-110, -110)).toBe(264)
+    expect(parlayOddsFromLines(100, 100)).toBe(300)
   })
 })
 

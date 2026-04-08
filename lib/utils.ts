@@ -1,3 +1,4 @@
+import { parlayOddsFromLines } from './odds'
 import type { FilterState, MatchupResult, SortState } from './types'
 
 const TEAM_ABBR: Record<string, string> = {
@@ -87,43 +88,131 @@ export function hitProbability(avg: number, atBats: number): number {
   return 1 - Math.pow(1 - avg, atBats)
 }
 
-export interface DailyDouble {
+const CONFIDENCE_WEIGHTS: Record<MatchupResult['confidence'], number> = {
+  high: 3,
+  medium: 2,
+  low: 1,
+}
+
+type EnrichedRecommendationLeg = {
+  matchup: MatchupResult
+  probability: number
+}
+
+export interface RecommendedDouble {
   first: MatchupResult
   second: MatchupResult
   firstProbability: number
   secondProbability: number
   combinedProbability: number
   isSmash: boolean  // true when both legs have OPS > 0.950 AND H >= 7
+  consensusParlayOddsAmerican: number | null
 }
 
-export function suggestDailyDouble(matchups: MatchupResult[]): DailyDouble | null {
-  const enriched = matchups
-    .map(matchup => ({
-      matchup,
-      probability: hitProbability(regressedAvg(matchup.avg, matchup.ab), expectedAtBats(resolveLineupPosition(matchup))),
-    }))
+export function isSmashDouble(first: MatchupResult, second: MatchupResult): boolean {
+  return first.ops > 0.950 && second.ops > 0.950 && first.h >= 7 && second.h >= 7
+}
 
-  let best: DailyDouble | null = null
+function buildRecommendationLeg(matchup: MatchupResult): EnrichedRecommendationLeg {
+  return {
+    matchup,
+    probability: hitProbability(regressedAvg(matchup.avg, matchup.ab), expectedAtBats(resolveLineupPosition(matchup))),
+  }
+}
 
-  for (let i = 0; i < enriched.length; i++) {
-    for (let j = i + 1; j < enriched.length; j++) {
-      const a = enriched[i]
-      const b = enriched[j]
-      const combinedProbability = a.probability * b.probability
-      if (!best || combinedProbability > best.combinedProbability) {
-        best = {
-          first: a.matchup,
-          second: b.matchup,
-          firstProbability: a.probability,
-          secondProbability: b.probability,
-          combinedProbability,
-          isSmash: a.matchup.ops > 0.950 && b.matchup.ops > 0.950 && a.matchup.h >= 7 && b.matchup.h >= 7,
-        }
-      }
-    }
+function compareLegs(a: EnrichedRecommendationLeg, b: EnrichedRecommendationLeg): number {
+  if (b.probability !== a.probability) return b.probability - a.probability
+  const confidenceDiff = CONFIDENCE_WEIGHTS[b.matchup.confidence] - CONFIDENCE_WEIGHTS[a.matchup.confidence]
+  if (confidenceDiff !== 0) return confidenceDiff
+  if (b.matchup.avg !== a.matchup.avg) return b.matchup.avg - a.matchup.avg
+  return b.matchup.ab - a.matchup.ab
+}
+
+function buildRecommendedDouble(a: EnrichedRecommendationLeg, b: EnrichedRecommendationLeg): RecommendedDouble {
+  const [first, second] = compareLegs(a, b) <= 0 ? [a, b] : [b, a]
+  return {
+    first: first.matchup,
+    second: second.matchup,
+    firstProbability: first.probability,
+    secondProbability: second.probability,
+    combinedProbability: first.probability * second.probability,
+    isSmash: isSmashDouble(first.matchup, second.matchup),
+    consensusParlayOddsAmerican: parlayOddsFromLines(first.matchup.consensusHitOddsAmerican, second.matchup.consensusHitOddsAmerican),
+  }
+}
+
+function doubleConfidenceScore(double: RecommendedDouble): number {
+  return CONFIDENCE_WEIGHTS[double.first.confidence] + CONFIDENCE_WEIGHTS[double.second.confidence]
+}
+
+function compareRecommendedDoubles(a: RecommendedDouble, b: RecommendedDouble): number {
+  if (a.isSmash !== b.isSmash) return a.isSmash ? -1 : 1
+  if (b.combinedProbability !== a.combinedProbability) return b.combinedProbability - a.combinedProbability
+  const confidenceDiff = doubleConfidenceScore(b) - doubleConfidenceScore(a)
+  if (confidenceDiff !== 0) return confidenceDiff
+  if (b.firstProbability !== a.firstProbability) return b.firstProbability - a.firstProbability
+  if (b.secondProbability !== a.secondProbability) return b.secondProbability - a.secondProbability
+  if (b.first.avg !== a.first.avg) return b.first.avg - a.first.avg
+  return b.second.avg - a.second.avg
+}
+
+function totalCombinedProbability(doubles: RecommendedDouble[]): number {
+  return doubles.reduce((sum, double) => sum + double.combinedProbability, 0)
+}
+
+function totalConfidence(doubles: RecommendedDouble[]): number {
+  return doubles.reduce((sum, double) => sum + doubleConfidenceScore(double), 0)
+}
+
+function compareRecommendedDoubleSets(a: RecommendedDouble[], b: RecommendedDouble[]): number {
+  const smashCountDiff = b.filter(double => double.isSmash).length - a.filter(double => double.isSmash).length
+  if (smashCountDiff !== 0) return smashCountDiff
+
+  const pairCount = Math.max(a.length, b.length)
+  for (let index = 0; index < pairCount; index++) {
+    const aDouble = a[index]
+    const bDouble = b[index]
+    if (!aDouble && bDouble) return 1
+    if (aDouble && !bDouble) return -1
+    if (!aDouble || !bDouble) continue
+    const comparison = compareRecommendedDoubles(aDouble, bDouble)
+    if (comparison !== 0) return comparison
   }
 
-  return best
+  const combinedProbabilityDiff = totalCombinedProbability(b) - totalCombinedProbability(a)
+  if (combinedProbabilityDiff !== 0) return combinedProbabilityDiff
+
+  return totalConfidence(b) - totalConfidence(a)
+}
+
+export function suggestRecommendedDoubles(matchups: MatchupResult[]): RecommendedDouble[] {
+  const enriched = matchups
+    .slice(0, 4)
+    .map(buildRecommendationLeg)
+
+  if (enriched.length < 2) return []
+
+  if (enriched.length < 4) {
+    const candidates: RecommendedDouble[] = []
+    for (let i = 0; i < enriched.length; i++) {
+      for (let j = i + 1; j < enriched.length; j++) {
+        candidates.push(buildRecommendedDouble(enriched[i], enriched[j]))
+      }
+    }
+    return candidates.sort(compareRecommendedDoubles).slice(0, 1)
+  }
+
+  const partitions: RecommendedDouble[][] = [
+    [buildRecommendedDouble(enriched[0], enriched[1]), buildRecommendedDouble(enriched[2], enriched[3])],
+    [buildRecommendedDouble(enriched[0], enriched[2]), buildRecommendedDouble(enriched[1], enriched[3])],
+    [buildRecommendedDouble(enriched[0], enriched[3]), buildRecommendedDouble(enriched[1], enriched[2])],
+  ].map(doubles => doubles.sort(compareRecommendedDoubles))
+
+  return partitions.sort(compareRecommendedDoubleSets)[0] ?? []
+}
+
+export function suggestDailyDouble(matchups: MatchupResult[]): RecommendedDouble | null {
+  return suggestRecommendedDoubles(matchups)[0] ?? null
 }
 
 /** Relative time until first pitch. Returns null if start is in the past or invalid. */
@@ -181,5 +270,41 @@ export function generateCSV(matchups: MatchupResult[]): string {
     m.avg.toFixed(3), m.slg.toFixed(3), m.obp.toFixed(3), m.ops.toFixed(3), m.xbh,
     m.confidence, resolveLineupPosition(m) ?? '', m.lineupSource,
   ])
+  return [headers, ...rows].map(row => row.join(',')).join('\n')
+}
+
+export function generateRecommendedDoublesCSV(doubles: RecommendedDouble[]): string {
+  const headers = [
+    'Double', 'Type', 'Combined Hit %', 'Parlay Odds', 'Leg',
+    'Batter', 'Team', 'Pitcher', 'Opp Team', 'Game Time',
+    'AB', 'H', 'AVG', 'OPS', 'Confidence', 'Lineup Slot', 'Lineup Source',
+  ]
+
+  const rows = doubles.flatMap((double, index) => {
+    const type = double.isSmash ? 'Smash Double' : doubles.length === 1 ? 'Recommended Double' : index === 0 ? 'Primary Double' : 'Secondary Double'
+    return [
+      { leg: double.first, legIndex: 1 },
+      { leg: double.second, legIndex: 2 },
+    ].map(({ leg, legIndex }) => [
+      index + 1,
+      type,
+      `${(double.combinedProbability * 100).toFixed(2)}%`,
+      double.consensusParlayOddsAmerican == null ? '' : String(double.consensusParlayOddsAmerican >= 0 ? `+${double.consensusParlayOddsAmerican}` : double.consensusParlayOddsAmerican),
+      legIndex,
+      leg.batterName,
+      leg.batterTeam,
+      leg.pitcherName,
+      leg.pitcherTeam,
+      formatTime(leg.gameTime),
+      leg.ab,
+      leg.h,
+      leg.avg.toFixed(3),
+      leg.ops.toFixed(3),
+      leg.confidence,
+      resolveLineupPosition(leg) ?? '',
+      leg.lineupSource,
+    ])
+  })
+
   return [headers, ...rows].map(row => row.join(',')).join('\n')
 }

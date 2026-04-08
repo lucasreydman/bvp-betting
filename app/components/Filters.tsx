@@ -2,22 +2,22 @@
 import { useId, useState, useEffect, useRef } from 'react'
 import type { FilterState, MatchupResult } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
-import { formatLocalDate, generateCSV } from '@/lib/utils'
-import type { DailyDouble } from '@/lib/utils'
+import { formatLocalDate, generateCSV, generateRecommendedDoublesCSV } from '@/lib/utils'
+import type { RecommendedDouble } from '@/lib/utils'
 
 
 interface Props {
   filters: FilterState
   onApply: (filters: FilterState) => void
   matchups: MatchupResult[]
-  top5?: MatchupResult[]
-  dailyDouble?: DailyDouble | null
+  topPlays?: MatchupResult[]
+  recommendedDoubles?: RecommendedDouble[]
 }
 
 const DEFAULT_OPS_VALUE = 0.950
 const DEFAULT_H_VALUE = 7
 
-export default function Filters({ filters, onApply, matchups, top5, dailyDouble }: Props) {
+export default function Filters({ filters, onApply, matchups, topPlays, recommendedDoubles = [] }: Props) {
   const minOpsId = useId()
   const minHId = useId()
   const [opsDisplay, setOpsDisplay] = useState(
@@ -72,6 +72,19 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
     const a = document.createElement('a')
     a.href = url
     a.download = `bvp-${label}-${formatLocalDate()}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    setShowExportMenu(false)
+    flashFor('export')
+  }
+
+  const downloadRecommendedDoublesCSV = (doubles: RecommendedDouble[]) => {
+    const csv = generateRecommendedDoublesCSV(doubles)
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `bvp-recommended-doubles-${formatLocalDate()}.csv`
     a.click()
     URL.revokeObjectURL(url)
     setShowExportMenu(false)
@@ -208,7 +221,7 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
             <button
               type="button"
               onClick={() => setShowExportMenu(prev => !prev)}
-              disabled={matchups.length === 0 && !top5?.length && !dailyDouble}
+              disabled={matchups.length === 0 && !topPlays?.length && recommendedDoubles.length === 0}
               className={`inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-lg border transition-all disabled:opacity-40 touch-manipulation ${
                 flash === 'export'
                   ? 'border-green-700 text-green-400'
@@ -227,24 +240,24 @@ export default function Filters({ filters, onApply, matchups, top5, dailyDouble 
               <div className="absolute bottom-full mb-2 right-0 w-52 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-20">
                 <button
                   type="button"
-                  disabled={!dailyDouble}
-                  onClick={() => dailyDouble && downloadCSV([dailyDouble.first, dailyDouble.second], 'recommended-double')}
+                  disabled={recommendedDoubles.length === 0}
+                  onClick={() => recommendedDoubles.length > 0 && downloadRecommendedDoublesCSV(recommendedDoubles)}
                   className="w-full text-left px-4 py-2.5 hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  <div className={`text-sm font-medium ${dailyDouble?.isSmash ? 'text-orange-400' : 'text-yellow-400'}`}>
-                    {dailyDouble?.isSmash ? 'Smash Double' : 'Recommended Double'}
+                  <div className={`text-sm font-medium ${recommendedDoubles[0]?.isSmash ? 'text-orange-400' : 'text-yellow-400'}`}>
+                    {recommendedDoubles.length > 1 ? 'Recommended Doubles' : recommendedDoubles[0]?.isSmash ? 'Smash Double' : 'Recommended Double'}
                   </div>
-                  <div className="text-xs text-gray-500 mt-0.5">2 legs</div>
+                  <div className="text-xs text-gray-500 mt-0.5">{recommendedDoubles.length} double{recommendedDoubles.length === 1 ? '' : 's'}{recommendedDoubles.length > 0 ? ` • ${recommendedDoubles.length * 2} legs` : ''}</div>
                 </button>
                 <div className="border-t border-gray-800" />
                 <button
                   type="button"
-                  disabled={!top5?.length}
-                  onClick={() => top5?.length && downloadCSV(top5, 'top5')}
+                  disabled={!topPlays?.length}
+                  onClick={() => topPlays?.length && downloadCSV(topPlays, 'top4')}
                   className="w-full text-left px-4 py-2.5 hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  <div className="text-sm font-medium text-gray-200">Top 5 Plays</div>
-                  <div className="text-xs text-gray-500 mt-0.5">{top5?.length ?? 0} rows</div>
+                  <div className="text-sm font-medium text-gray-200">Top 4 Plays</div>
+                  <div className="text-xs text-gray-500 mt-0.5">{topPlays?.length ?? 0} rows</div>
                 </button>
                 <div className="border-t border-gray-800" />
                 <button

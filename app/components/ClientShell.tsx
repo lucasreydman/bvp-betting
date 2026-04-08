@@ -2,8 +2,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { MatchupResult, FilterState, MatchupsResponse, SortState } from '@/lib/types'
 import { DEFAULT_FILTERS } from '@/lib/types'
-import { applyFilters, formatLocalDate, sortMatchups, suggestDailyDouble } from '@/lib/utils'
-import type { DailyDouble } from '@/lib/utils'
+import { applyFilters, formatLocalDate, sortMatchups, suggestRecommendedDoubles } from '@/lib/utils'
+import type { RecommendedDouble } from '@/lib/utils'
 import StatusBar from './StatusBar'
 import DatePicker from './DatePicker'
 import LoadingSkeleton from './LoadingSkeleton'
@@ -11,6 +11,7 @@ import TopPlays from './TopPlays'
 import Filters from './Filters'
 import MatchupTable from './MatchupTable'
 
+const TOP_PLAYS_LIMIT = 4
 
 export default function ClientShell() {
   const [date, setDate] = useState(formatLocalDate)
@@ -21,12 +22,14 @@ export default function ClientShell() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tick, setTick] = useState(0)
+  const hasEstimatedUpcoming = allMatchups.some(m => m.gameStatus === 'upcoming' && m.lineupSource === 'estimated')
+  const backgroundRefreshMs = hasEstimatedUpcoming ? 30_000 : 300_000
 
   const fetchMatchups = useCallback(async (d: string) => {
     setIsLoading(true)
     setError(null)
     try {
-      const res = await fetch(`/api/matchups?date=${d}`)
+      const res = await fetch(`/api/matchups?date=${d}`, { cache: 'no-store' })
       if (!res.ok) throw new Error(`Server error: ${res.status}`)
       const data: MatchupsResponse = await res.json()
       setAllMatchups(data.results)
@@ -54,7 +57,7 @@ export default function ClientShell() {
   useEffect(() => {
     const id = setInterval(async () => {
       try {
-        const res = await fetch(`/api/matchups?date=${date}`)
+        const res = await fetch(`/api/matchups?date=${date}`, { cache: 'no-store' })
         if (!res.ok) return
         const data: MatchupsResponse = await res.json()
         setAllMatchups(data.results)
@@ -62,9 +65,9 @@ export default function ClientShell() {
       } catch {
         // silent — don't disrupt the user for a background refresh failure
       }
-    }, 300_000)
+    }, backgroundRefreshMs)
     return () => clearInterval(id)
-  }, [date])
+  }, [backgroundRefreshMs, date])
 
   const handleSort = (column: keyof MatchupResult) => {
     setSort(prev => ({
@@ -88,17 +91,17 @@ export default function ClientShell() {
   const totalInProgress = allInProgress.length
   const hasActiveOptionalFilters = filters.minOPS !== null || filters.minH !== null
 
-  const top5Score = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
+  const topPlayScore = (m: MatchupResult) => m.avg * Math.min(m.ab / 30, 1)
   const filtersKey = `${filters.minOPS ?? 'none'}-${filters.minH ?? 'none'}`
 
-  // Top 5 for display + "Top 5 Plays" CSV: upcoming only (bettable)
-  const top5Matchups = [...upcoming]
-    .sort((a, b) => top5Score(b) - top5Score(a) || b.avg - a.avg || b.ab - a.ab)
-    .slice(0, 5)
+  // Top plays for display + Top Plays CSV: upcoming only (bettable)
+  const topPlaysMatchups = [...upcoming]
+    .sort((a, b) => topPlayScore(b) - topPlayScore(a) || b.avg - a.avg || b.ab - a.ab)
+    .slice(0, TOP_PLAYS_LIMIT)
 
-  // Recommended Double always computed from the same filtered top-5 shown in TopPlays,
+  // Recommended doubles always computed from the same filtered top-play set shown in TopPlays,
   // so filters (min AB, min AVG) apply consistently to both.
-  const csvDailyDouble: DailyDouble | null = suggestDailyDouble(top5Matchups)
+  const recommendedDoubles: RecommendedDouble[] = suggestRecommendedDoubles(topPlaysMatchups)
 
   return (
     <div>
@@ -123,14 +126,14 @@ export default function ClientShell() {
         <LoadingSkeleton date={date} />
       ) : (
         <>
-          <TopPlays matchups={upcoming} overrideDailyDouble={csvDailyDouble} now={now} />
+          <TopPlays matchups={upcoming} overrideRecommendedDoubles={recommendedDoubles} now={now} />
           <Filters
             key={filtersKey}
             filters={filters}
             onApply={setFilters}
             matchups={csvMatchups}
-            top5={top5Matchups}
-            dailyDouble={csvDailyDouble}
+            topPlays={topPlaysMatchups}
+            recommendedDoubles={recommendedDoubles}
           />
           <MatchupTable
             matchups={upcoming}

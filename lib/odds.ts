@@ -50,6 +50,12 @@ export function fmtOdds(american: number): string {
   return american >= 0 ? `+${american}` : String(american)
 }
 
+export function parlayOddsFromLines(first?: number | null, second?: number | null): number | null {
+  if (first == null || second == null) return null
+  const combinedImplied = americanToImplied(first) * americanToImplied(second)
+  return Math.round(impliedToAmerican(combinedImplied))
+}
+
 // ── API types ────────────────────────────────────────────────────────────────
 
 // batter_hits outcomes use: name="Over"|"Under", description=playerName, point=line (0.5/1.5/2.5)

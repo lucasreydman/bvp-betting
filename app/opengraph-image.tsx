@@ -88,7 +88,7 @@ export default function Image() {
             display: 'flex',
           }}
         >
-          Career BvP stats for the Player Hits prop with a 15 AB minimum and .300 AVG floor. Recommended Double parlay picks ranked by weighted average.
+          Career BvP stats for the Player Hits prop with a 15 AB minimum and .300 AVG floor. Recommended doubles ranked from the Top 4, with smash pairs forced to the top when available.
         </div>
 
         {/* Sportsbook pills */}

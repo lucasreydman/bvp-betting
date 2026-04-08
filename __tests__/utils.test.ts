@@ -1,4 +1,4 @@
-import { formatTime, formatLocalDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, hitProbability, suggestDailyDouble, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
+import { formatTime, formatLocalDate, formatCountdownToStart, generateCSV, applyFilters, sortMatchups, regressedAvg, expectedAtBats, hitProbability, suggestDailyDouble, suggestRecommendedDoubles, generateRecommendedDoublesCSV, resolveLineupPosition, medianLineupPosition } from '@/lib/utils'
 import { DEFAULT_FILTERS, type MatchupResult } from '@/lib/types'
 
 const makeMatchup = (overrides: Partial<MatchupResult> = {}): MatchupResult => ({
@@ -157,48 +157,73 @@ describe('hitProbability', () => {
   })
 })
 
-describe('suggestDailyDouble', () => {
-  it('returns the single best pair by combined probability', () => {
+describe('suggestRecommendedDoubles', () => {
+  it('returns the single best pair by combined probability when fewer than four plays qualify', () => {
     const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.300, ab: 40 })
     const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.320, ab: 30 })
     const c = makeMatchup({ batterId: 3, pitcherId: 3, avg: 0.350, ab: 20 })
-    const result = suggestDailyDouble([a, b, c])
+    const result = suggestRecommendedDoubles([a, b, c])
 
-    expect(result).not.toBeNull()
-    expect(result!.first.batterId).not.toBe(result!.second.batterId)
-    expect(result!.combinedProbability).toBeGreaterThan(0)
+    expect(result).toHaveLength(1)
+    expect(result[0].first.batterId).not.toBe(result[0].second.batterId)
+    expect(result[0].combinedProbability).toBeGreaterThan(0)
+  })
+
+  it('returns two doubles when four plays qualify', () => {
+    const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.340, ab: 40 })
+    const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.335, ab: 36 })
+    const c = makeMatchup({ batterId: 3, pitcherId: 3, avg: 0.330, ab: 34 })
+    const d = makeMatchup({ batterId: 4, pitcherId: 4, avg: 0.325, ab: 32 })
+    const result = suggestRecommendedDoubles([a, b, c, d])
+
+    expect(result).toHaveLength(2)
+    const ids = result.flatMap(double => [double.first.batterId, double.second.batterId]).sort()
+    expect(ids).toEqual([1, 2, 3, 4])
+  })
+
+  it('forces a smash double into the first slot when one exists', () => {
+    const smashA = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.310, ab: 18, ops: 0.980, h: 8 })
+    const smashB = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.305, ab: 18, ops: 0.970, h: 7 })
+    const betterC = makeMatchup({ batterId: 3, pitcherId: 3, avg: 0.420, ab: 45, ops: 0.910, h: 10 })
+    const betterD = makeMatchup({ batterId: 4, pitcherId: 4, avg: 0.410, ab: 42, ops: 0.900, h: 9 })
+    const result = suggestRecommendedDoubles([smashA, smashB, betterC, betterD])
+
+    expect(result).toHaveLength(2)
+    expect(result[0].isSmash).toBe(true)
+    expect([result[0].first.batterId, result[0].second.batterId].sort()).toEqual([1, 2])
+    expect([result[1].first.batterId, result[1].second.batterId].sort()).toEqual([3, 4])
   })
 
   it('marks isSmash when both legs have OPS > 0.950 and H >= 7', () => {
     const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.400, ab: 40, ops: 1.100, h: 16 })
     const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.380, ab: 35, ops: 0.980, h: 13 })
-    const result = suggestDailyDouble([a, b])
+    const result = suggestRecommendedDoubles([a, b])
 
-    expect(result).not.toBeNull()
-    expect(result!.isSmash).toBe(true)
+    expect(result).toHaveLength(1)
+    expect(result[0].isSmash).toBe(true)
   })
 
   it('does not mark isSmash when one leg is below 0.950 OPS', () => {
     const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.400, ab: 40, ops: 1.100, h: 16 })
     const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.380, ab: 35, ops: 0.900, h: 13 })
-    const result = suggestDailyDouble([a, b])
+    const result = suggestRecommendedDoubles([a, b])
 
-    expect(result).not.toBeNull()
-    expect(result!.isSmash).toBe(false)
+    expect(result).toHaveLength(1)
+    expect(result[0].isSmash).toBe(false)
   })
 
   it('does not mark isSmash when one leg has fewer than 7 hits', () => {
     const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.400, ab: 40, ops: 1.100, h: 16 })
     const b = makeMatchup({ batterId: 2, pitcherId: 2, avg: 0.333, ab: 15, ops: 0.980, h: 5 })
-    const result = suggestDailyDouble([a, b])
+    const result = suggestRecommendedDoubles([a, b])
 
-    expect(result).not.toBeNull()
-    expect(result!.isSmash).toBe(false)
+    expect(result).toHaveLength(1)
+    expect(result[0].isSmash).toBe(false)
   })
 
-  it('returns null when no valid pairs exist', () => {
+  it('returns no doubles when no valid pairs exist', () => {
     const a = makeMatchup({ batterId: 1, pitcherId: 1, avg: 0.300, ab: 40 })
-    expect(suggestDailyDouble([a])).toBeNull()
+    expect(suggestRecommendedDoubles([a])).toEqual([])
   })
 
   it('uses predicted lineup position when confirmed order is unavailable', () => {
@@ -208,6 +233,19 @@ describe('suggestDailyDouble', () => {
 
     expect(result).not.toBeNull()
     expect(result!.firstProbability).toBeGreaterThan(result!.secondProbability)
+  })
+})
+
+describe('generateRecommendedDoublesCSV', () => {
+  it('includes grouping columns for recommended doubles export', () => {
+    const first = makeMatchup({ batterId: 1, pitcherId: 1 })
+    const second = makeMatchup({ batterId: 2, pitcherId: 2, batterName: 'Second Batter' })
+    const doubles = suggestRecommendedDoubles([first, second])
+    const csv = generateRecommendedDoublesCSV(doubles)
+
+    expect(csv).toContain('Double,Type,Combined Hit %,Parlay Odds,Leg')
+    expect(csv).toContain('Smash Double')
+    expect(csv).toContain('Second Batter')
   })
 })
 

@@ -34,12 +34,12 @@ export default function Footer() {
           </p>
         </div>
         <div>
-          <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Confidence &amp; Top 5</h3>
+          <h3 className="text-gray-400 font-semibold uppercase tracking-wider mb-2">Confidence &amp; Top 4</h3>
           <p className="leading-relaxed">
             Confidence reflects sample size: <span className="text-green-500">green</span> = 25+ AB,{' '}
             <span className="text-yellow-500">yellow</span> = 20–24 AB,{' '}
             <span className="text-red-500">red</span> = 15–19 AB.
-            Top 5 Plays ranks by{' '}
+            Top 4 Plays ranks by{' '}
             <Formula inline className="text-gray-400 text-[0.9rem]">
               <span>AVG</span>
               <span>×</span>

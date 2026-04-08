@@ -22,7 +22,7 @@ app/
     DatePicker.tsx       # Today + tomorrow nav, UTC-safe date arithmetic
     StatusBar.tsx        # Last updated, games scanned, refresh; stacks vertically on mobile
     Filters.tsx          # Min AB + Min AVG + optional OPS filter; Apply / Reset / Export CSV (CSV hidden on mobile)
-    TopPlays.tsx         # Top 5 by AVG×confidence (AB-scaled); upcoming only; 2-row card layout on mobile; Daily Double/Smash Double card
+    TopPlays.tsx         # Top 4 by AVG×confidence (AB-scaled); upcoming only; 2-row card layout on mobile; recommended doubles + Smash Double cards
     MatchupTable.tsx     # Sortable table (sm+) + card list (mobile); sort chips on mobile; TEAM_ABBR map for mobile cards
     MatchupRow.tsx       # Single <tr> row; used only in the sm+ table path
     InfoTooltip.tsx      # Hover/tap tooltip used in top plays
@@ -31,7 +31,7 @@ app/
 lib/
   types.ts    # MatchupResult, FilterState, DEFAULT_FILTERS, SortState, MatchupsResponse
   stats.ts    # calcStats(), assignConfidence(), parseSplit()
-  utils.ts    # applyFilters(), sortMatchups(), generateCSV(), formatTime(), suggestDailyDouble(), hitProbability(), regressedAvg(), expectedAtBats()
+  utils.ts    # applyFilters(), sortMatchups(), generateCSV(), formatTime(), suggestRecommendedDoubles(), hitProbability(), regressedAvg(), expectedAtBats()
   mlb-api.ts       # MLB Stats API fetch helpers
   game-status.ts   # Pure helpers: getGameStatus(), computeHitResult()
   cache.ts         # createCache<T>(ttlMs), in-memory TTL cache
@@ -56,13 +56,13 @@ lib/
 - **Filters:** minAB (15) and minAVG (.300) are server-enforced hard minimums — not user-editable. Only minOPS is user-configurable (optional). OPS filter applies to all three tables (upcoming, inProgress, settled).
 - **Game status split:** Server-driven via `gameStatus` field on each `MatchupResult`. `getGameStatus(detailedState)` maps MLB API states → `upcoming | inProgress | settled`. Client reads `gameStatus` directly — no time-based split.
 - **TopPlays:** Only `upcoming` matchups (not the full unfiltered list).
-- **Default sort:** AVG desc by default (table). Top 5 card uses AVG × min(AB/30, 1) with tiebreakers raw AVG then AB.
+- **Default sort:** AVG desc by default (table). Top 4 card uses AVG × min(AB/30, 1) with tiebreakers raw AVG then AB.
 - **Confidence:** AB vs this pitcher: high ≥25 (green), medium 20–24 (yellow), low 15–19 (red). Server enforces 15 AB minimum so all three tiers are reachable.
 - **Caches:** Module-level only for BvP and roster/name TTL caches (not recreated inside the handler). Response-level KV cache at `matchups-response:{date}` with 5-min TTL.
 - **`parseSplit(stat)`:** Single mapping from MLB stat fields to raw + calculated fields; use in both API routes.
 - **Aggregate dedup:** Drop rows where `keyCounts(statKey) >= 3` for identical raw lines (same team vs same pitcher). 3+ identical BvP lines from the same team is impossible in real data.
 - **`formatTime()`:** Uses `Intl.DateTimeFormat().resolvedOptions().timeZone` (browser local time, not hardcoded ET).
-- **Mobile layout:** `MatchupTable` renders a card list (`sm:hidden`) and a full table (`hidden sm:block`). Cards show batter, AVG, team abbreviation vs pitcher, H/AB, lineup badge, and `GameTimeCell`. Sort chips (AVG / AB / Time) replace column-header sorting on mobile. `TopPlays` uses `sm:hidden` / `hidden sm:flex` to switch between a 2-row card and the single-row desktop layout. Daily Double / Smash Double legs use a 2-row card on all screen sizes (name+AVG row 1, pitcher+OPS+AB+hit% row 2). `StatusBar` stacks clock + "Updated" on the left with the refresh button on the right on mobile; "games scanned" text is `hidden sm:inline`.
+- **Mobile layout:** `MatchupTable` renders a card list (`sm:hidden`) and a full table (`hidden sm:block`). Cards show batter, AVG, team abbreviation vs pitcher, H/AB, lineup badge, and `GameTimeCell`. Sort chips (AVG / AB / Time) replace column-header sorting on mobile. `TopPlays` uses `sm:hidden` / `hidden sm:flex` to switch between a 2-row card and the single-row desktop layout. Recommended doubles / Smash Double legs use a 2-row card on all screen sizes (name+AVG row 1, pitcher+OPS+AB+hit% row 2). `StatusBar` stacks clock + "Updated" on the left with the refresh button on the right on mobile; "games scanned" text is `hidden sm:inline`.
 - **Team abbreviations:** `TEAM_ABBR` map in `MatchupTable.tsx` covers all 30 MLB teams; `abbr()` falls back to initials for unknown names.
 - **KV TTLs:** Response cache uses 5-min TTL. `kvSet` accepts an optional third argument `ttlSeconds`.
 - **PPD/cancelled games:** Filtered in `fetchSchedule` before any lineup or BvP work. Status checked via `g.status.detailedState`.
