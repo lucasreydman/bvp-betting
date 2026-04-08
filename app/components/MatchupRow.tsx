@@ -38,7 +38,7 @@ export default function MatchupRow({ matchup: m, gameKind }: Props) {
       <td className="px-3 py-2 font-medium text-white whitespace-normal sm:whitespace-nowrap break-words">
         <div className="flex items-center gap-2 min-w-0">
           <span className="truncate">{m.batterName}</span>
-          <RecommendationTagBadge tag={m.recommendationTag} />
+          <RecommendationTagBadge tags={m.recommendationTags} />
         </div>
         <span className="ml-1.5 text-gray-600 text-xs font-normal">[{teamAbbr(m.batterTeam)}]</span>
       </td>

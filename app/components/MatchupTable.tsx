@@ -147,7 +147,7 @@ export default function MatchupTable({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 min-w-0">
                         <div className="font-medium text-white text-sm truncate">{m.batterName}</div>
-                        <RecommendationTagBadge tag={m.recommendationTag} />
+                        <RecommendationTagBadge tags={m.recommendationTags} />
                       </div>
                       <div className="mt-0.5 text-gray-500 text-xs font-mono">{teamAbbr(m.batterTeam)}</div>
                     </div>

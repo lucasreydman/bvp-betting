@@ -57,7 +57,7 @@ Recommendation tags now live in the matchup tables so tagged players stay identi
 - **SMASH**: leg of the Smash Double
 - **RD**: leg of the primary recommended double, or the only recommended double when there is just one
 - **SD**: leg of the secondary double when two doubles are shown
-- **T4**: Top 4 play that is not currently part of a recommended double
+- **T4**: current Top 4 play, including ones that also belong to SMASH, RD, or SD
 
 ## Date navigation
 

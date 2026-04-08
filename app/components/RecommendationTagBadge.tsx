@@ -11,22 +11,27 @@ const TAG_TITLES: Record<RecommendationTag, string> = {
   SMASH: 'Part of the Smash Double',
   RD: 'Part of the primary recommended double',
   SD: 'Part of the secondary recommended double',
-  T4: 'Top 4 play that is not currently in a recommended double',
+  T4: 'Current Top 4 play',
 }
 
 interface Props {
-  tag?: RecommendationTag
+  tags?: RecommendationTag[]
 }
 
-export default function RecommendationTagBadge({ tag }: Props) {
-  if (!tag) return null
+export default function RecommendationTagBadge({ tags }: Props) {
+  if (!tags || tags.length === 0) return null
 
   return (
-    <span
-      className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] ${TAG_STYLES[tag]}`}
-      title={TAG_TITLES[tag]}
-    >
-      {tag}
+    <span className="inline-flex flex-wrap items-center gap-1">
+      {tags.map(tag => (
+        <span
+          key={tag}
+          className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] ${TAG_STYLES[tag]}`}
+          title={TAG_TITLES[tag]}
+        >
+          {tag}
+        </span>
+      ))}
     </span>
   )
 }

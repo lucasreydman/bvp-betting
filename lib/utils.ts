@@ -248,11 +248,13 @@ export function suggestDailyDouble(matchups: MatchupResult[]): RecommendedDouble
 export function buildRecommendationTags(
   topPlays: MatchupResult[],
   recommendedDoubles: RecommendedDouble[],
-): Record<string, RecommendationTag> {
-  const tags: Record<string, RecommendationTag> = {}
+): Record<string, RecommendationTag[]> {
+  const tags: Record<string, RecommendationTag[]> = {}
 
-  for (const matchup of topPlays) {
-    tags[matchupKey(matchup)] = 'T4'
+  const appendTag = (key: string, tag: RecommendationTag) => {
+    const existingTags = tags[key] ?? []
+    if (existingTags.includes(tag)) return
+    tags[key] = [...existingTags, tag]
   }
 
   for (const [index, double] of recommendedDoubles.entries()) {
@@ -263,8 +265,12 @@ export function buildRecommendationTags(
         : 'SD'
 
     for (const leg of [double.first, double.second]) {
-      tags[matchupKey(leg)] = tag
+      appendTag(matchupKey(leg), tag)
     }
+  }
+
+  for (const matchup of topPlays) {
+    appendTag(matchupKey(matchup), 'T4')
   }
 
   return tags

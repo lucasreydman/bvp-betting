@@ -22,7 +22,7 @@ export default function ClientShell() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tick, setTick] = useState(0)
-  const [trackedRecommendationTags, setTrackedRecommendationTags] = useState<Record<string, RecommendationTag>>({})
+  const [trackedRecommendationTags, setTrackedRecommendationTags] = useState<Record<string, RecommendationTag[]>>({})
   const hasEstimatedUpcoming = allMatchups.some(m => m.gameStatus === 'upcoming' && m.lineupSource === 'estimated')
   const backgroundRefreshMs = hasEstimatedUpcoming ? 30_000 : 300_000
 
@@ -111,15 +111,19 @@ export default function ClientShell() {
   }, [date])
 
   useEffect(() => {
-    const nextEntries = Object.entries(JSON.parse(currentRecommendationTagsKey) as Record<string, RecommendationTag>)
+    const nextEntries = Object.entries(JSON.parse(currentRecommendationTagsKey) as Record<string, RecommendationTag[]>)
 
     setTrackedRecommendationTags(prev => {
       let changed = false
       const next = { ...prev }
 
-      for (const [key, tag] of nextEntries) {
-        if (next[key] !== tag) {
-          next[key] = tag
+      for (const [key, tags] of nextEntries) {
+        const previousTags = next[key] ?? []
+        const sameLength = previousTags.length === tags.length
+        const sameTags = sameLength && previousTags.every((previousTag, index) => previousTag === tags[index])
+
+        if (!sameTags) {
+          next[key] = tags
           changed = true
         }
       }
@@ -130,12 +134,17 @@ export default function ClientShell() {
 
   const attachRecommendationTags = (matchups: MatchupResult[]) => matchups.map(matchup => {
     const key = matchupKey(matchup)
-    const recommendationTag = matchup.gameStatus === 'upcoming'
+    const recommendationTags = matchup.gameStatus === 'upcoming'
       ? currentRecommendationTags[key]
       : trackedRecommendationTags[key]
 
-    if (matchup.recommendationTag === recommendationTag) return matchup
-    return { ...matchup, recommendationTag }
+    const previousTags = matchup.recommendationTags ?? []
+    const nextTags = recommendationTags ?? []
+    const sameLength = previousTags.length === nextTags.length
+    const sameTags = sameLength && previousTags.every((tag, index) => tag === nextTags[index])
+
+    if (sameTags) return matchup
+    return { ...matchup, recommendationTags: nextTags.length > 0 ? nextTags : undefined }
   })
 
   const taggedUpcoming = attachRecommendationTags(upcoming)
