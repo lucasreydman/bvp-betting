@@ -16,9 +16,11 @@ app/
   disclaimer/
     page.tsx             # Disclaimer + responsible gambling page
   api/
-    matchups/route.ts    # Main endpoint: all BvP pairs for a date; 5-min KV response cache
-    bvp/route.ts         # Debug: single batter vs pitcher lookup
-    schedule/route.ts    # Schedule for a date
+    matchups/route.ts                    # Main endpoint: all BvP pairs for a date; 5-min KV response cache
+    bvp/route.ts                         # Debug: single batter vs pitcher lookup
+    schedule/route.ts                    # Schedule for a date
+    notifications/discord/route.ts       # POST: sends pending Discord webhook events (Top 4 lock/fill, doubles, hits, day summary); guarded by CRON_SECRET
+    admin/lineup-exclusions/route.ts     # GET/POST/DELETE: manage ManualLineupExclusion records in KV; guarded by ADMIN_SECRET
   components/
     ClientShell.tsx      # Root client component; owns state; auto-refreshes every 5 min (silent) + re-renders every 60s
     DatePicker.tsx       # Today through tomorrow nav, UTC-safe date arithmetic
@@ -33,13 +35,17 @@ app/
     GameTimeCell.tsx     # Game time display cell used in table rows
     LoadingSkeleton.tsx  # Loading state with elapsed timer and progress messages
 lib/
-  types.ts    # MatchupResult, FilterState, DEFAULT_FILTERS, SortState, MatchupsResponse
-  stats.ts    # calcStats(), assignConfidence(), parseSplit()
-  utils.ts    # applyFilters(), sortMatchups(), generateCSV(), formatTime(), suggestRecommendedDoubles(), hitProbability(), regressedAvg(), expectedAtBats()
-  mlb-api.ts       # MLB Stats API fetch helpers
-  game-status.ts   # Pure helpers: getGameStatus(), computeHitResult()
-  cache.ts         # createCache<T>(ttlMs), in-memory TTL cache
-  kv.ts            # Vercel KV wrapper with in-memory fallback; kvGet/kvSet(key, value, ttlSeconds?)/kvDel
+  types.ts                     # MatchupResult, FilterState, DEFAULT_FILTERS, SortState, MatchupsResponse, DiscordTopPlaysSnapshot
+  stats.ts                     # calcStats(), assignConfidence(), parseSplit()
+  utils.ts                     # applyFilters(), sortMatchups(), generateCSV(), formatTime(), suggestRecommendedDoubles(), hitProbability(), regressedAvg(), expectedAtBats(), selectTopPlays(), fillOpenTopPlaySlots(), matchupKey(), teamAbbr(), medianLineupPosition()
+  mlb-api.ts                   # MLB Stats API fetch helpers
+  game-status.ts               # Pure helpers: getGameStatus(), computeHitResult()
+  cache.ts                     # createCache<T>(ttlMs), in-memory TTL cache
+  kv.ts                        # Vercel KV wrapper with in-memory fallback; kvGet/kvSet(key, value, ttlSeconds?)/kvDel
+  site.ts                      # getSiteUrl() (reads NEXT_PUBLIC_SITE_URL → VERCEL_PROJECT_PRODUCTION_URL → VERCEL_URL → localhost:3000), SITE_NAME constant
+  lineup-estimation.ts         # buildEstimatedLineup(): ranks roster candidates by recent starts, median lineup position, career PA; used pre-game only
+  manual-lineup-exclusions.ts  # KV-backed CRUD for ManualLineupExclusion records; scoped by playerId/teamId/gamePk; 7-day TTL; key prefix manual-lineup-exclusions:{date}
+  discord-notifications.ts     # Event builders for Discord webhook notifications: Top 4 lock, fill, doubles lock, per-leg hits, double hits, day summary; dedup via sent-event KV keys
 ```
 
 ## Data Flow
@@ -84,6 +90,9 @@ lib/
 | `matchups-response:{date}` | `MatchupsResponse` | 30 sec pre-lock, 5 min post-lock | Full compiled tracked response cache |
 | `slate-top4:{date}` | `SlateTopPlaysSnapshot` | 36 hr | Official Top 4 snapshot frozen at the slate's first scheduled pitch |
 | `game-qualifying:{gamePk}` | `MatchupResult[]` | 36 hr | Pre-game qualifying snapshot; read for in-progress/settled games; written fire-and-forget for upcoming games after dedup |
+| `discord-top4:{date}` | `DiscordTopPlaysSnapshot` | 72 hr | Discord notification snapshot; locked `DISCORD_NOTIFICATION_LEAD_MINUTES` (default 60) before first pitch |
+| `discord-notify-sent:{date}` | `string[]` | 72 hr | IDs of Discord notification events already sent; prevents duplicate webhook posts |
+| `manual-lineup-exclusions:{date}` | `ManualLineupExclusion[]` | 7 days | Admin-managed player exclusions from estimated lineups; scoped by playerId/teamId/gamePk |
 
 ## MLB Stats API
 
