@@ -67,7 +67,7 @@ export default function Footer() {
           </a>
           {' · '}
           <a
-            href="https://github.com/lucasreydman/bvp-betting"
+            href="https://github.com/lucasreydman/hitlist"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-white transition-colors"

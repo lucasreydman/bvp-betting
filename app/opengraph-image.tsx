@@ -115,7 +115,7 @@ export default function Image() {
             display: 'flex',
           }}
         >
-          bvp-betting.vercel.app
+          hitlist-mlb.vercel.app
         </div>
       </div>
     ),
