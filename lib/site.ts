@@ -13,4 +13,4 @@ export function getSiteUrl(): string {
   return stripTrailingSlash(rawUrl)
 }
 
-export const SITE_NAME = 'MLB BvP Betting'
+export const SITE_NAME = 'Hitlist'

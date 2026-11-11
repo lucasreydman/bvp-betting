@@ -18,7 +18,7 @@ const structuredData = [
   {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'MLB BvP Betting',
+    name: 'Hitlist',
     url: siteUrl,
     description:
       'Daily MLB batter versus pitcher stats and BVP betting board for hit props, ranked by career matchup data.',
@@ -32,7 +32,7 @@ const structuredData = [
       'Daily batter versus pitcher stats, BVP betting angles, and MLB hit props ranked by career batting average weighted by sample size.',
     isPartOf: {
       '@type': 'WebSite',
-      name: 'MLB BvP Betting',
+      name: 'Hitlist',
       url: siteUrl,
     },
     about: [
@@ -53,7 +53,11 @@ export default function Home() {
       />
 
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-white tracking-tight">MLB BvP Betting</h1>
+        <h1 className="flex items-center gap-2.5 text-2xl font-bold text-white tracking-tight">
+          {/* eslint-disable-next-line @next/next/no-img-element -- a 28px inline mark; the optimizer adds nothing */}
+          <img src="/hitlist-mark.svg" alt="" width={28} height={28} className="h-7 w-7" />
+          Hitlist
+        </h1>
         <p className="text-gray-400 text-sm mt-1 max-w-full text-balance">
           Daily <span className="text-white font-semibold">batter versus pitcher stats</span> for the <span className="text-white font-semibold">Player to Record a Hit</span> prop (1+ hits / over 0.5 hits).
           Matchups are ranked by career BvP batting average weighted by sample size so the board stays focused on the strongest historical hit matchups.

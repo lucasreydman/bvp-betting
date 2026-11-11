@@ -5,7 +5,7 @@ import ScoringLogicContent from '@/app/components/ScoringLogicContent'
 export const metadata: Metadata = {
   title: 'BvP Scoring Guide for MLB Hit Props',
   description:
-    'See how MLB BvP Betting ranks batter versus pitcher stats, calculates hit probability, and selects Daily Double, Secondary Double, and Smash Double cards.',
+    'See how Hitlist ranks batter versus pitcher stats, calculates hit probability, and selects Daily Double, Secondary Double, and Smash Double cards.',
   alternates: {
     canonical: '/scoring-logic',
   },

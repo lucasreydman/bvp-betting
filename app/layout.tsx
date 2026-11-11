@@ -11,8 +11,8 @@ const SITE_URL = getSiteUrl()
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'MLB BvP Betting | Batter vs Pitcher Stats for MLB Hit Props',
-    template: '%s | MLB BvP Betting',
+    default: 'Hitlist | Batter vs Pitcher Stats for MLB Hit Props',
+    template: '%s | Hitlist',
   },
   description:
     'Daily MLB batter versus pitcher stats for hit props and BvP betting. Track career BVP stats, MLB hit props, and Top 4 batter vs pitcher matchups ranked by batting average weighted by sample size.',
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   },
   category: 'sports',
   openGraph: {
-    title: 'MLB BvP Betting: Batter vs Pitcher Stats for MLB Hit Props',
+    title: 'Hitlist: Batter vs Pitcher Stats for MLB Hit Props',
     description:
       'Daily MLB batter versus pitcher stats, BvP betting angles, and hit prop picks ranked by career batting average and sample size.',
     type: 'website',
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MLB BvP Betting: Batter vs Pitcher Stats for MLB Hit Props',
+    title: 'Hitlist: Batter vs Pitcher Stats for MLB Hit Props',
     description:
       'Daily MLB batter versus pitcher stats, BvP betting angles, and hit prop picks ranked by career batting average and sample size.',
     images: ['/opengraph-image'],
