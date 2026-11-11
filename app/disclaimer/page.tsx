@@ -2,15 +2,15 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Disclaimer | MLB BvP',
-  description: 'Terms of use and disclaimer for MLB BvP.',
+  title: 'Disclaimer | Hitlist',
+  description: 'Terms of use and disclaimer for Hitlist.',
 }
 
 export default function DisclaimerPage() {
   return (
     <main className="max-w-3xl mx-auto px-4 py-10 text-gray-300 text-sm leading-7">
       <Link href="/" className="text-sky-400 hover:text-sky-300 transition-colors text-xs">
-        &larr; Back to MLB BvP
+        &larr; Back to Hitlist
       </Link>
 
       <h1 className="text-2xl font-bold text-white mt-6 mb-8">Disclaimer &amp; Terms of Use</h1>
@@ -19,7 +19,7 @@ export default function DisclaimerPage() {
         <section>
           <h2 className="text-base font-semibold text-white mb-2">For Informational Purposes Only</h2>
           <p>
-            MLB BvP provides historical career batter vs pitcher statistics sourced from the official MLB Stats API.
+            Hitlist provides historical career batter vs pitcher statistics sourced from the official MLB Stats API.
             All content is provided strictly for informational and entertainment purposes. Nothing on this site
             constitutes financial advice, gambling advice, or a recommendation to place any wager.
           </p>
@@ -58,7 +58,7 @@ export default function DisclaimerPage() {
         <section>
           <h2 className="text-base font-semibold text-white mb-2">Intellectual Property</h2>
           <p>
-            MLB team names, logos, and statistical data are the property of their respective owners. MLB BvP is
+            MLB team names, logos, and statistical data are the property of their respective owners. Hitlist is
             an independent tool and is not affiliated with, endorsed by, or sponsored by Major League Baseball
             or any of its teams.
           </p>

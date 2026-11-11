@@ -1,4 +1,6 @@
-# MLB BvP
+# Hitlist
+
+The product is named Hitlist (renamed from MLB BvP on 2026-11-11). The repo and the live URL keep the old `bvp-betting` name.
 
 Next.js 16 / React 19 app. App Router only (no pages router). Tailwind v4 (no config file; `@import "tailwindcss"` in CSS).
 

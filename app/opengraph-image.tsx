@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'MLB BvP Betting: Daily Hit Prop Picks'
+export const alt = 'Hitlist: Daily MLB Hit Prop Picks'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -35,21 +35,13 @@ export default function Image() {
 
         {/* Icon + title row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginBottom: 28 }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 96,
-              height: 96,
-              borderRadius: 999,
-              background: '#0f172a',
-              border: '2px solid #1e3a5f',
-              fontSize: 52,
-            }}
-          >
-            ⚾
-          </div>
+          <svg width="96" height="96" viewBox="0 0 64 64">
+            <rect width="64" height="64" rx="14" fill="#0f172a" />
+            <circle cx="17.5" cy="19" r="6.5" fill="#22c55e" />
+            <rect x="29" y="15" width="24" height="8" rx="4" fill="#0ea5e9" />
+            <rect x="11" y="30" width="34" height="8" rx="4" fill="#0ea5e9" opacity="0.62" />
+            <rect x="11" y="44" width="25" height="8" rx="4" fill="#0ea5e9" opacity="0.34" />
+          </svg>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div
               style={{
@@ -60,7 +52,7 @@ export default function Image() {
                 display: 'flex',
               }}
             >
-              MLB BvP Betting
+              Hitlist
             </div>
             <div
               style={{

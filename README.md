@@ -1,4 +1,6 @@
-# MLB BvP
+# Hitlist
+
+Formerly MLB BvP. A ranked list of today's best batter versus pitcher hit matchups.
 
 Built for the **Player Hits (1+)** prop and similar 1+ hit markets. Any single, double, triple, or homer wins. This tool surfaces today's best historical matchups ranked by **career BvP batting average**, weighted by sample size for reliability.
 
