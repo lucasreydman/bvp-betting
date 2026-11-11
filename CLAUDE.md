@@ -1,6 +1,6 @@
 # Hitlist
 
-The product is named Hitlist (renamed from MLB BvP on 2026-11-11). The repo and the live URL keep the old `bvp-betting` name.
+The product is named Hitlist (renamed from MLB BvP on 2026-11-11). The repo is `lucasreydman/hitlist` and it is live at hitlist-mlb.vercel.app; the old `bvp-betting` repo URL and bvp-betting.vercel.app both redirect.
 
 Next.js 16 / React 19 app. App Router only (no pages router). Tailwind v4 (no config file; `@import "tailwindcss"` in CSS).
 

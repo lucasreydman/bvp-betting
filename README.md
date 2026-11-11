@@ -4,7 +4,7 @@ Formerly MLB BvP. A ranked list of today's best batter versus pitcher hit matchu
 
 Built for the **Player Hits (1+)** prop and similar 1+ hit markets. Any single, double, triple, or homer wins. This tool surfaces today's best historical matchups ranked by **career BvP batting average**, weighted by sample size for reliability.
 
-**Live:** [bvp-betting.vercel.app](https://bvp-betting.vercel.app)
+**Live:** [hitlist-mlb.vercel.app](https://hitlist-mlb.vercel.app)
 
 ## How to use it for best results
 
@@ -264,7 +264,7 @@ lib/
 
 ## Disclaimer
 
-For informational purposes only. Not financial or gambling advice. See [/disclaimer](https://bvp-betting.vercel.app/disclaimer) for full terms.
+For informational purposes only. Not financial or gambling advice. See [/disclaimer](https://hitlist-mlb.vercel.app/disclaimer) for full terms.
 
 ## License
 
